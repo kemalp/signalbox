@@ -1,0 +1,58 @@
+{
+  "provider": "anthropic",
+  "asOf": "2026-10-09",
+  "sourceUrl": "https://platform.claude.com/docs/en/about-claude/pricing",
+  "currency": "USD",
+  "models": {
+    "claude-fable-5-1": { "input": 10, "output": 50, "cacheRead": 0.25, "cacheWrite5m": 12.5, "cacheWrite1h": 20, "webSearchPerRequest": 0.01 },
+    "claude-mythos-5-1": { "input": 10, "output": 50, "cacheRead": 0.25, "cacheWrite5m": 12.5, "cacheWrite1h": 20, "webSearchPerRequest": 0.01 },
+    "claude-fable-5": { "input": 10, "output": 50, "cacheRead": 1, "cacheWrite5m": 12.5, "cacheWrite1h": 20, "webSearchPerRequest": 0.01 },
+    "claude-mythos-5": { "input": 10, "output": 50, "cacheRead": 1, "cacheWrite5m": 12.5, "cacheWrite1h": 20, "webSearchPerRequest": 0.01 },
+
+    "claude-opus-5-5": {
+      "input": 4, "output": 20, "cacheRead": 0.2, "cacheWrite5m": 5, "cacheWrite1h": 8, "webSearchPerRequest": 0.01,
+      "fast": { "input": 8, "output": 40, "cacheRead": 0.4, "cacheWrite5m": 10, "cacheWrite1h": 16 }
+    },
+    "claude-opus-5": {
+      "input": 5, "output": 25, "cacheRead": 0.5, "cacheWrite5m": 6.25, "cacheWrite1h": 10, "webSearchPerRequest": 0.01,
+      "fast": { "input": 10, "output": 50, "cacheRead": 1, "cacheWrite5m": 12.5, "cacheWrite1h": 20 }
+    },
+    "claude-opus-4-8": {
+      "input": 5, "output": 25, "cacheRead": 0.5, "cacheWrite5m": 6.25, "cacheWrite1h": 10, "webSearchPerRequest": 0.01,
+      "fast": { "input": 10, "output": 50, "cacheRead": 1, "cacheWrite5m": 12.5, "cacheWrite1h": 20 }
+    },
+    "claude-opus-4-7": { "input": 5, "output": 25, "cacheRead": 0.5, "cacheWrite5m": 6.25, "cacheWrite1h": 10, "webSearchPerRequest": 0.01 },
+    "claude-opus-4-6": { "input": 5, "output": 25, "cacheRead": 0.5, "cacheWrite5m": 6.25, "cacheWrite1h": 10, "webSearchPerRequest": 0.01 },
+    "claude-opus-4-5*": { "input": 5, "output": 25, "cacheRead": 0.5, "cacheWrite5m": 6.25, "cacheWrite1h": 10, "webSearchPerRequest": 0.01 },
+    "claude-opus-4-1*": { "input": 15, "output": 75, "cacheRead": 1.5, "cacheWrite5m": 18.75, "cacheWrite1h": 30, "webSearchPerRequest": 0.01 },
+    "claude-opus-4-0": { "input": 15, "output": 75, "cacheRead": 1.5, "cacheWrite5m": 18.75, "cacheWrite1h": 30, "webSearchPerRequest": 0.01 },
+    "claude-opus-4-20250514": { "input": 15, "output": 75, "cacheRead": 1.5, "cacheWrite5m": 18.75, "cacheWrite1h": 30, "webSearchPerRequest": 0.01 },
+
+    "claude-sonnet-5-5": { "input": 2, "output": 10, "cacheRead": 0.1, "cacheWrite5m": 2.5, "cacheWrite1h": 4, "webSearchPerRequest": 0.01 },
+    "claude-sonnet-5": { "input": 2, "output": 10, "cacheRead": 0.2, "cacheWrite5m": 2.5, "cacheWrite1h": 4, "webSearchPerRequest": 0.01 },
+    "claude-sonnet-4-6": { "input": 3, "output": 15, "cacheRead": 0.3, "cacheWrite5m": 3.75, "cacheWrite1h": 6, "webSearchPerRequest": 0.01 },
+    "claude-sonnet-4-5*": { "input": 3, "output": 15, "cacheRead": 0.3, "cacheWrite5m": 3.75, "cacheWrite1h": 6, "webSearchPerRequest": 0.01 },
+    "claude-sonnet-4-0": { "input": 3, "output": 15, "cacheRead": 0.3, "cacheWrite5m": 3.75, "cacheWrite1h": 6, "webSearchPerRequest": 0.01 },
+    "claude-sonnet-4-20250514": { "input": 3, "output": 15, "cacheRead": 0.3, "cacheWrite5m": 3.75, "cacheWrite1h": 6, "webSearchPerRequest": 0.01 },
+
+    "claude-haiku-5-5": {
+      "input": 0.1, "output": 0.5, "cacheRead": 0.01, "cacheWrite5m": 0.125, "cacheWrite1h": 0.2, "webSearchPerRequest": 0.01,
+      "longContext": { "thresholdTokens": 100000, "input": 0.5, "output": 2.5, "cacheRead": 0.05, "cacheWrite5m": 0.625, "cacheWrite1h": 1 }
+    },
+    "claude-haiku-4-5*": { "input": 1, "output": 5, "cacheRead": 0.1, "cacheWrite5m": 1.25, "cacheWrite1h": 2, "webSearchPerRequest": 0.01 },
+    "claude-3-5-haiku*": { "input": 0.8, "output": 4, "cacheRead": 0.08, "cacheWrite5m": 1, "cacheWrite1h": 1.6, "webSearchPerRequest": 0.01 }
+  },
+  "geoMultipliers": { "global": 1, "us": 1.1 },
+  "notes": [
+    "Claude API (first-party) list prices from the official pricing page, fetched 2026-10-09. Also valid for Claude Platform on AWS and Microsoft Foundry. Bedrock and Google Cloud price separately and are not covered.",
+    "Cache writes are 1.25x input (5-minute TTL) and 2x input (1-hour TTL). Cache reads are 0.1x input, except 0.025x on Fable 5.1 / Mythos 5.1 and 0.05x on Opus 5.5 / Sonnet 5.5.",
+    "Sonnet 5.5 cache reads: the official page says $0.10/MTok (0.05x). Claude Code's own cost-state ledger and the claude-api skill's cached model table (2026-10-06) use $0.20. The official page wins here, so Claude Code's own costUSD runs higher than ours on Sonnet 5.5 sessions that are heavy on cache reads.",
+    "Long context: only Haiku 5.5 has a tier. A request whose prompt (input + cache reads + cache writes) is over 100,000 tokens pays the longContext row. Other Claude 4.6+ models bill the full 1M window at standard rates.",
+    "inference_geo 'us' costs 1.1x on every token category for Claude 4.6+ models (earlier models reject the parameter). 'global' (the default) is standard. Web search is not multiplied. Geo values not listed here are priced at 1x.",
+    "Web search costs $10 per 1,000 searches (webSearchPerRequest 0.01).",
+    "'fast' (ModelPrice.fast) holds research-preview fast-mode rates (Claude API only): Opus 5.5 $8/$40, Opus 5 and Opus 4.8 $10/$50. Its cache rates apply the standard caching multipliers on top of fast pricing, as the pricing page documents. Opus 4.6 fast requests bill at standard rates.",
+    "Batch API (50% off) and Priority Tier are not modelled, because agent transcripts don't record them.",
+    "Keys ending in '*' cover dated snapshot ids, e.g. claude-opus-4-5-20251101 and claude-haiku-4-5-20251001. Opus 4 and Sonnet 4 snapshots drop the '-0' (claude-opus-4-20250514), so they are listed exactly. Broad family prefixes such as 'claude-opus-5*' are deliberately absent, so an unreleased model stays unpriced instead of being guessed.",
+    "Opus 4.1, Opus 4, Sonnet 4 and Haiku 3.5 are retired on the Claude API. They are kept for old transcripts."
+  ]
+}

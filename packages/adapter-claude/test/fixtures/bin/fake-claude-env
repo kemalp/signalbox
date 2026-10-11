@@ -1,0 +1,3 @@
+#!/bin/sh
+# Echoes the CLAUDE_CONFIG_DIR it was given as a session name (tests only).
+printf '[{"sessionId":"env-check","status":"idle","name":"%s"}]\n' "${CLAUDE_CONFIG_DIR:-unset}"

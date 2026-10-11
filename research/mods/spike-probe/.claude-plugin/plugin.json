@@ -1,0 +1,6 @@
+{
+  "name": "spike-probe",
+  "version": "0.1.0",
+  "description": "Signalbox Day-0 spike. Throwaway sessions only. Records usage figures and runs read-only checks when you type /spike-check.",
+  "author": { "name": "Signalbox" }
+}

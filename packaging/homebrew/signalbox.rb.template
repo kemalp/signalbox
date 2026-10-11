@@ -1,0 +1,33 @@
+# Homebrew cask template for Signalbox. apps/macos/scripts/release.sh fills in the @...@ placeholders, drops these
+# comment lines and writes dist/release/signalbox.rb. Copy that file into a tap's Casks/ folder by hand: nothing
+# here is published automatically. See docs/RELEASE.md.
+cask "signalbox" do
+  version "@VERSION@"
+  sha256 "@SHA256@"
+
+  url "@URL@"
+  name "Signalbox"
+  desc "Local dashboard for AI coding agents' sessions, usage and limits"
+  homepage "@HOMEPAGE@"
+
+  depends_on arch: :arm64
+  depends_on macos: ">= :sonoma"
+
+  app "Signalbox.app"
+  # The app carries the command-line tool as well; link it so `signalbox report` works in a terminal.
+  binary "#{appdir}/Signalbox.app/Contents/Resources/signalbox"
+
+  # The spool folder is shared with the optional signalbox-tap plugin, so only `--zap` removes it.
+  zap trash: [
+    "~/Library/Application Support/signalbox",
+    "~/Library/Preferences/dev.signalbox.app.plist",
+    "~/Library/Saved Application State/dev.signalbox.app.savedState",
+  ]
+
+  caveats <<~EOS
+    Signalbox is ad-hoc signed and not notarized by Apple, so macOS blocks its first launch.
+    To allow it once, open Signalbox, then click "Open Anyway" in
+    System Settings > Privacy & Security. On macOS 14 you can instead Control-click
+    the app in Finder and choose Open.
+  EOS
+end

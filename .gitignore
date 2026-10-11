@@ -1,0 +1,15 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.DS_Store
+__pycache__/
+*.pyc
+
+# Never commit real agent data. Synthetic fixtures live in fixtures/ and are allowed.
+*.jsonl
+!fixtures/**/*.jsonl
+!packages/*/test/fixtures/**/*.jsonl
+*.heapsnapshot
+otlp_*.json*
+.env
+.env.*

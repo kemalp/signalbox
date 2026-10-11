@@ -1,0 +1,3181 @@
+{
+  "v": 1,
+  "generatedAt": "2026-10-09T14:30:00.000Z",
+  "entries": [
+    {
+      "agent": "claude-code",
+      "sessionId": "7f3a91c2-0b4e-4d8a-9a51-2c6f1e8d4b10",
+      "title": "api-refactor",
+      "titleSource": "custom",
+      "project": "/Users/you/code/api-refactor",
+      "gitBranch": "main",
+      "entrypoint": "claude-desktop",
+      "version": "2.1.293",
+      "startedAt": "2026-10-09T09:30:00.000Z",
+      "lastActivityAt": "2026-10-09T14:29:56.000Z",
+      "durationMs": 17996000,
+      "live": true,
+      "models": [
+        "claude-opus-5-5"
+      ],
+      "tokens": {
+        "input": 69863,
+        "output": 91256,
+        "cacheRead": 9894164,
+        "cacheWrite5m": 406011,
+        "cacheWrite1h": 4306
+      },
+      "costUsd": 18.42,
+      "unpricedTokens": 0,
+      "responses": 349,
+      "placeholderShare": 0.02,
+      "ledgerUsd": 19.71,
+      "compactions": 2,
+      "subagentFiles": 3,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 7f3a91c2-0b4e-4d8a-9a51-2c6f1e8d4b10",
+        "cwd": "/Users/you/code/api-refactor"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-api-refactor/7f3a91c2-0b4e-4d8a-9a51-2c6f1e8d4b10.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "a0c7e2d9-41b6-4f85-b3a0-8e9d1c2f6a47",
+      "title": "nightly-triage",
+      "titleSource": "agent-name",
+      "project": "/Users/you/code/signalbox",
+      "gitBranch": "feat/streaming-usage",
+      "entrypoint": "sdk",
+      "version": "2.1.293",
+      "startedAt": "2026-10-09T13:49:00.000Z",
+      "lastActivityAt": "2026-10-09T14:29:42.000Z",
+      "durationMs": 2442000,
+      "live": true,
+      "models": [
+        "claude-haiku-4-5"
+      ],
+      "tokens": {
+        "input": 76731,
+        "output": 118436,
+        "cacheRead": 1713478,
+        "cacheWrite5m": 192123,
+        "cacheWrite1h": 160499
+      },
+      "costUsd": 1.4,
+      "unpricedTokens": 0,
+      "responses": 165,
+      "placeholderShare": 0.02,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume a0c7e2d9-41b6-4f85-b3a0-8e9d1c2f6a47",
+        "cwd": "/Users/you/code/signalbox"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-signalbox/a0c7e2d9-41b6-4f85-b3a0-8e9d1c2f6a47.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "2b9e0f14-6c3d-47a1-b8e9-5d4c2a1f7e03",
+      "title": "docs sweep",
+      "titleSource": "custom",
+      "project": "/Users/you/code/signalbox",
+      "gitBranch": "fix/checkout-flake",
+      "entrypoint": "claude-desktop",
+      "version": "2.1.293",
+      "startedAt": "2026-10-09T12:30:00.000Z",
+      "lastActivityAt": "2026-10-09T14:25:29.000Z",
+      "durationMs": 6929000,
+      "live": true,
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "tokens": {
+        "input": 28232,
+        "output": 29936,
+        "cacheRead": 6572719,
+        "cacheWrite5m": 530468,
+        "cacheWrite1h": 166954
+      },
+      "costUsd": 3.17,
+      "unpricedTokens": 0,
+      "responses": 333,
+      "placeholderShare": 0.02,
+      "ledgerUsd": 3.39,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 2b9e0f14-6c3d-47a1-b8e9-5d4c2a1f7e03",
+        "cwd": "/Users/you/code/signalbox"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-signalbox/2b9e0f14-6c3d-47a1-b8e9-5d4c2a1f7e03.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "codex",
+      "sessionId": "rollout-2026-10-09T08-12-44-019a",
+      "title": "Tidy up the terraform plan output",
+      "titleSource": "index",
+      "project": "/Users/you/code/infra",
+      "gitBranch": "main",
+      "entrypoint": "cli",
+      "version": "0.71.0",
+      "startedAt": "2026-10-09T11:30:00.000Z",
+      "lastActivityAt": "2026-10-09T14:21:00.000Z",
+      "durationMs": 10260000,
+      "live": true,
+      "models": [
+        "gpt-5.5-codex"
+      ],
+      "tokens": {
+        "input": 18871,
+        "output": 24599,
+        "cacheRead": 5238237,
+        "cacheWrite5m": 73804,
+        "cacheWrite1h": 0,
+        "reasoning": 7380
+      },
+      "costUsd": 0,
+      "unpricedTokens": 5355511,
+      "responses": 46,
+      "placeholderShare": 0.02,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "codex resume rollout-2026-10-09T08-12-44-019a"
+      },
+      "transcriptPath": "/Users/you/.codex/sessions/2026/10/09/rollout-2026-10-09T08-12-44-019a.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "c41d2e77-5a90-4f3b-8e2d-91b0a7c3f562",
+      "title": "Fix flaky checkout end-to-end tests",
+      "titleSource": "ai",
+      "project": "/Users/you/code/web-app",
+      "gitBranch": "feat/streaming-usage",
+      "entrypoint": "cli",
+      "version": "2.1.293",
+      "startedAt": "2026-10-09T07:30:00.000Z",
+      "lastActivityAt": "2026-10-09T14:04:00.000Z",
+      "durationMs": 23640000,
+      "live": true,
+      "models": [
+        "claude-opus-5-5"
+      ],
+      "tokens": {
+        "input": 56671,
+        "output": 112777,
+        "cacheRead": 4422022,
+        "cacheWrite5m": 439121,
+        "cacheWrite1h": 149982
+      },
+      "costUsd": 41.9,
+      "unpricedTokens": 0,
+      "responses": 350,
+      "placeholderShare": 0.02,
+      "ledgerUsd": 44.83,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume c41d2e77-5a90-4f3b-8e2d-91b0a7c3f562",
+        "cwd": "/Users/you/code/web-app"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-web-app/c41d2e77-5a90-4f3b-8e2d-91b0a7c3f562.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "9e3779b1-0001-4e37-879b-c5e690240001",
+      "title": "Investigate the intermittent websocket reconnect storm in staging after the TLS certificate rotation and write it up",
+      "titleSource": "app",
+      "project": "/Users/you/code/clients/acme/api",
+      "gitBranch": "main",
+      "entrypoint": "claude-desktop",
+      "version": "2.1.290",
+      "startedAt": "2026-10-09T12:46:00.000Z",
+      "lastActivityAt": "2026-10-09T13:00:00.000Z",
+      "durationMs": 840000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "tokens": {
+        "input": 39839,
+        "output": 15356,
+        "cacheRead": 5593210,
+        "cacheWrite5m": 193597,
+        "cacheWrite1h": 87051
+      },
+      "costUsd": 3.28,
+      "unpricedTokens": 0,
+      "responses": 145,
+      "placeholderShare": 0.08,
+      "compactions": 1,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 9e3779b1-0001-4e37-879b-c5e690240001",
+        "cwd": "/Users/you/code/clients/acme/api"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-clients-acme-api/9e3779b1-0001-4e37-879b-c5e690240001.jsonl",
+      "appSessionId": "local_c9b842b9-5001-49b8-842b-9269ab2c5001",
+      "archived": false,
+      "appTitleSource": "auto",
+      "effort": "high",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "e8a5c3b1-9d72-4e60-a4f8-0c1b3d5e7f29",
+      "title": "release notes",
+      "titleSource": "custom",
+      "project": "/Users/you/code/api-refactor",
+      "gitBranch": "main",
+      "entrypoint": "cli",
+      "version": "2.1.293",
+      "startedAt": "2026-10-09T08:30:00.000Z",
+      "lastActivityAt": "2026-10-09T11:30:00.000Z",
+      "durationMs": 10800000,
+      "live": false,
+      "models": [
+        "claude-opus-5-5"
+      ],
+      "tokens": {
+        "input": 32539,
+        "output": 122595,
+        "cacheRead": 11179893,
+        "cacheWrite5m": 250341,
+        "cacheWrite1h": 4992
+      },
+      "costUsd": 24.11,
+      "unpricedTokens": 0,
+      "responses": 297,
+      "placeholderShare": 0.02,
+      "ledgerUsd": 25.8,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume e8a5c3b1-9d72-4e60-a4f8-0c1b3d5e7f29",
+        "cwd": "/Users/you/code/api-refactor"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-api-refactor/e8a5c3b1-9d72-4e60-a4f8-0c1b3d5e7f29.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "local_4d5e5fde-5950-4d5e-85fd-168fb64b5950",
+      "title": "Sketch the onboarding checklist",
+      "titleSource": "app",
+      "appTitleSource": "auto",
+      "project": "/Users/you/code/web-app",
+      "startedAt": "2026-10-09T10:40:00.000Z",
+      "lastActivityAt": "2026-10-09T11:20:00.000Z",
+      "durationMs": 2400000,
+      "live": false,
+      "models": [
+        "claude-opus-5-5"
+      ],
+      "effort": "medium",
+      "appSessionId": "local_4d5e5fde-5950-4d5e-85fd-168fb64b5950",
+      "archived": false,
+      "hasTranscript": false
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "3c6ef362-0002-4c6e-8f36-67bf1af70002",
+      "title": "Upgrade the mobile app's navigation library",
+      "titleSource": "custom",
+      "project": "/Users/you/code/signalbox",
+      "gitBranch": "main",
+      "entrypoint": "sdk",
+      "version": "2.1.290",
+      "startedAt": "2026-10-08T23:06:57.000Z",
+      "lastActivityAt": "2026-10-09T02:42:57.000Z",
+      "durationMs": 12960000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5",
+        "claude-haiku-4-5"
+      ],
+      "tokens": {
+        "input": 32580,
+        "output": 31443,
+        "cacheRead": 3153171,
+        "cacheWrite5m": 151930,
+        "cacheWrite1h": 66648
+      },
+      "costUsd": 2.3,
+      "unpricedTokens": 0,
+      "responses": 39,
+      "placeholderShare": 0,
+      "ledgerUsd": 2.58,
+      "compactions": 0,
+      "subagentFiles": 3,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 3c6ef362-0002-4c6e-8f36-67bf1af70002",
+        "cwd": "/Users/you/code/signalbox"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-signalbox/3c6ef362-0002-4c6e-8f36-67bf1af70002.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "daa66d13-0003-4aa6-86d1-817784860003",
+      "title": "Add retries to webhook delivery",
+      "titleSource": "custom",
+      "project": "/Users/you/code/Client Work/o'reilly-site",
+      "gitBranch": "feat/add-retries-to",
+      "entrypoint": "cli",
+      "version": "2.1.293",
+      "startedAt": "2026-10-08T17:17:44.000Z",
+      "lastActivityAt": "2026-10-08T19:08:44.000Z",
+      "durationMs": 6660000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "tokens": {
+        "input": 69492,
+        "output": 18824,
+        "cacheRead": 3294347,
+        "cacheWrite5m": 517957,
+        "cacheWrite1h": 7317
+      },
+      "costUsd": 3.47,
+      "unpricedTokens": 0,
+      "responses": 120,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume daa66d13-0003-4aa6-86d1-817784860003",
+        "cwd": "/Users/you/code/Client Work/o'reilly-site"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-Client-Work-o-reilly-site/daa66d13-0003-4aa6-86d1-817784860003.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "local_89cd5340-5952-49cd-8534-d21cbad55952",
+      "title": "Try the new MCP server config",
+      "titleSource": "app",
+      "appTitleSource": "auto",
+      "project": "/Users/you/code/infra",
+      "startedAt": "2026-10-08T11:00:00.000Z",
+      "lastActivityAt": "2026-10-08T12:30:00.000Z",
+      "durationMs": 5400000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "appSessionId": "local_89cd5340-5952-49cd-8534-d21cbad55952",
+      "archived": true,
+      "hasTranscript": false
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "15ae3f57-0903-45ae-83f5-4e7fd6c20903",
+      "titleSource": "none",
+      "project": "/Users/you/code/web-app",
+      "entrypoint": "claude-desktop",
+      "version": "2.1.293",
+      "startedAt": "2026-10-08T12:25:29.000Z",
+      "lastActivityAt": "2026-10-08T12:26:00.000Z",
+      "durationMs": 31000,
+      "live": false,
+      "models": [],
+      "responses": 0,
+      "tokens": {
+        "input": 0,
+        "output": 0,
+        "cacheRead": 0,
+        "cacheWrite5m": 0,
+        "cacheWrite1h": 0
+      },
+      "costUsd": 0,
+      "unpricedTokens": 0,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 15ae3f57-0903-45ae-83f5-4e7fd6c20903",
+        "cwd": "/Users/you/code/web-app"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-web-app/15ae3f57-0903-45ae-83f5-4e7fd6c20903.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "7776c5a6-0902-4776-8c5a-2ca72c330902",
+      "titleSource": "none",
+      "project": "/Users/you/code/signalbox",
+      "entrypoint": "claude-desktop",
+      "version": "2.1.293",
+      "startedAt": "2026-10-08T12:22:29.000Z",
+      "lastActivityAt": "2026-10-08T12:23:00.000Z",
+      "durationMs": 31000,
+      "live": false,
+      "models": [],
+      "responses": 0,
+      "tokens": {
+        "input": 0,
+        "output": 0,
+        "cacheRead": 0,
+        "cacheWrite5m": 0,
+        "cacheWrite1h": 0
+      },
+      "costUsd": 0,
+      "unpricedTokens": 0,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 7776c5a6-0902-4776-8c5a-2ca72c330902",
+        "cwd": "/Users/you/code/signalbox"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-signalbox/7776c5a6-0902-4776-8c5a-2ca72c330902.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "codex",
+      "sessionId": "rollout-2026-10-08T07-28-39-78dd",
+      "title": "Add dark mode to the settings page",
+      "titleSource": "index",
+      "project": "/Users/you/code/infra",
+      "gitBranch": "main",
+      "entrypoint": "cli",
+      "version": "0.71.0",
+      "startedAt": "2026-10-08T07:28:39.000Z",
+      "lastActivityAt": "2026-10-08T10:35:39.000Z",
+      "durationMs": 11220000,
+      "live": false,
+      "models": [
+        "gpt-5.5-codex"
+      ],
+      "tokens": {
+        "input": 96034,
+        "output": 71233,
+        "cacheRead": 3108667,
+        "cacheWrite5m": 713529,
+        "cacheWrite1h": 0,
+        "reasoning": 21370
+      },
+      "costUsd": 0,
+      "unpricedTokens": 3989463,
+      "responses": 323,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "codex resume rollout-2026-10-08T07-28-39-78dd"
+      },
+      "transcriptPath": "/Users/you/.codex/sessions/2026/10/08/rollout-2026-10-08T07-28-39-78dd.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "local_eb95d98f-5951-4b95-8d98-b044301a5951",
+      "title": "Plan the Q4 roadmap doc",
+      "titleSource": "app",
+      "appTitleSource": "auto",
+      "project": "/Users/you/code/signalbox",
+      "startedAt": "2026-10-08T09:05:00.000Z",
+      "lastActivityAt": "2026-10-08T09:30:00.000Z",
+      "durationMs": 1500000,
+      "live": false,
+      "models": [],
+      "appSessionId": "local_eb95d98f-5951-4b95-8d98-b044301a5951",
+      "archived": false,
+      "hasTranscript": false
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "17156075-0005-4715-8607-4cc489e00005",
+      "titleSource": "none",
+      "project": "/Users/you/code/signalbox",
+      "gitBranch": "develop",
+      "entrypoint": "cli",
+      "version": "2.1.293",
+      "startedAt": "2026-10-08T01:37:01.000Z",
+      "lastActivityAt": "2026-10-08T02:38:01.000Z",
+      "durationMs": 3660000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "tokens": {
+        "input": 32862,
+        "output": 19979,
+        "cacheRead": 4647193,
+        "cacheWrite5m": 123287,
+        "cacheWrite1h": 31051
+      },
+      "costUsd": 2.44,
+      "unpricedTokens": 0,
+      "responses": 92,
+      "placeholderShare": 0.08,
+      "ledgerUsd": 2.73,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 17156075-0005-4715-8607-4cc489e00005",
+        "cwd": "/Users/you/code/signalbox"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-signalbox/17156075-0005-4715-8607-4cc489e00005.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "3b07d244-0900-4b07-8d24-60d63bd10900",
+      "title": "Hotfix for the expired signing certificate",
+      "titleSource": "custom",
+      "project": "/Users/you/code/web-app",
+      "gitBranch": "hotfix/signing-cert",
+      "entrypoint": "cli",
+      "version": "2.1.293",
+      "startedAt": "2026-10-07T23:10:00.000Z",
+      "lastActivityAt": "2026-10-08T00:45:00.000Z",
+      "durationMs": 5700000,
+      "live": false,
+      "models": [
+        "claude-opus-5-5"
+      ],
+      "tokens": {
+        "input": 34728,
+        "output": 64383,
+        "cacheRead": 5715622,
+        "cacheWrite5m": 233109,
+        "cacheWrite1h": 65341
+      },
+      "costUsd": 6.75,
+      "unpricedTokens": 0,
+      "responses": 72,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 3b07d244-0900-4b07-8d24-60d63bd10900",
+        "cwd": "/Users/you/code/web-app"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-web-app/3b07d244-0900-4b07-8d24-60d63bd10900.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "b54cda26-0006-454c-8da2-ee9d33b30006",
+      "title": "Port the billing scripts to TypeScript",
+      "titleSource": "custom",
+      "project": "/Users/you/code/personal/api",
+      "gitBranch": "main",
+      "entrypoint": "cli",
+      "version": "2.1.293",
+      "startedAt": "2026-10-07T18:35:42.000Z",
+      "lastActivityAt": "2026-10-07T18:48:42.000Z",
+      "durationMs": 780000,
+      "live": false,
+      "models": [
+        "claude-opus-5-5",
+        "claude-haiku-4-5"
+      ],
+      "tokens": {
+        "input": 50312,
+        "output": 51235,
+        "cacheRead": 4426052,
+        "cacheWrite5m": 346137,
+        "cacheWrite1h": 59528
+      },
+      "costUsd": 4.85,
+      "unpricedTokens": 0,
+      "responses": 147,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 2,
+      "workflowRuns": 1,
+      "resume": {
+        "command": "claude --resume b54cda26-0006-454c-8da2-ee9d33b30006",
+        "cwd": "/Users/you/code/personal/api"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-personal-api/b54cda26-0006-454c-8da2-ee9d33b30006.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "538453d7-0007-4384-853d-0855ba420007",
+      "title": "Websocket reconnect storm write-up",
+      "titleSource": "app",
+      "project": "/Users/you/code/mobile-app",
+      "gitBranch": "develop",
+      "entrypoint": "claude-desktop",
+      "version": "2.1.293",
+      "startedAt": "2026-10-07T07:48:36.000Z",
+      "lastActivityAt": "2026-10-07T08:40:36.000Z",
+      "durationMs": 3120000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5",
+        "claude-haiku-4-5"
+      ],
+      "tokens": {
+        "input": 53759,
+        "output": 59034,
+        "cacheRead": 12682542,
+        "cacheWrite5m": 295238,
+        "cacheWrite1h": 48162
+      },
+      "costUsd": 5.44,
+      "unpricedTokens": 0,
+      "responses": 284,
+      "placeholderShare": 0,
+      "compactions": 1,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 538453d7-0007-4384-853d-0855ba420007",
+        "cwd": "/Users/you/code/mobile-app"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-mobile-app/538453d7-0007-4384-853d-0855ba420007.jsonl",
+      "appSessionId": "local_7f051cdf-5007-4f05-81cd-24d4f54a5007",
+      "archived": false,
+      "appTitleSource": "user",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "f1bbcd88-0008-41bb-8cd8-aa6a241d0008",
+      "title": "Review dependency updates",
+      "titleSource": "app",
+      "project": "/Users/you/code/web-app",
+      "gitBranch": "main",
+      "entrypoint": "claude-desktop",
+      "version": "2.1.293",
+      "startedAt": "2026-10-07T03:46:39.000Z",
+      "lastActivityAt": "2026-10-07T04:05:39.000Z",
+      "durationMs": 1140000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5",
+        "claude-haiku-4-5"
+      ],
+      "tokens": {
+        "input": 32034,
+        "output": 51431,
+        "cacheRead": 1342894,
+        "cacheWrite5m": 322357,
+        "cacheWrite1h": 14249
+      },
+      "costUsd": 2.21,
+      "unpricedTokens": 0,
+      "responses": 97,
+      "placeholderShare": 0,
+      "ledgerUsd": 2.48,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume f1bbcd88-0008-41bb-8cd8-aa6a241d0008",
+        "cwd": "/Users/you/code/web-app"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-web-app/f1bbcd88-0008-41bb-8cd8-aa6a241d0008.jsonl",
+      "appSessionId": "local_1d3c9690-5008-4d3c-8969-46ed7f055008",
+      "archived": true,
+      "appTitleSource": "auto",
+      "hasTranscript": true
+    },
+    {
+      "agent": "codex",
+      "sessionId": "rollout-2026-10-06T17-59-19-8ff3",
+      "title": "Migrate CI to the new runner images",
+      "titleSource": "index",
+      "project": "/Users/you/code/api-refactor",
+      "gitBranch": "develop",
+      "entrypoint": "cli",
+      "version": "0.71.0",
+      "startedAt": "2026-10-06T17:59:19.000Z",
+      "lastActivityAt": "2026-10-06T20:05:19.000Z",
+      "durationMs": 7560000,
+      "live": false,
+      "models": [
+        "gpt-6-sol"
+      ],
+      "tokens": {
+        "input": 66083,
+        "output": 48853,
+        "cacheRead": 10240475,
+        "cacheWrite5m": 347310,
+        "cacheWrite1h": 0,
+        "reasoning": 14656
+      },
+      "costUsd": 1.85,
+      "unpricedTokens": 0,
+      "responses": 264,
+      "placeholderShare": 0.08,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "codex resume rollout-2026-10-06T17-59-19-8ff3"
+      },
+      "transcriptPath": "/Users/you/.codex/sessions/2026/10/06/rollout-2026-10-06T17-59-19-8ff3.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "2e2ac0ea-0010-4e2a-8c0e-75fb297f0010",
+      "title": "Remove unused feature flags",
+      "titleSource": "ai",
+      "project": "/Users/you/code/clients/acme/api",
+      "gitBranch": "develop",
+      "entrypoint": "cli",
+      "version": "2.1.288",
+      "startedAt": "2026-10-06T05:02:18.000Z",
+      "lastActivityAt": "2026-10-06T07:33:18.000Z",
+      "durationMs": 9060000,
+      "live": false,
+      "models": [
+        "claude-opus-5-5"
+      ],
+      "tokens": {
+        "input": 22563,
+        "output": 56302,
+        "cacheRead": 2177071,
+        "cacheWrite5m": 63653,
+        "cacheWrite1h": 101290
+      },
+      "costUsd": 4.02,
+      "unpricedTokens": 0,
+      "responses": 175,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 4,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 2e2ac0ea-0010-4e2a-8c0e-75fb297f0010",
+        "cwd": "/Users/you/code/clients/acme/api"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-clients-acme-api/2e2ac0ea-0010-4e2a-8c0e-75fb297f0010.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "cc623a9b-0011-4c62-83a9-97b3d30e0011",
+      "title": "Speed up the test suite with sharding",
+      "titleSource": "app",
+      "project": "/Users/you/code/mobile-app",
+      "gitBranch": "develop",
+      "entrypoint": "claude-desktop",
+      "version": "2.1.293",
+      "startedAt": "2026-10-05T23:38:28.000Z",
+      "lastActivityAt": "2026-10-06T01:17:28.000Z",
+      "durationMs": 5940000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "tokens": {
+        "input": 38451,
+        "output": 121404,
+        "cacheRead": 6947361,
+        "cacheWrite5m": 349034,
+        "cacheWrite1h": 68970
+      },
+      "costUsd": 5.74,
+      "unpricedTokens": 0,
+      "responses": 123,
+      "placeholderShare": 0,
+      "ledgerUsd": 6.43,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume cc623a9b-0011-4c62-83a9-97b3d30e0011",
+        "cwd": "/Users/you/code/mobile-app"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-mobile-app/cc623a9b-0011-4c62-83a9-97b3d30e0011.jsonl",
+      "appSessionId": "local_f7e303a3-5011-47e3-803a-ac32ea365011",
+      "archived": false,
+      "appTitleSource": "user",
+      "effort": "high",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "6a99b44c-0012-4a99-8b44-31485dd90012",
+      "title": "Refactor auth middleware to use session tokens",
+      "titleSource": "custom",
+      "project": "/Users/you/code/api-refactor",
+      "gitBranch": "develop",
+      "entrypoint": "cli",
+      "version": "2.1.290",
+      "startedAt": "2026-10-05T15:12:42.000Z",
+      "lastActivityAt": "2026-10-05T15:30:42.000Z",
+      "durationMs": 1080000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5",
+        "claude-haiku-4-5"
+      ],
+      "tokens": {
+        "input": 18608,
+        "output": 47028,
+        "cacheRead": 3372006,
+        "cacheWrite5m": 215158,
+        "cacheWrite1h": 27869
+      },
+      "costUsd": 2.24,
+      "unpricedTokens": 0,
+      "responses": 32,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 6a99b44c-0012-4a99-8b44-31485dd90012",
+        "cwd": "/Users/you/code/api-refactor"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-api-refactor/6a99b44c-0012-4a99-8b44-31485dd90012.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "08d12dfd-0013-48d1-82df-5300c4680013",
+      "title": "Replace the date library with Temporal",
+      "titleSource": "ai",
+      "project": "/Users/you/code/Client Work/o'reilly-site",
+      "gitBranch": "develop",
+      "entrypoint": "cli",
+      "version": "2.1.290",
+      "startedAt": "2026-10-05T06:16:02.000Z",
+      "lastActivityAt": "2026-10-05T09:08:02.000Z",
+      "durationMs": 10320000,
+      "live": false,
+      "models": [
+        "claude-opus-5-5",
+        "claude-haiku-4-5"
+      ],
+      "tokens": {
+        "input": 52254,
+        "output": 132338,
+        "cacheRead": 12656034,
+        "cacheWrite5m": 572366,
+        "cacheWrite1h": 115844
+      },
+      "costUsd": 12.77,
+      "unpricedTokens": 0,
+      "responses": 344,
+      "placeholderShare": 0.08,
+      "compactions": 2,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 08d12dfd-0013-48d1-82df-5300c4680013",
+        "cwd": "/Users/you/code/Client Work/o'reilly-site"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-Client-Work-o-reilly-site/08d12dfd-0013-48d1-82df-5300c4680013.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "codex",
+      "sessionId": "rollout-2026-10-05T04-10-52-a708",
+      "titleSource": "none",
+      "project": "/Users/you/code/infra",
+      "gitBranch": "develop",
+      "entrypoint": "cli",
+      "version": "0.71.0",
+      "startedAt": "2026-10-05T04:10:52.000Z",
+      "lastActivityAt": "2026-10-05T04:35:52.000Z",
+      "durationMs": 1500000,
+      "live": false,
+      "models": [
+        "gpt-6-sol",
+        "gpt-5.5-codex"
+      ],
+      "tokens": {
+        "input": 12445,
+        "output": 29222,
+        "cacheRead": 599594,
+        "cacheWrite5m": 147415,
+        "cacheWrite1h": 0,
+        "reasoning": 8767
+      },
+      "costUsd": 0.33,
+      "unpricedTokens": 203684,
+      "responses": 57,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 3,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "codex resume rollout-2026-10-05T04-10-52-a708"
+      },
+      "transcriptPath": "/Users/you/.codex/sessions/2026/10/05/rollout-2026-10-05T04-10-52-a708.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "4540215f-0015-4540-8215-1e91c8ca0015",
+      "title": "Write onboarding docs for new contributors",
+      "titleSource": "custom",
+      "project": "/Users/you/code/personal/api",
+      "gitBranch": "main",
+      "entrypoint": "cli",
+      "version": "2.1.288",
+      "startedAt": "2026-10-04T16:15:14.000Z",
+      "lastActivityAt": "2026-10-04T17:11:14.000Z",
+      "durationMs": 3360000,
+      "live": false,
+      "models": [
+        "claude-opus-5-5"
+      ],
+      "tokens": {
+        "input": 95228,
+        "output": 140333,
+        "cacheRead": 7420431,
+        "cacheWrite5m": 231478,
+        "cacheWrite1h": 163324
+      },
+      "costUsd": 10.77,
+      "unpricedTokens": 0,
+      "responses": 403,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 4540215f-0015-4540-8215-1e91c8ca0015",
+        "cwd": "/Users/you/code/personal/api"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-personal-api/4540215f-0015-4540-8215-1e91c8ca0015.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "e3779b10-0016-4377-89b1-b8a672850016",
+      "title": "Set up preview deployments for pull requests",
+      "titleSource": "app",
+      "project": "/Users/you/code/Client Work/o'reilly-site",
+      "gitBranch": "main",
+      "entrypoint": "claude-desktop",
+      "version": "2.1.288",
+      "startedAt": "2026-10-04T08:48:53.000Z",
+      "lastActivityAt": "2026-10-04T10:25:53.000Z",
+      "durationMs": 5820000,
+      "live": false,
+      "models": [
+        "claude-opus-5-5"
+      ],
+      "tokens": {
+        "input": 23959,
+        "output": 55785,
+        "cacheRead": 7399653,
+        "cacheWrite5m": 243044,
+        "cacheWrite1h": 44296
+      },
+      "costUsd": 7.18,
+      "unpricedTokens": 0,
+      "responses": 149,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 1,
+      "resume": {
+        "command": "claude --resume e3779b10-0016-4377-89b1-b8a672850016",
+        "cwd": "/Users/you/code/Client Work/o'reilly-site"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-Client-Work-o-reilly-site/e3779b10-0016-4377-89b1-b8a672850016.jsonl",
+      "appSessionId": "local_0ef86418-5016-4ef8-8641-55298d8d5016",
+      "archived": false,
+      "appTitleSource": "auto",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "81af14c1-0017-41af-814c-da7efd540017",
+      "title": "Fix the timezone bug in weekly reports",
+      "titleSource": "custom",
+      "project": "/Users/you/code/personal/api",
+      "gitBranch": "main",
+      "entrypoint": "sdk",
+      "version": "2.1.288",
+      "startedAt": "2026-10-04T05:35:43.000Z",
+      "lastActivityAt": "2026-10-04T05:44:43.000Z",
+      "durationMs": 540000,
+      "live": false,
+      "models": [
+        "claude-opus-5-5"
+      ],
+      "tokens": {
+        "input": 16328,
+        "output": 40406,
+        "cacheRead": 2171075,
+        "cacheWrite5m": 57180,
+        "cacheWrite1h": 39860
+      },
+      "costUsd": 2.93,
+      "unpricedTokens": 0,
+      "responses": 27,
+      "placeholderShare": 0.08,
+      "ledgerUsd": 3.28,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 81af14c1-0017-41af-814c-da7efd540017",
+        "cwd": "/Users/you/code/personal/api"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-personal-api/81af14c1-0017-41af-814c-da7efd540017.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "1fe68e72-0018-4fe6-88e7-443767e70018",
+      "title": "release-captain",
+      "titleSource": "agent-name",
+      "project": "/Users/you/code/web-app",
+      "gitBranch": "develop",
+      "entrypoint": "sdk",
+      "version": "2.1.290",
+      "startedAt": "2026-10-03T20:19:49.000Z",
+      "lastActivityAt": "2026-10-03T20:45:49.000Z",
+      "durationMs": 1560000,
+      "live": false,
+      "models": [
+        "claude-opus-5-5"
+      ],
+      "tokens": {
+        "input": 44827,
+        "output": 49589,
+        "cacheRead": 7211964,
+        "cacheWrite5m": 190170,
+        "cacheWrite1h": 80257
+      },
+      "costUsd": 7.06,
+      "unpricedTokens": 0,
+      "responses": 154,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 3,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 1fe68e72-0018-4fe6-88e7-443767e70018",
+        "cwd": "/Users/you/code/web-app"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-web-app/1fe68e72-0018-4fe6-88e7-443767e70018.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "codex",
+      "sessionId": "rollout-2026-10-03T11-17-40-be1e",
+      "title": "Split the monolith config into packages",
+      "titleSource": "index",
+      "project": "/Users/you/code/infra",
+      "gitBranch": "main",
+      "entrypoint": "cli",
+      "version": "0.71.0",
+      "startedAt": "2026-10-03T11:17:40.000Z",
+      "lastActivityAt": "2026-10-03T14:37:40.000Z",
+      "durationMs": 12000000,
+      "live": false,
+      "models": [
+        "gpt-6-sol",
+        "gpt-5.5-codex"
+      ],
+      "tokens": {
+        "input": 94824,
+        "output": 147618,
+        "cacheRead": 19155775,
+        "cacheWrite5m": 380832,
+        "cacheWrite1h": 0,
+        "reasoning": 44285
+      },
+      "costUsd": 3.19,
+      "unpricedTokens": 3463550,
+      "responses": 255,
+      "placeholderShare": 0,
+      "compactions": 3,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "codex resume rollout-2026-10-03T11-17-40-be1e"
+      },
+      "transcriptPath": "/Users/you/.codex/sessions/2026/10/03/rollout-2026-10-03T11-17-40-be1e.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "5c5581d4-0020-4c55-881d-078468410020",
+      "title": "Session token middleware",
+      "titleSource": "app",
+      "project": "/Users/you/code/api-refactor",
+      "gitBranch": "develop",
+      "entrypoint": "claude-desktop",
+      "version": "2.1.290",
+      "startedAt": "2026-10-03T03:33:37.000Z",
+      "lastActivityAt": "2026-10-03T04:17:37.000Z",
+      "durationMs": 2640000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5",
+        "claude-haiku-4-5"
+      ],
+      "tokens": {
+        "input": 52941,
+        "output": 19926,
+        "cacheRead": 4972292,
+        "cacheWrite5m": 244516,
+        "cacheWrite1h": 69237
+      },
+      "costUsd": 2.83,
+      "unpricedTokens": 0,
+      "responses": 131,
+      "placeholderShare": 0,
+      "ledgerUsd": 3.17,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 5c5581d4-0020-4c55-881d-078468410020",
+        "cwd": "/Users/you/code/api-refactor"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-api-refactor/5c5581d4-0020-4c55-881d-078468410020.jsonl",
+      "appSessionId": "local_87d64adc-5020-47d6-84ad-dc07a3495020",
+      "archived": true,
+      "appTitleSource": "user",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "fa8cfb85-0021-4a8c-8fb8-a15d12100021",
+      "title": "Add dark mode to the settings page",
+      "titleSource": "custom",
+      "project": "/Users/you/code/clients/acme/api",
+      "gitBranch": "main",
+      "entrypoint": "cli",
+      "version": "2.1.288",
+      "startedAt": "2026-10-02T20:00:34.000Z",
+      "lastActivityAt": "2026-10-02T21:54:34.000Z",
+      "durationMs": 6840000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "tokens": {
+        "input": 40718,
+        "output": 60183,
+        "cacheRead": 4892616,
+        "cacheWrite5m": 152308,
+        "cacheWrite1h": 66510
+      },
+      "costUsd": 3.46,
+      "unpricedTokens": 0,
+      "responses": 231,
+      "placeholderShare": 0.08,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume fa8cfb85-0021-4a8c-8fb8-a15d12100021",
+        "cwd": "/Users/you/code/clients/acme/api"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-clients-acme-api/fa8cfb85-0021-4a8c-8fb8-a15d12100021.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "98c47536-0022-48c4-8753-c3159ca30022",
+      "title": "Split the monolith config into packages",
+      "titleSource": "ai",
+      "project": "/Users/you/code/clients/acme/api",
+      "gitBranch": "main",
+      "entrypoint": "cli",
+      "version": "2.1.290",
+      "startedAt": "2026-10-02T14:00:00.000Z",
+      "lastActivityAt": "2026-10-02T14:30:00.000Z",
+      "durationMs": 1800000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "tokens": {
+        "input": 87175,
+        "output": 42560,
+        "cacheRead": 3851665,
+        "cacheWrite5m": 617690,
+        "cacheWrite1h": 168784
+      },
+      "costUsd": 5.38,
+      "unpricedTokens": 0,
+      "responses": 460,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 4,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 98c47536-0022-48c4-8753-c3159ca30022",
+        "cwd": "/Users/you/code/clients/acme/api"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-clients-acme-api/98c47536-0022-48c4-8753-c3159ca30022.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "36fbeee7-0023-46fb-8eee-6d2a07720023",
+      "titleSource": "none",
+      "project": "/Users/you/code/Client Work/o'reilly-site",
+      "gitBranch": "main",
+      "entrypoint": "cli",
+      "version": "2.1.293",
+      "startedAt": "2026-09-30T09:47:35.000Z",
+      "lastActivityAt": "2026-09-30T14:07:35.000Z",
+      "durationMs": 15600000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5",
+        "claude-haiku-4-5"
+      ],
+      "tokens": {
+        "input": 53434,
+        "output": 101602,
+        "cacheRead": 5335318,
+        "cacheWrite5m": 672245,
+        "cacheWrite1h": 170049
+      },
+      "costUsd": 5.97,
+      "unpricedTokens": 0,
+      "responses": 290,
+      "placeholderShare": 0,
+      "ledgerUsd": 6.69,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 36fbeee7-0023-46fb-8eee-6d2a07720023",
+        "cwd": "/Users/you/code/Client Work/o'reilly-site"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-Client-Work-o-reilly-site/36fbeee7-0023-46fb-8eee-6d2a07720023.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "codex",
+      "sessionId": "rollout-2026-09-28T12-25-44-d533",
+      "title": "Add an export to CSV button",
+      "titleSource": "index",
+      "project": "/Users/you/code/signalbox",
+      "gitBranch": "main",
+      "entrypoint": "cli",
+      "version": "0.71.0",
+      "startedAt": "2026-09-28T12:25:44.000Z",
+      "lastActivityAt": "2026-09-28T12:32:44.000Z",
+      "durationMs": 420000,
+      "live": false,
+      "models": [
+        "gpt-5.5-codex"
+      ],
+      "tokens": {
+        "input": 75481,
+        "output": 105276,
+        "cacheRead": 3628729,
+        "cacheWrite5m": 420826,
+        "cacheWrite1h": 0,
+        "reasoning": 31583
+      },
+      "costUsd": 0,
+      "unpricedTokens": 4230312,
+      "responses": 124,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "codex resume rollout-2026-09-28T12-25-44-d533"
+      },
+      "transcriptPath": "/Users/you/.codex/sessions/2026/09/28/rollout-2026-09-28T12-25-44-d533.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "d93f4bf5-0901-493f-84bf-82eea2600901",
+      "titleSource": "none",
+      "startedAt": "2026-09-27T11:30:00.000Z",
+      "lastActivityAt": "2026-09-27T11:30:00.000Z",
+      "live": false,
+      "models": [],
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "736ae249-0025-436a-8e24-28bb0bdc0025",
+      "title": "Replace the date library with Temporal",
+      "titleSource": "ai",
+      "project": "/Users/you/code/signalbox",
+      "gitBranch": "main",
+      "entrypoint": "sdk",
+      "version": "2.1.288",
+      "startedAt": "2026-09-25T23:10:40.000Z",
+      "lastActivityAt": "2026-09-25T23:47:40.000Z",
+      "durationMs": 2220000,
+      "live": false,
+      "models": [
+        "claude-opus-5-5"
+      ],
+      "tokens": {
+        "input": 11800,
+        "output": 36893,
+        "cacheRead": 1300440,
+        "cacheWrite5m": 102961,
+        "cacheWrite1h": 22775
+      },
+      "costUsd": 2.5,
+      "unpricedTokens": 0,
+      "responses": 76,
+      "placeholderShare": 0.08,
+      "compactions": 2,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 736ae249-0025-436a-8e24-28bb0bdc0025",
+        "cwd": "/Users/you/code/signalbox"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-signalbox/736ae249-0025-436a-8e24-28bb0bdc0025.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "fc8403e9-0953-4c84-803e-a755ea7c0953",
+      "title": "Clean up old feature branches",
+      "titleSource": "app",
+      "appTitleSource": "auto",
+      "project": "/Users/you/code/mobile-app",
+      "startedAt": "2026-09-24T11:30:00.000Z",
+      "lastActivityAt": "2026-09-24T14:30:00.000Z",
+      "durationMs": 10800000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "appSessionId": "local_2804ccf1-5953-4804-8ccf-73d525645953",
+      "archived": false,
+      "hasTranscript": false
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "11a25bfa-0026-41a2-85bf-4a73b26f0026",
+      "title": "Profile slow dashboard queries",
+      "titleSource": "custom",
+      "project": "/Users/you/code/clients/acme/api",
+      "gitBranch": "develop",
+      "entrypoint": "cli",
+      "version": "2.1.290",
+      "startedAt": "2026-09-23T16:16:41.000Z",
+      "lastActivityAt": "2026-09-23T18:10:41.000Z",
+      "durationMs": 6840000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "tokens": {
+        "input": 20679,
+        "output": 20194,
+        "cacheRead": 3037510,
+        "cacheWrite5m": 79399,
+        "cacheWrite1h": 679
+      },
+      "costUsd": 1.58,
+      "unpricedTokens": 0,
+      "responses": 76,
+      "placeholderShare": 0,
+      "ledgerUsd": 1.77,
+      "compactions": 0,
+      "subagentFiles": 2,
+      "workflowRuns": 1,
+      "resume": {
+        "command": "claude --resume 11a25bfa-0026-41a2-85bf-4a73b26f0026",
+        "cwd": "/Users/you/code/clients/acme/api"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-clients-acme-api/11a25bfa-0026-41a2-85bf-4a73b26f0026.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "afd9d5ab-0027-4fd9-8d5a-f4083c3e0027",
+      "title": "Upgrade the mobile app's navigation library",
+      "titleSource": "custom",
+      "project": "/Users/you/code/infra",
+      "gitBranch": "main",
+      "entrypoint": "sdk",
+      "version": "2.1.293",
+      "startedAt": "2026-09-22T06:00:24.000Z",
+      "lastActivityAt": "2026-09-22T09:19:24.000Z",
+      "durationMs": 11940000,
+      "live": false,
+      "models": [
+        "claude-opus-5-5"
+      ],
+      "tokens": {
+        "input": 16446,
+        "output": 63375,
+        "cacheRead": 3132554,
+        "cacheWrite5m": 246178,
+        "cacheWrite1h": 30146
+      },
+      "costUsd": 5.07,
+      "unpricedTokens": 0,
+      "responses": 129,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume afd9d5ab-0027-4fd9-8d5a-f4083c3e0027",
+        "cwd": "/Users/you/code/infra"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-infra/afd9d5ab-0027-4fd9-8d5a-f4083c3e0027.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "4e114f5c-0028-4e11-84f5-15c0a6c90028",
+      "title": "Refactor auth middleware to use session tokens",
+      "titleSource": "ai",
+      "project": "/Users/you/code/infra",
+      "gitBranch": "main",
+      "entrypoint": "sdk",
+      "version": "2.1.288",
+      "startedAt": "2026-09-21T04:43:48.000Z",
+      "lastActivityAt": "2026-09-21T07:43:48.000Z",
+      "durationMs": 10800000,
+      "live": false,
+      "models": [
+        "claude-opus-5-5"
+      ],
+      "tokens": {
+        "input": 28367,
+        "output": 75780,
+        "cacheRead": 1898606,
+        "cacheWrite5m": 210082,
+        "cacheWrite1h": 7389
+      },
+      "costUsd": 4.37,
+      "unpricedTokens": 0,
+      "responses": 215,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 4e114f5c-0028-4e11-84f5-15c0a6c90028",
+        "cwd": "/Users/you/code/infra"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-infra/4e114f5c-0028-4e11-84f5-15c0a6c90028.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "codex",
+      "sessionId": "rollout-2026-09-18T13-20-34-ec48",
+      "title": "Set up preview deployments for pull requests",
+      "titleSource": "index",
+      "project": "/Users/you/code/personal/api",
+      "gitBranch": "main",
+      "entrypoint": "cli",
+      "version": "0.71.0",
+      "startedAt": "2026-09-18T13:20:34.000Z",
+      "lastActivityAt": "2026-09-18T17:36:34.000Z",
+      "durationMs": 15360000,
+      "live": false,
+      "models": [
+        "gpt-6-sol"
+      ],
+      "tokens": {
+        "input": 67648,
+        "output": 49133,
+        "cacheRead": 2181852,
+        "cacheWrite5m": 584474,
+        "cacheWrite1h": 0,
+        "reasoning": 14740
+      },
+      "costUsd": 0.85,
+      "unpricedTokens": 0,
+      "responses": 300,
+      "placeholderShare": 0.08,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "codex resume rollout-2026-09-18T13-20-34-ec48"
+      },
+      "transcriptPath": "/Users/you/.codex/sessions/2026/09/18/rollout-2026-09-18T13-20-34-ec48.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "8a8042be-0030-4a80-842b-d151ab2b0030",
+      "title": "Add retries to webhook delivery",
+      "titleSource": "custom",
+      "project": "/Users/you/code/signalbox",
+      "gitBranch": "feat/add-retries-to",
+      "entrypoint": "cli",
+      "version": "2.1.293",
+      "startedAt": "2026-09-16T20:42:04.000Z",
+      "lastActivityAt": "2026-09-16T22:39:04.000Z",
+      "durationMs": 7020000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "tokens": {
+        "input": 27852,
+        "output": 20361,
+        "cacheRead": 5237863,
+        "cacheWrite5m": 120430,
+        "cacheWrite1h": 5757
+      },
+      "costUsd": 2.45,
+      "unpricedTokens": 0,
+      "responses": 26,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 6,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 8a8042be-0030-4a80-842b-d151ab2b0030",
+        "cwd": "/Users/you/code/signalbox"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-signalbox/8a8042be-0030-4a80-842b-d151ab2b0030.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "28b7bc6f-0031-48b7-8bc6-736655fa0031",
+      "title": "Upgrade the mobile app's navigation library",
+      "titleSource": "ai",
+      "project": "/Users/you/code/Client Work/o'reilly-site",
+      "gitBranch": "main",
+      "entrypoint": "cli",
+      "version": "2.1.290",
+      "startedAt": "2026-09-15T05:17:13.000Z",
+      "lastActivityAt": "2026-09-15T08:15:13.000Z",
+      "durationMs": 10680000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "tokens": {
+        "input": 29931,
+        "output": 18220,
+        "cacheRead": 9005998,
+        "cacheWrite5m": 338378,
+        "cacheWrite1h": 30173
+      },
+      "costUsd": 4.51,
+      "unpricedTokens": 0,
+      "responses": 277,
+      "placeholderShare": 0,
+      "compactions": 2,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 28b7bc6f-0031-48b7-8bc6-736655fa0031",
+        "cwd": "/Users/you/code/Client Work/o'reilly-site"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-Client-Work-o-reilly-site/28b7bc6f-0031-48b7-8bc6-736655fa0031.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "c6ef3620-0032-46ef-8362-9d3edfb50032",
+      "titleSource": "none",
+      "project": "/Users/you/code/web-app",
+      "gitBranch": "main",
+      "entrypoint": "cli",
+      "version": "2.1.288",
+      "startedAt": "2026-09-14T01:55:45.000Z",
+      "lastActivityAt": "2026-09-14T02:13:45.000Z",
+      "durationMs": 1080000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "tokens": {
+        "input": 57318,
+        "output": 86366,
+        "cacheRead": 5609891,
+        "cacheWrite5m": 291755,
+        "cacheWrite1h": 117294
+      },
+      "costUsd": 4.95,
+      "unpricedTokens": 0,
+      "responses": 115,
+      "placeholderShare": 0,
+      "ledgerUsd": 5.54,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume c6ef3620-0032-46ef-8362-9d3edfb50032",
+        "cwd": "/Users/you/code/web-app"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-web-app/c6ef3620-0032-46ef-8362-9d3edfb50032.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "6526afd1-0033-4526-8afd-3ef746440033",
+      "title": "Profile slow dashboard queries",
+      "titleSource": "custom",
+      "project": "/Users/you/code/infra",
+      "gitBranch": "feat/profile-slow-dashboard",
+      "entrypoint": "cli",
+      "version": "2.1.288",
+      "startedAt": "2026-09-12T00:11:29.000Z",
+      "lastActivityAt": "2026-09-12T02:03:29.000Z",
+      "durationMs": 6720000,
+      "live": false,
+      "models": [
+        "claude-opus-5-5",
+        "claude-haiku-4-5"
+      ],
+      "tokens": {
+        "input": 39843,
+        "output": 80731,
+        "cacheRead": 7460389,
+        "cacheWrite5m": 350973,
+        "cacheWrite1h": 80229
+      },
+      "costUsd": 7.88,
+      "unpricedTokens": 0,
+      "responses": 168,
+      "placeholderShare": 0.08,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 6526afd1-0033-4526-8afd-3ef746440033",
+        "cwd": "/Users/you/code/infra"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-infra/6526afd1-0033-4526-8afd-3ef746440033.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "codex",
+      "sessionId": "rollout-2026-09-09T14-34-30-035e",
+      "title": "Review dependency updates",
+      "titleSource": "index",
+      "project": "/Users/you/code/data-pipeline",
+      "gitBranch": "develop",
+      "entrypoint": "cli",
+      "version": "0.71.0",
+      "startedAt": "2026-09-09T14:34:30.000Z",
+      "lastActivityAt": "2026-09-09T15:15:30.000Z",
+      "durationMs": 2460000,
+      "live": false,
+      "models": [
+        "gpt-6-sol"
+      ],
+      "tokens": {
+        "input": 53865,
+        "output": 67645,
+        "cacheRead": 8445786,
+        "cacheWrite5m": 210405,
+        "cacheWrite1h": 0,
+        "reasoning": 20294
+      },
+      "costUsd": 1.8,
+      "unpricedTokens": 0,
+      "responses": 137,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 1,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "codex resume rollout-2026-09-09T14-34-30-035e"
+      },
+      "transcriptPath": "/Users/you/.codex/sessions/2026/09/09/rollout-2026-09-09T14-34-30-035e.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "a195a333-0035-4195-8a33-fa444aa60035",
+      "title": "Investigate memory growth in the worker pool",
+      "titleSource": "custom",
+      "project": "/Users/you/code/infra",
+      "gitBranch": "main",
+      "entrypoint": "sdk",
+      "version": "2.1.293",
+      "startedAt": "2026-09-07T23:31:01.000Z",
+      "lastActivityAt": "2026-09-08T03:07:01.000Z",
+      "durationMs": 12960000,
+      "live": false,
+      "models": [
+        "claude-opus-5-5"
+      ],
+      "tokens": {
+        "input": 67742,
+        "output": 125280,
+        "cacheRead": 3575323,
+        "cacheWrite5m": 212336,
+        "cacheWrite1h": 146423
+      },
+      "costUsd": 8.05,
+      "unpricedTokens": 0,
+      "responses": 269,
+      "placeholderShare": 0,
+      "ledgerUsd": 9.02,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume a195a333-0035-4195-8a33-fa444aa60035",
+        "cwd": "/Users/you/code/infra"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-infra/a195a333-0035-4195-8a33-fa444aa60035.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "3fcd1ce4-0036-4fcd-81ce-641cf5710036",
+      "title": "Speed up the test suite with sharding",
+      "titleSource": "app",
+      "project": "/Users/you/code/Client Work/o'reilly-site",
+      "gitBranch": "feat/speed-up-the",
+      "entrypoint": "claude-desktop",
+      "version": "2.1.290",
+      "startedAt": "2026-09-05T02:48:22.000Z",
+      "lastActivityAt": "2026-09-05T05:55:22.000Z",
+      "durationMs": 11220000,
+      "live": false,
+      "models": [
+        "claude-opus-5-5",
+        "claude-haiku-4-5"
+      ],
+      "tokens": {
+        "input": 94898,
+        "output": 70635,
+        "cacheRead": 13727875,
+        "cacheWrite5m": 354464,
+        "cacheWrite1h": 149091
+      },
+      "costUsd": 11.06,
+      "unpricedTokens": 0,
+      "responses": 155,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 1,
+      "resume": {
+        "command": "claude --resume 3fcd1ce4-0036-4fcd-81ce-641cf5710036",
+        "cwd": "/Users/you/code/Client Work/o'reilly-site"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-Client-Work-o-reilly-site/3fcd1ce4-0036-4fcd-81ce-641cf5710036.jsonl",
+      "appSessionId": "local_6b4de5ec-5036-4b4d-8e5e-309c0c795036",
+      "archived": false,
+      "appTitleSource": "auto",
+      "effort": "high",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "local_c63c46a2-5954-463c-846a-9dedaf375954",
+      "title": "Prototype the pricing page",
+      "titleSource": "app",
+      "appTitleSource": "auto",
+      "project": "/Users/you/code/web-app",
+      "startedAt": "2026-09-03T12:30:00.000Z",
+      "lastActivityAt": "2026-09-03T14:30:00.000Z",
+      "durationMs": 7200000,
+      "live": false,
+      "models": [
+        "claude-opus-5-5"
+      ],
+      "appSessionId": "local_c63c46a2-5954-463c-846a-9dedaf375954",
+      "archived": true,
+      "hasTranscript": false
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "de049695-0037-4e04-8969-85d57f000037",
+      "title": "Write onboarding docs for new contributors",
+      "titleSource": "app",
+      "project": "/Users/you/code/api-refactor",
+      "gitBranch": "develop",
+      "entrypoint": "claude-desktop",
+      "version": "2.1.288",
+      "startedAt": "2026-09-03T10:35:06.000Z",
+      "lastActivityAt": "2026-09-03T13:26:06.000Z",
+      "durationMs": 10260000,
+      "live": false,
+      "models": [
+        "claude-opus-5-5",
+        "claude-haiku-4-5"
+      ],
+      "tokens": {
+        "input": 7509,
+        "output": 7549,
+        "cacheRead": 973613,
+        "cacheWrite5m": 177246,
+        "cacheWrite1h": 18174
+      },
+      "costUsd": 1.58,
+      "unpricedTokens": 0,
+      "responses": 19,
+      "placeholderShare": 0.08,
+      "compactions": 2,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume de049695-0037-4e04-8969-85d57f000037",
+        "cwd": "/Users/you/code/api-refactor"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-api-refactor/de049695-0037-4e04-8969-85d57f000037.jsonl",
+      "appSessionId": "local_09855f9d-5037-4985-85f9-5254b6085037",
+      "archived": false,
+      "appTitleSource": "user",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "7c3c1046-0038-4c3c-8104-27edf9d30038",
+      "title": "Improve search ranking for short queries",
+      "titleSource": "app",
+      "project": "/Users/you/code/Client Work/o'reilly-site",
+      "gitBranch": "develop",
+      "entrypoint": "claude-desktop",
+      "version": "2.1.288",
+      "startedAt": "2026-09-01T14:34:23.000Z",
+      "lastActivityAt": "2026-09-01T17:39:23.000Z",
+      "durationMs": 11100000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5",
+        "claude-haiku-4-5"
+      ],
+      "tokens": {
+        "input": 6536,
+        "output": 18596,
+        "cacheRead": 1749813,
+        "cacheWrite5m": 29735,
+        "cacheWrite1h": 1644
+      },
+      "costUsd": 0.76,
+      "unpricedTokens": 0,
+      "responses": 14,
+      "placeholderShare": 0,
+      "ledgerUsd": 0.85,
+      "compactions": 0,
+      "subagentFiles": 2,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 7c3c1046-0038-4c3c-8104-27edf9d30038",
+        "cwd": "/Users/you/code/Client Work/o'reilly-site"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-Client-Work-o-reilly-site/7c3c1046-0038-4c3c-8104-27edf9d30038.jsonl",
+      "appSessionId": "local_a7bcd94e-5038-47bc-8d94-fc6d30db5038",
+      "archived": true,
+      "appTitleSource": "auto",
+      "hasTranscript": true
+    },
+    {
+      "agent": "codex",
+      "sessionId": "rollout-2026-08-31T01-44-53-1a73",
+      "title": "Upgrade the mobile app's navigation library",
+      "titleSource": "index",
+      "project": "/Users/you/code/mobile-app",
+      "gitBranch": "main",
+      "entrypoint": "cli",
+      "version": "0.71.0",
+      "startedAt": "2026-08-31T01:44:53.000Z",
+      "lastActivityAt": "2026-08-31T05:58:53.000Z",
+      "durationMs": 15240000,
+      "live": false,
+      "models": [
+        "gpt-5.5-codex"
+      ],
+      "tokens": {
+        "input": 15576,
+        "output": 26771,
+        "cacheRead": 1566517,
+        "cacheWrite5m": 168601,
+        "cacheWrite1h": 0,
+        "reasoning": 8031
+      },
+      "costUsd": 0,
+      "unpricedTokens": 1777465,
+      "responses": 111,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "codex resume rollout-2026-08-31T01-44-53-1a73"
+      },
+      "transcriptPath": "/Users/you/.codex/sessions/2026/08/31/rollout-2026-08-31T01-44-53-1a73.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "b8ab03a8-0040-48ab-803a-e37aea3d0040",
+      "title": "Worker pool memory growth",
+      "titleSource": "app",
+      "project": "/Users/you/code/web-app",
+      "gitBranch": "develop",
+      "entrypoint": "claude-desktop",
+      "version": "2.1.288",
+      "startedAt": "2026-08-29T22:02:51.000Z",
+      "lastActivityAt": "2026-08-29T22:37:51.000Z",
+      "durationMs": 2100000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5",
+        "claude-haiku-4-5"
+      ],
+      "tokens": {
+        "input": 18819,
+        "output": 112202,
+        "cacheRead": 12706135,
+        "cacheWrite5m": 234696,
+        "cacheWrite1h": 164842
+      },
+      "costUsd": 6.79,
+      "unpricedTokens": 0,
+      "responses": 310,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume b8ab03a8-0040-48ab-803a-e37aea3d0040",
+        "cwd": "/Users/you/code/web-app"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-web-app/b8ab03a8-0040-48ab-803a-e37aea3d0040.jsonl",
+      "appSessionId": "local_e42bccb0-5040-442b-8ccb-bffa25255040",
+      "archived": false,
+      "appTitleSource": "user",
+      "effort": "high",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "56e27d59-0041-46e2-87d5-0d3394cc0041",
+      "titleSource": "none",
+      "project": "/Users/you/code/Client Work/o'reilly-site",
+      "gitBranch": "main",
+      "entrypoint": "sdk",
+      "version": "2.1.288",
+      "startedAt": "2026-08-28T14:43:48.000Z",
+      "lastActivityAt": "2026-08-28T15:21:48.000Z",
+      "durationMs": 2280000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5",
+        "claude-haiku-4-5"
+      ],
+      "tokens": {
+        "input": 13350,
+        "output": 24797,
+        "cacheRead": 2681722,
+        "cacheWrite5m": 122659,
+        "cacheWrite1h": 68874
+      },
+      "costUsd": 1.71,
+      "unpricedTokens": 0,
+      "responses": 119,
+      "placeholderShare": 0.08,
+      "ledgerUsd": 1.92,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 56e27d59-0041-46e2-87d5-0d3394cc0041",
+        "cwd": "/Users/you/code/Client Work/o'reilly-site"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-Client-Work-o-reilly-site/56e27d59-0041-46e2-87d5-0d3394cc0041.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "f519f70a-0042-4519-8f70-aec81e9f0042",
+      "title": "Fix the timezone bug in weekly reports",
+      "titleSource": "custom",
+      "project": "/Users/you/code/web-app",
+      "gitBranch": "feat/fix-the-timezone",
+      "entrypoint": "cli",
+      "version": "2.1.290",
+      "startedAt": "2026-08-26T13:31:48.000Z",
+      "lastActivityAt": "2026-08-26T16:27:48.000Z",
+      "durationMs": 10560000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "tokens": {
+        "input": 11371,
+        "output": 40560,
+        "cacheRead": 905210,
+        "cacheWrite5m": 180892,
+        "cacheWrite1h": 15666
+      },
+      "costUsd": 1.69,
+      "unpricedTokens": 0,
+      "responses": 38,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 3,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume f519f70a-0042-4519-8f70-aec81e9f0042",
+        "cwd": "/Users/you/code/web-app"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-web-app/f519f70a-0042-4519-8f70-aec81e9f0042.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "935170bb-0043-4351-870b-c880992e0043",
+      "title": "Add an export to CSV button",
+      "titleSource": "ai",
+      "project": "/Users/you/code/api-refactor",
+      "gitBranch": "main",
+      "entrypoint": "cli",
+      "version": "2.1.293",
+      "startedAt": "2026-08-24T11:52:12.000Z",
+      "lastActivityAt": "2026-08-24T13:20:12.000Z",
+      "durationMs": 5280000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "tokens": {
+        "input": 18019,
+        "output": 31938,
+        "cacheRead": 3022579,
+        "cacheWrite5m": 147958,
+        "cacheWrite1h": 9106
+      },
+      "costUsd": 2.05,
+      "unpricedTokens": 0,
+      "responses": 51,
+      "placeholderShare": 0,
+      "compactions": 3,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 935170bb-0043-4351-870b-c880992e0043",
+        "cwd": "/Users/you/code/api-refactor"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-api-refactor/935170bb-0043-4351-870b-c880992e0043.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "codex",
+      "sessionId": "rollout-2026-08-21T21-30-46-3188",
+      "title": "Migrate CI to the new runner images",
+      "titleSource": "index",
+      "project": "/Users/you/code/personal/api",
+      "gitBranch": "develop",
+      "entrypoint": "cli",
+      "version": "0.71.0",
+      "startedAt": "2026-08-21T21:30:46.000Z",
+      "lastActivityAt": "2026-08-21T23:44:46.000Z",
+      "durationMs": 8040000,
+      "live": false,
+      "models": [
+        "gpt-6-sol"
+      ],
+      "tokens": {
+        "input": 41663,
+        "output": 150787,
+        "cacheRead": 14813451,
+        "cacheWrite5m": 123091,
+        "cacheWrite1h": 0,
+        "reasoning": 45236
+      },
+      "costUsd": 3.41,
+      "unpricedTokens": 0,
+      "responses": 279,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "codex resume rollout-2026-08-21T21-30-46-3188"
+      },
+      "transcriptPath": "/Users/you/.codex/sessions/2026/08/21/rollout-2026-08-21T21-30-46-3188.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "cfc0641d-0045-4fc0-8641-94118d880045",
+      "title": "Split the monolith config into packages",
+      "titleSource": "custom",
+      "project": "/Users/you/code/Client Work/o'reilly-site",
+      "gitBranch": "feat/split-the-monolith",
+      "entrypoint": "sdk",
+      "version": "2.1.290",
+      "startedAt": "2026-08-21T00:15:07.000Z",
+      "lastActivityAt": "2026-08-21T00:24:07.000Z",
+      "durationMs": 540000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "tokens": {
+        "input": 14745,
+        "output": 15150,
+        "cacheRead": 994841,
+        "cacheWrite5m": 21107,
+        "cacheWrite1h": 1248
+      },
+      "costUsd": 0.66,
+      "unpricedTokens": 0,
+      "responses": 49,
+      "placeholderShare": 0.08,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume cfc0641d-0045-4fc0-8641-94118d880045",
+        "cwd": "/Users/you/code/Client Work/o'reilly-site"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-Client-Work-o-reilly-site/cfc0641d-0045-4fc0-8641-94118d880045.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "6df7ddce-0046-4df7-8ddc-3626345b0046",
+      "title": "Profile slow dashboard queries",
+      "titleSource": "app",
+      "project": "/Users/you/code/data-pipeline",
+      "gitBranch": "main",
+      "entrypoint": "claude-desktop",
+      "version": "2.1.288",
+      "startedAt": "2026-08-19T01:27:33.000Z",
+      "lastActivityAt": "2026-08-19T03:41:33.000Z",
+      "durationMs": 8040000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5",
+        "claude-haiku-4-5"
+      ],
+      "tokens": {
+        "input": 92828,
+        "output": 164417,
+        "cacheRead": 13399900,
+        "cacheWrite5m": 581563,
+        "cacheWrite1h": 171053
+      },
+      "costUsd": 8.89,
+      "unpricedTokens": 0,
+      "responses": 348,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 3,
+      "workflowRuns": 1,
+      "resume": {
+        "command": "claude --resume 6df7ddce-0046-4df7-8ddc-3626345b0046",
+        "cwd": "/Users/you/code/data-pipeline"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-data-pipeline/6df7ddce-0046-4df7-8ddc-3626345b0046.jsonl",
+      "appSessionId": "local_9978a6d6-5046-4978-8a6d-c2a94f435046",
+      "archived": false,
+      "appTitleSource": "auto",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "0c2f577f-0047-4c2f-8577-57febeea0047",
+      "title": "Upgrade the mobile app's navigation library",
+      "titleSource": "custom",
+      "project": "/Users/you/code/mobile-app",
+      "gitBranch": "main",
+      "entrypoint": "cli",
+      "version": "2.1.290",
+      "startedAt": "2026-08-18T04:03:00.000Z",
+      "lastActivityAt": "2026-08-18T04:36:00.000Z",
+      "durationMs": 1980000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "tokens": {
+        "input": 73980,
+        "output": 97580,
+        "cacheRead": 9124229,
+        "cacheWrite5m": 506823,
+        "cacheWrite1h": 83405
+      },
+      "costUsd": 6.82,
+      "unpricedTokens": 0,
+      "responses": 241,
+      "placeholderShare": 0,
+      "ledgerUsd": 7.64,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 0c2f577f-0047-4c2f-8577-57febeea0047",
+        "cwd": "/Users/you/code/mobile-app"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-mobile-app/0c2f577f-0047-4c2f-8577-57febeea0047.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "aa66d130-0048-4a66-8d13-f1b738a50048",
+      "title": "Upgrade the mobile app's navigation library",
+      "titleSource": "app",
+      "project": "/Users/you/code/api-refactor",
+      "gitBranch": "develop",
+      "entrypoint": "claude-desktop",
+      "version": "2.1.288",
+      "startedAt": "2026-08-15T22:24:40.000Z",
+      "lastActivityAt": "2026-08-15T23:59:40.000Z",
+      "durationMs": 5700000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "tokens": {
+        "input": 46296,
+        "output": 44052,
+        "cacheRead": 5267443,
+        "cacheWrite5m": 105916,
+        "cacheWrite1h": 83947
+      },
+      "costUsd": 3.28,
+      "unpricedTokens": 0,
+      "responses": 130,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume aa66d130-0048-4a66-8d13-f1b738a50048",
+        "cwd": "/Users/you/code/api-refactor"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-api-refactor/aa66d130-0048-4a66-8d13-f1b738a50048.jsonl",
+      "appSessionId": "local_d5e79a38-5048-45e7-89a3-8e3673ad5048",
+      "archived": true,
+      "appTitleSource": "user",
+      "hasTranscript": true
+    },
+    {
+      "agent": "codex",
+      "sessionId": "rollout-2026-08-13T17-48-12-489e",
+      "title": "Draft the 3.2 release notes",
+      "titleSource": "index",
+      "project": "/Users/you/code/api-refactor",
+      "gitBranch": "develop",
+      "entrypoint": "cli",
+      "version": "0.71.0",
+      "startedAt": "2026-08-13T17:48:12.000Z",
+      "lastActivityAt": "2026-08-13T18:42:12.000Z",
+      "durationMs": 3240000,
+      "live": false,
+      "models": [
+        "gpt-5.5-codex"
+      ],
+      "tokens": {
+        "input": 21913,
+        "output": 35740,
+        "cacheRead": 6833421,
+        "cacheWrite5m": 444405,
+        "cacheWrite1h": 0,
+        "reasoning": 10722
+      },
+      "costUsd": 0,
+      "unpricedTokens": 7335479,
+      "responses": 232,
+      "placeholderShare": 0.08,
+      "compactions": 3,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "codex resume rollout-2026-08-13T17-48-12-489e"
+      },
+      "transcriptPath": "/Users/you/.codex/sessions/2026/08/13/rollout-2026-08-13T17-48-12-489e.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "e6d5c492-0050-46d5-8c49-bd042d070050",
+      "titleSource": "none",
+      "project": "/Users/you/code/web-app",
+      "gitBranch": "feat/untitled",
+      "entrypoint": "cli",
+      "version": "2.1.288",
+      "startedAt": "2026-08-11T21:32:09.000Z",
+      "lastActivityAt": "2026-08-11T22:26:09.000Z",
+      "durationMs": 3240000,
+      "live": false,
+      "models": [
+        "claude-opus-5-5",
+        "claude-haiku-4-5"
+      ],
+      "tokens": {
+        "input": 78401,
+        "output": 119635,
+        "cacheRead": 4842114,
+        "cacheWrite5m": 445362,
+        "cacheWrite1h": 16794
+      },
+      "costUsd": 7.12,
+      "unpricedTokens": 0,
+      "responses": 149,
+      "placeholderShare": 0,
+      "ledgerUsd": 7.97,
+      "compactions": 0,
+      "subagentFiles": 3,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume e6d5c492-0050-46d5-8c49-bd042d070050",
+        "cwd": "/Users/you/code/web-app"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-web-app/e6d5c492-0050-46d5-8c49-bd042d070050.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "850d3e43-0051-450d-83e4-dedcd7d60051",
+      "title": "release-captain",
+      "titleSource": "agent-name",
+      "project": "/Users/you/code/data-pipeline",
+      "gitBranch": "develop",
+      "entrypoint": "cli",
+      "version": "2.1.290",
+      "startedAt": "2026-08-09T13:37:33.000Z",
+      "lastActivityAt": "2026-08-09T14:01:33.000Z",
+      "durationMs": 1440000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "tokens": {
+        "input": 15790,
+        "output": 13253,
+        "cacheRead": 3119399,
+        "cacheWrite5m": 168799,
+        "cacheWrite1h": 23832
+      },
+      "costUsd": 1.96,
+      "unpricedTokens": 0,
+      "responses": 81,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 850d3e43-0051-450d-83e4-dedcd7d60051",
+        "cwd": "/Users/you/code/data-pipeline"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-data-pipeline/850d3e43-0051-450d-83e4-dedcd7d60051.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "2344b7f4-0052-4344-8b7f-78955e610052",
+      "title": "Fix the timezone bug in weekly reports",
+      "titleSource": "app",
+      "project": "/Users/you/code/mobile-app",
+      "gitBranch": "main",
+      "entrypoint": "claude-desktop",
+      "version": "2.1.293",
+      "startedAt": "2026-08-07T07:58:33.000Z",
+      "lastActivityAt": "2026-08-07T10:15:33.000Z",
+      "durationMs": 8220000,
+      "live": false,
+      "models": [
+        "claude-opus-5-5"
+      ],
+      "tokens": {
+        "input": 101010,
+        "output": 73058,
+        "cacheRead": 4399731,
+        "cacheWrite5m": 250970,
+        "cacheWrite1h": 163441
+      },
+      "costUsd": 7.73,
+      "unpricedTokens": 0,
+      "responses": 228,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 2344b7f4-0052-4344-8b7f-78955e610052",
+        "cwd": "/Users/you/code/mobile-app"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-mobile-app/2344b7f4-0052-4344-8b7f-78955e610052.jsonl",
+      "appSessionId": "local_4ec580fc-5052-4ec5-880f-151469695052",
+      "archived": false,
+      "appTitleSource": "auto",
+      "effort": "high",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "local_6473c053-5955-4473-8c05-3fa229c65955",
+      "title": "Notes on the data retention policy",
+      "titleSource": "app",
+      "appTitleSource": "auto",
+      "project": "/Users/you/code/data-pipeline",
+      "startedAt": "2026-08-06T13:40:00.000Z",
+      "lastActivityAt": "2026-08-06T14:30:00.000Z",
+      "durationMs": 3000000,
+      "live": false,
+      "models": [],
+      "appSessionId": "local_6473c053-5955-4473-8c05-3fa229c65955",
+      "archived": false,
+      "hasTranscript": false
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "c17c31a5-0053-417c-831a-9aadd8300053",
+      "title": "Replace the date library with Temporal",
+      "titleSource": "custom",
+      "project": "/Users/you/code/clients/acme/api",
+      "gitBranch": "develop",
+      "entrypoint": "cli",
+      "version": "2.1.290",
+      "startedAt": "2026-08-04T21:50:12.000Z",
+      "lastActivityAt": "2026-08-04T22:43:12.000Z",
+      "durationMs": 3180000,
+      "live": false,
+      "models": [
+        "claude-opus-5-5"
+      ],
+      "tokens": {
+        "input": 13235,
+        "output": 28917,
+        "cacheRead": 3767388,
+        "cacheWrite5m": 274645,
+        "cacheWrite1h": 43708
+      },
+      "costUsd": 4.83,
+      "unpricedTokens": 0,
+      "responses": 147,
+      "placeholderShare": 0.08,
+      "ledgerUsd": 5.41,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume c17c31a5-0053-417c-831a-9aadd8300053",
+        "cwd": "/Users/you/code/clients/acme/api"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-clients-acme-api/c17c31a5-0053-417c-831a-9aadd8300053.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "codex",
+      "sessionId": "rollout-2026-08-02T09-01-33-5fb3",
+      "title": "Fix the timezone bug in weekly reports",
+      "titleSource": "index",
+      "project": "/Users/you/code/api-refactor",
+      "gitBranch": "main",
+      "entrypoint": "cli",
+      "version": "0.71.0",
+      "startedAt": "2026-08-02T09:01:33.000Z",
+      "lastActivityAt": "2026-08-02T12:19:33.000Z",
+      "durationMs": 11880000,
+      "live": false,
+      "models": [
+        "gpt-6-sol",
+        "gpt-5.5-codex"
+      ],
+      "tokens": {
+        "input": 43559,
+        "output": 23207,
+        "cacheRead": 2592934,
+        "cacheWrite5m": 416444,
+        "cacheWrite1h": 0,
+        "reasoning": 6963
+      },
+      "costUsd": 0.48,
+      "unpricedTokens": 496992,
+      "responses": 145,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 3,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "codex resume rollout-2026-08-02T09-01-33-5fb3"
+      },
+      "transcriptPath": "/Users/you/.codex/sessions/2026/08/02/rollout-2026-08-02T09-01-33-5fb3.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "fdeb2507-0055-4deb-8250-a63acc920055",
+      "title": "Upgrade the mobile app's navigation library",
+      "titleSource": "ai",
+      "project": "/Users/you/code/infra",
+      "gitBranch": "main",
+      "entrypoint": "cli",
+      "version": "2.1.290",
+      "startedAt": "2026-07-31T04:11:04.000Z",
+      "lastActivityAt": "2026-07-31T05:36:04.000Z",
+      "durationMs": 5100000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5",
+        "claude-haiku-4-5"
+      ],
+      "tokens": {
+        "input": 27767,
+        "output": 69703,
+        "cacheRead": 10578330,
+        "cacheWrite5m": 395816,
+        "cacheWrite1h": 142876
+      },
+      "costUsd": 6.26,
+      "unpricedTokens": 0,
+      "responses": 280,
+      "placeholderShare": 0,
+      "compactions": 2,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume fdeb2507-0055-4deb-8250-a63acc920055",
+        "cwd": "/Users/you/code/infra"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-infra/fdeb2507-0055-4deb-8250-a63acc920055.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "9c229eb8-0056-4c22-89eb-c7f3772d0056",
+      "title": "Dashboard query profiling",
+      "titleSource": "app",
+      "project": "/Users/you/code/web-app",
+      "gitBranch": "develop",
+      "entrypoint": "claude-desktop",
+      "version": "2.1.290",
+      "startedAt": "2026-07-29T06:47:26.000Z",
+      "lastActivityAt": "2026-07-29T09:26:26.000Z",
+      "durationMs": 9540000,
+      "live": false,
+      "models": [
+        "claude-opus-5-5",
+        "claude-haiku-4-5"
+      ],
+      "tokens": {
+        "input": 21194,
+        "output": 21430,
+        "cacheRead": 2288265,
+        "cacheWrite5m": 91490,
+        "cacheWrite1h": 28906
+      },
+      "costUsd": 1.88,
+      "unpricedTokens": 0,
+      "responses": 21,
+      "placeholderShare": 0,
+      "ledgerUsd": 2.11,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 1,
+      "resume": {
+        "command": "claude --resume 9c229eb8-0056-4c22-89eb-c7f3772d0056",
+        "cwd": "/Users/you/code/web-app"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-web-app/9c229eb8-0056-4c22-89eb-c7f3772d0056.jsonl",
+      "appSessionId": "local_c7a367c0-5056-47a3-867c-9c728e555056",
+      "archived": false,
+      "appTitleSource": "user",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "3a5a1869-0057-4a5a-8186-618bf1fc0057",
+      "title": "Remove unused feature flags",
+      "titleSource": "custom",
+      "project": "/Users/you/code/personal/api",
+      "gitBranch": "develop",
+      "entrypoint": "cli",
+      "version": "2.1.290",
+      "startedAt": "2026-07-28T07:19:00.000Z",
+      "lastActivityAt": "2026-07-28T10:54:00.000Z",
+      "durationMs": 12900000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5",
+        "claude-haiku-4-5"
+      ],
+      "tokens": {
+        "input": 16236,
+        "output": 26645,
+        "cacheRead": 1245664,
+        "cacheWrite5m": 112030,
+        "cacheWrite1h": 39061
+      },
+      "costUsd": 1.34,
+      "unpricedTokens": 0,
+      "responses": 60,
+      "placeholderShare": 0.08,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 3a5a1869-0057-4a5a-8186-618bf1fc0057",
+        "cwd": "/Users/you/code/personal/api"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-personal-api/3a5a1869-0057-4a5a-8186-618bf1fc0057.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "d891921a-0058-4891-8921-83407b8f0058",
+      "title": "Upgrade the mobile app's navigation library",
+      "titleSource": "ai",
+      "project": "/Users/you/code/api-refactor",
+      "gitBranch": "develop",
+      "entrypoint": "cli",
+      "version": "2.1.290",
+      "startedAt": "2026-07-25T17:45:21.000Z",
+      "lastActivityAt": "2026-07-25T19:33:21.000Z",
+      "durationMs": 6480000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5",
+        "claude-haiku-4-5"
+      ],
+      "tokens": {
+        "input": 38015,
+        "output": 91573,
+        "cacheRead": 7546224,
+        "cacheWrite5m": 320985,
+        "cacheWrite1h": 121528
+      },
+      "costUsd": 4.62,
+      "unpricedTokens": 0,
+      "responses": 215,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 5,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume d891921a-0058-4891-8921-83407b8f0058",
+        "cwd": "/Users/you/code/api-refactor"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-api-refactor/d891921a-0058-4891-8921-83407b8f0058.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "codex",
+      "sessionId": "rollout-2026-07-23T08-37-57-76c9",
+      "titleSource": "none",
+      "project": "/Users/you/code/signalbox",
+      "gitBranch": "develop",
+      "entrypoint": "cli",
+      "version": "0.71.0",
+      "startedAt": "2026-07-23T08:37:57.000Z",
+      "lastActivityAt": "2026-07-23T09:27:57.000Z",
+      "durationMs": 3000000,
+      "live": false,
+      "models": [
+        "gpt-6-sol",
+        "gpt-5.5-codex"
+      ],
+      "tokens": {
+        "input": 81618,
+        "output": 59743,
+        "cacheRead": 4537629,
+        "cacheWrite5m": 242321,
+        "cacheWrite1h": 0,
+        "reasoning": 17923
+      },
+      "costUsd": 1.02,
+      "unpricedTokens": 816813,
+      "responses": 190,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "codex resume rollout-2026-07-23T08-37-57-76c9"
+      },
+      "transcriptPath": "/Users/you/.codex/sessions/2026/07/23/rollout-2026-07-23T08-37-57-76c9.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "1500857c-0060-4500-8857-4ed16ce90060",
+      "title": "Investigate memory growth in the worker pool",
+      "titleSource": "custom",
+      "project": "/Users/you/code/infra",
+      "gitBranch": "develop",
+      "entrypoint": "cli",
+      "version": "2.1.288",
+      "startedAt": "2026-07-20T16:10:58.000Z",
+      "lastActivityAt": "2026-07-20T16:37:58.000Z",
+      "durationMs": 1620000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5",
+        "claude-haiku-4-5"
+      ],
+      "tokens": {
+        "input": 71111,
+        "output": 118942,
+        "cacheRead": 13941122,
+        "cacheWrite5m": 474796,
+        "cacheWrite1h": 81632
+      },
+      "costUsd": 7.2,
+      "unpricedTokens": 0,
+      "responses": 215,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 1500857c-0060-4500-8857-4ed16ce90060",
+        "cwd": "/Users/you/code/infra"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-infra/1500857c-0060-4500-8857-4ed16ce90060.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "b337ff2d-0061-4337-8ff2-e8e616b80061",
+      "title": "Remove unused feature flags",
+      "titleSource": "ai",
+      "project": "/Users/you/code/api-refactor",
+      "gitBranch": "develop",
+      "entrypoint": "sdk",
+      "version": "2.1.290",
+      "startedAt": "2026-07-17T20:06:14.000Z",
+      "lastActivityAt": "2026-07-17T20:47:14.000Z",
+      "durationMs": 2460000,
+      "live": false,
+      "models": [
+        "claude-opus-5-5"
+      ],
+      "tokens": {
+        "input": 18490,
+        "output": 16222,
+        "cacheRead": 662980,
+        "cacheWrite5m": 116446,
+        "cacheWrite1h": 8813
+      },
+      "costUsd": 1.65,
+      "unpricedTokens": 0,
+      "responses": 73,
+      "placeholderShare": 0.08,
+      "compactions": 3,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume b337ff2d-0061-4337-8ff2-e8e616b80061",
+        "cwd": "/Users/you/code/api-refactor"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-api-refactor/b337ff2d-0061-4337-8ff2-e8e616b80061.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "516f78de-0062-416f-878d-0abe914b0062",
+      "title": "release-captain",
+      "titleSource": "agent-name",
+      "project": "/Users/you/code/Client Work/o'reilly-site",
+      "gitBranch": "main",
+      "entrypoint": "sdk",
+      "version": "2.1.288",
+      "startedAt": "2026-07-15T16:29:17.000Z",
+      "lastActivityAt": "2026-07-15T18:55:17.000Z",
+      "durationMs": 8760000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5",
+        "claude-haiku-4-5"
+      ],
+      "tokens": {
+        "input": 19432,
+        "output": 12934,
+        "cacheRead": 3486584,
+        "cacheWrite5m": 95450,
+        "cacheWrite1h": 27564
+      },
+      "costUsd": 1.53,
+      "unpricedTokens": 0,
+      "responses": 62,
+      "placeholderShare": 0,
+      "ledgerUsd": 1.71,
+      "compactions": 0,
+      "subagentFiles": 1,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 516f78de-0062-416f-878d-0abe914b0062",
+        "cwd": "/Users/you/code/Client Work/o'reilly-site"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-Client-Work-o-reilly-site/516f78de-0062-416f-878d-0abe914b0062.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "efa6f28f-0063-4fa6-8f28-b4771b1a0063",
+      "title": "Upgrade the mobile app's navigation library",
+      "titleSource": "custom",
+      "project": "/Users/you/code/signalbox",
+      "gitBranch": "main",
+      "entrypoint": "sdk",
+      "version": "2.1.288",
+      "startedAt": "2026-07-13T06:59:26.000Z",
+      "lastActivityAt": "2026-07-13T07:36:26.000Z",
+      "durationMs": 2220000,
+      "live": false,
+      "models": [
+        "claude-opus-5-5"
+      ],
+      "tokens": {
+        "input": 58448,
+        "output": 89335,
+        "cacheRead": 4374902,
+        "cacheWrite5m": 292565,
+        "cacheWrite1h": 34456
+      },
+      "costUsd": 6.89,
+      "unpricedTokens": 0,
+      "responses": 342,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume efa6f28f-0063-4fa6-8f28-b4771b1a0063",
+        "cwd": "/Users/you/code/signalbox"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-signalbox/efa6f28f-0063-4fa6-8f28-b4771b1a0063.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "codex",
+      "sessionId": "rollout-2026-07-11T20-15-25-8dde",
+      "title": "Migrate CI to the new runner images",
+      "titleSource": "index",
+      "project": "/Users/you/code/Client Work/o'reilly-site",
+      "gitBranch": "main",
+      "entrypoint": "cli",
+      "version": "0.71.0",
+      "startedAt": "2026-07-11T20:15:25.000Z",
+      "lastActivityAt": "2026-07-12T00:22:25.000Z",
+      "durationMs": 14820000,
+      "live": false,
+      "models": [
+        "gpt-6-sol",
+        "gpt-5.5-codex"
+      ],
+      "tokens": {
+        "input": 45804,
+        "output": 38550,
+        "cacheRead": 6461612,
+        "cacheWrite5m": 98464,
+        "cacheWrite1h": 0,
+        "reasoning": 11566
+      },
+      "costUsd": 0.91,
+      "unpricedTokens": 1833958,
+      "responses": 116,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "codex resume rollout-2026-07-11T20-15-25-8dde"
+      },
+      "transcriptPath": "/Users/you/.codex/sessions/2026/07/11/rollout-2026-07-11T20-15-25-8dde.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "2c15e5f1-0065-4c15-8e5f-77c40c640065",
+      "title": "Add dark mode to the settings page",
+      "titleSource": "custom",
+      "project": "/Users/you/code/web-app",
+      "gitBranch": "develop",
+      "entrypoint": "cli",
+      "version": "2.1.290",
+      "startedAt": "2026-07-10T23:49:21.000Z",
+      "lastActivityAt": "2026-07-11T01:22:21.000Z",
+      "durationMs": 5580000,
+      "live": false,
+      "models": [
+        "claude-opus-5-5",
+        "claude-haiku-4-5"
+      ],
+      "tokens": {
+        "input": 15402,
+        "output": 79117,
+        "cacheRead": 4202618,
+        "cacheWrite5m": 139960,
+        "cacheWrite1h": 95642
+      },
+      "costUsd": 4.28,
+      "unpricedTokens": 0,
+      "responses": 122,
+      "placeholderShare": 0.08,
+      "ledgerUsd": 4.79,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 2c15e5f1-0065-4c15-8e5f-77c40c640065",
+        "cwd": "/Users/you/code/web-app"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-web-app/2c15e5f1-0065-4c15-8e5f-77c40c640065.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "ca4d5fa2-0066-4a4d-85fa-919cb6370066",
+      "title": "Improve search ranking for short queries",
+      "titleSource": "app",
+      "project": "/Users/you/code/signalbox",
+      "gitBranch": "develop",
+      "entrypoint": "claude-desktop",
+      "version": "2.1.288",
+      "startedAt": "2026-07-09T05:12:50.000Z",
+      "lastActivityAt": "2026-07-09T07:28:50.000Z",
+      "durationMs": 8160000,
+      "live": false,
+      "models": [
+        "claude-opus-5-5",
+        "claude-haiku-4-5"
+      ],
+      "tokens": {
+        "input": 33659,
+        "output": 18289,
+        "cacheRead": 5155374,
+        "cacheWrite5m": 260423,
+        "cacheWrite1h": 77622
+      },
+      "costUsd": 4.56,
+      "unpricedTokens": 0,
+      "responses": 154,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 3,
+      "workflowRuns": 1,
+      "resume": {
+        "command": "claude --resume ca4d5fa2-0066-4a4d-85fa-919cb6370066",
+        "cwd": "/Users/you/code/signalbox"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-signalbox/ca4d5fa2-0066-4a4d-85fa-919cb6370066.jsonl",
+      "appSessionId": "local_f5ce28aa-5066-45ce-828a-ae1fc13f5066",
+      "archived": true,
+      "appTitleSource": "auto",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "6884d953-0067-4884-8d95-335530c60067",
+      "title": "Remove unused feature flags",
+      "titleSource": "ai",
+      "project": "/Users/you/code/mobile-app",
+      "gitBranch": "feat/remove-unused-feature",
+      "entrypoint": "sdk",
+      "version": "2.1.288",
+      "startedAt": "2026-07-08T00:34:16.000Z",
+      "lastActivityAt": "2026-07-08T01:23:16.000Z",
+      "durationMs": 2940000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "tokens": {
+        "input": 15399,
+        "output": 10170,
+        "cacheRead": 3461523,
+        "cacheWrite5m": 30975,
+        "cacheWrite1h": 12181
+      },
+      "costUsd": 1.43,
+      "unpricedTokens": 0,
+      "responses": 113,
+      "placeholderShare": 0,
+      "compactions": 1,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 6884d953-0067-4884-8d95-335530c60067",
+        "cwd": "/Users/you/code/mobile-app"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-mobile-app/6884d953-0067-4884-8d95-335530c60067.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "06bc5304-0068-46bc-8530-5d6dba910068",
+      "titleSource": "none",
+      "project": "/Users/you/code/mobile-app",
+      "gitBranch": "feat/untitled",
+      "entrypoint": "sdk",
+      "version": "2.1.290",
+      "startedAt": "2026-07-06T17:33:44.000Z",
+      "lastActivityAt": "2026-07-06T19:01:44.000Z",
+      "durationMs": 5280000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5",
+        "claude-haiku-4-5"
+      ],
+      "tokens": {
+        "input": 119530,
+        "output": 159780,
+        "cacheRead": 17435854,
+        "cacheWrite5m": 513176,
+        "cacheWrite1h": 49582
+      },
+      "costUsd": 9.39,
+      "unpricedTokens": 0,
+      "responses": 80,
+      "placeholderShare": 0,
+      "ledgerUsd": 10.52,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 06bc5304-0068-46bc-8530-5d6dba910068",
+        "cwd": "/Users/you/code/mobile-app"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-mobile-app/06bc5304-0068-46bc-8530-5d6dba910068.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "codex",
+      "sessionId": "rollout-2026-07-05T13-34-33-a4f3",
+      "title": "Split the monolith config into packages",
+      "titleSource": "index",
+      "project": "/Users/you/code/data-pipeline",
+      "gitBranch": "main",
+      "entrypoint": "cli",
+      "version": "0.71.0",
+      "startedAt": "2026-07-05T13:34:33.000Z",
+      "lastActivityAt": "2026-07-05T16:49:33.000Z",
+      "durationMs": 11700000,
+      "live": false,
+      "models": [
+        "gpt-6-sol",
+        "gpt-5.5-codex"
+      ],
+      "tokens": {
+        "input": 86085,
+        "output": 122979,
+        "cacheRead": 1706243,
+        "cacheWrite5m": 106385,
+        "cacheWrite1h": 0,
+        "reasoning": 36894
+      },
+      "costUsd": 1.32,
+      "unpricedTokens": 374773,
+      "responses": 55,
+      "placeholderShare": 0.08,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "codex resume rollout-2026-07-05T13-34-33-a4f3"
+      },
+      "transcriptPath": "/Users/you/.codex/sessions/2026/07/05/rollout-2026-07-05T13-34-33-a4f3.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "432b4666-0070-432b-8466-18faaff30070",
+      "title": "Review dependency updates",
+      "titleSource": "ai",
+      "project": "/Users/you/code/mobile-app",
+      "gitBranch": "feat/review-dependency-updates",
+      "entrypoint": "sdk",
+      "version": "2.1.288",
+      "startedAt": "2026-07-04T15:46:25.000Z",
+      "lastActivityAt": "2026-07-04T16:49:25.000Z",
+      "durationMs": 3780000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "tokens": {
+        "input": 17524,
+        "output": 15909,
+        "cacheRead": 2312370,
+        "cacheWrite5m": 94996,
+        "cacheWrite1h": 50000
+      },
+      "costUsd": 1.64,
+      "unpricedTokens": 0,
+      "responses": 144,
+      "placeholderShare": 0,
+      "compactions": 0,
+      "subagentFiles": 3,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume 432b4666-0070-432b-8466-18faaff30070",
+        "cwd": "/Users/you/code/mobile-app"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-mobile-app/432b4666-0070-432b-8466-18faaff30070.jsonl",
+      "hasTranscript": true
+    },
+    {
+      "agent": "claude-code",
+      "sessionId": "e162c017-0071-4162-8c01-bab329820071",
+      "title": "Fix the timezone bug in weekly reports",
+      "titleSource": "custom",
+      "project": "/Users/you/code/mobile-app",
+      "gitBranch": "develop",
+      "entrypoint": "cli",
+      "version": "2.1.288",
+      "startedAt": "2026-07-01T19:25:36.000Z",
+      "lastActivityAt": "2026-07-01T23:35:36.000Z",
+      "durationMs": 15000000,
+      "live": false,
+      "models": [
+        "claude-sonnet-5-5"
+      ],
+      "tokens": {
+        "input": 62283,
+        "output": 84876,
+        "cacheRead": 6591406,
+        "cacheWrite5m": 87744,
+        "cacheWrite1h": 49497
+      },
+      "costUsd": 4.06,
+      "unpricedTokens": 0,
+      "responses": 279,
+      "placeholderShare": 0,
+      "ledgerUsd": 4.55,
+      "compactions": 0,
+      "subagentFiles": 0,
+      "workflowRuns": 0,
+      "resume": {
+        "command": "claude --resume e162c017-0071-4162-8c01-bab329820071",
+        "cwd": "/Users/you/code/mobile-app"
+      },
+      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-mobile-app/e162c017-0071-4162-8c01-bab329820071.jsonl",
+      "hasTranscript": true
+    }
+  ],
+  "total": 87,
+  "truncated": false,
+  "sources": {
+    "transcripts": 81,
+    "claudeApp": {
+      "enabled": true,
+      "records": 21,
+      "merged": 15,
+      "appOnly": 6,
+      "archived": 7
+    }
+  }
+}

@@ -1,0 +1,3 @@
+[test]
+# Engine-native mod tests import `claude-code/testing` and run under `claude plugin test`, not Bun.
+pathIgnorePatterns = ["plugins/*/tests/**", "research/mods/*/tests/**"]

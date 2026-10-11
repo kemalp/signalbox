@@ -1,0 +1,18 @@
+{
+  "fill" : {
+    "automatic-gradient" : "srgb:0.15686,0.21176,0.26275,1.00000"
+  },
+  "groups" : [
+    {
+      "layers" : [ { "image-name" : "signal.png", "name" : "signal" } ],
+      "shadow" : { "kind" : "neutral", "opacity" : 0.5 },
+      "translucency" : { "enabled" : true, "value" : 0.3 }
+    },
+    {
+      "layers" : [ { "image-name" : "ground.png", "name" : "ground" } ]
+    }
+  ],
+  "supported-platforms" : {
+    "squares" : "shared"
+  }
+}

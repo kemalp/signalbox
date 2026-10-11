@@ -1,0 +1,79 @@
+{
+  "provider": "openai",
+  "asOf": "2026-10-09",
+  "sourceUrl": "https://developers.openai.com/api/docs/pricing",
+  "currency": "USD",
+  "models": {
+    "gpt-6-astra": {
+      "input": 10, "output": 50, "cacheRead": 1, "cacheWrite5m": 12.5, "cacheWrite1h": 12.5, "webSearchPerRequest": 0.01,
+      "longContext": { "thresholdTokens": 272000, "input": 20, "output": 75, "cacheRead": 2, "cacheWrite5m": 25, "cacheWrite1h": 25 },
+      "fast": { "input": 20, "output": 100, "cacheRead": 2, "cacheWrite5m": 25, "cacheWrite1h": 25 }
+    },
+    "gpt-6.1-sol": {
+      "input": 2, "output": 10, "cacheRead": 0.1, "cacheWrite5m": 2.5, "cacheWrite1h": 2.5, "webSearchPerRequest": 0.01,
+      "longContext": { "thresholdTokens": 272000, "input": 4, "output": 15, "cacheRead": 0.2, "cacheWrite5m": 5, "cacheWrite1h": 5 },
+      "fast": { "input": 4, "output": 20, "cacheRead": 0.2, "cacheWrite5m": 5, "cacheWrite1h": 5 }
+    },
+    "gpt-6-sol": {
+      "input": 2, "output": 10, "cacheRead": 0.2, "cacheWrite5m": 2.5, "cacheWrite1h": 2.5, "webSearchPerRequest": 0.01,
+      "longContext": { "thresholdTokens": 272000, "input": 4, "output": 15, "cacheRead": 0.4, "cacheWrite5m": 5, "cacheWrite1h": 5 },
+      "fast": { "input": 4, "output": 20, "cacheRead": 0.4, "cacheWrite5m": 5, "cacheWrite1h": 5 }
+    },
+    "gpt-6-luna": {
+      "input": 0.1, "output": 0.5, "cacheRead": 0.01, "cacheWrite5m": 0.125, "cacheWrite1h": 0.125, "webSearchPerRequest": 0.01,
+      "longContext": { "thresholdTokens": 272000, "input": 0.2, "output": 0.75, "cacheRead": 0.02, "cacheWrite5m": 0.25, "cacheWrite1h": 0.25 },
+      "fast": { "input": 0.2, "output": 1, "cacheRead": 0.02, "cacheWrite5m": 0.25, "cacheWrite1h": 0.25 }
+    },
+    "gpt-5.6-sol": {
+      "input": 4, "output": 20, "cacheRead": 0.4, "cacheWrite5m": 5, "cacheWrite1h": 5, "webSearchPerRequest": 0.01,
+      "longContext": { "thresholdTokens": 272000, "input": 8, "output": 30, "cacheRead": 0.8, "cacheWrite5m": 10, "cacheWrite1h": 10 },
+      "fast": { "input": 8, "output": 40, "cacheRead": 0.8, "cacheWrite5m": 10, "cacheWrite1h": 10 }
+    },
+    "gpt-5.6-terra": {
+      "input": 2, "output": 12, "cacheRead": 0.2, "cacheWrite5m": 2.5, "cacheWrite1h": 2.5, "webSearchPerRequest": 0.01,
+      "longContext": { "thresholdTokens": 272000, "input": 4, "output": 18, "cacheRead": 0.4, "cacheWrite5m": 5, "cacheWrite1h": 5 },
+      "fast": { "input": 4, "output": 24, "cacheRead": 0.4, "cacheWrite5m": 5, "cacheWrite1h": 5 }
+    },
+    "gpt-5.6-luna": {
+      "input": 0.2, "output": 1.2, "cacheRead": 0.02, "cacheWrite5m": 0.25, "cacheWrite1h": 0.25, "webSearchPerRequest": 0.01,
+      "longContext": { "thresholdTokens": 272000, "input": 0.4, "output": 1.8, "cacheRead": 0.04, "cacheWrite5m": 0.5, "cacheWrite1h": 0.5 },
+      "fast": { "input": 0.4, "output": 2.4, "cacheRead": 0.04, "cacheWrite5m": 0.5, "cacheWrite1h": 0.5 }
+    },
+    "gpt-5.5": {
+      "input": 5, "output": 30, "cacheRead": 0.5, "cacheWrite5m": 5, "cacheWrite1h": 5, "webSearchPerRequest": 0.01,
+      "longContext": { "thresholdTokens": 272000, "input": 10, "output": 45, "cacheRead": 1, "cacheWrite5m": 10, "cacheWrite1h": 10 },
+      "fast": { "input": 12.5, "output": 75, "cacheRead": 1.25, "cacheWrite5m": 12.5, "cacheWrite1h": 12.5 }
+    },
+    "gpt-5.4": {
+      "input": 2.5, "output": 15, "cacheRead": 0.25, "cacheWrite5m": 2.5, "cacheWrite1h": 2.5, "webSearchPerRequest": 0.01,
+      "longContext": { "thresholdTokens": 272000, "input": 5, "output": 22.5, "cacheRead": 0.5, "cacheWrite5m": 5, "cacheWrite1h": 5 }
+    },
+    "gpt-5.4-mini": { "input": 0.75, "output": 4.5, "cacheRead": 0.075, "cacheWrite5m": 0.75, "cacheWrite1h": 0.75, "webSearchPerRequest": 0.01 },
+    "gpt-5.4-nano": { "input": 0.2, "output": 1.25, "cacheRead": 0.02, "cacheWrite5m": 0.2, "cacheWrite1h": 0.2, "webSearchPerRequest": 0.01 },
+    "gpt-5.3-codex": {
+      "input": 1.75, "output": 14, "cacheRead": 0.175, "cacheWrite5m": 1.75, "cacheWrite1h": 1.75, "webSearchPerRequest": 0.01,
+      "fast": { "input": 3.5, "output": 28, "cacheRead": 0.35, "cacheWrite5m": 3.5, "cacheWrite1h": 3.5 }
+    },
+    "gpt-5.2": { "input": 1.75, "output": 14, "cacheRead": 0.175, "cacheWrite5m": 1.75, "cacheWrite1h": 1.75, "webSearchPerRequest": 0.01 },
+    "gpt-5.1": { "input": 1.25, "output": 10, "cacheRead": 0.125, "cacheWrite5m": 1.25, "cacheWrite1h": 1.25, "webSearchPerRequest": 0.01 },
+    "gpt-5": { "input": 1.25, "output": 10, "cacheRead": 0.125, "cacheWrite5m": 1.25, "cacheWrite1h": 1.25, "webSearchPerRequest": 0.01 },
+    "gpt-5-mini": { "input": 0.25, "output": 2, "cacheRead": 0.025, "cacheWrite5m": 0.25, "cacheWrite1h": 0.25, "webSearchPerRequest": 0.01 },
+    "gpt-5-nano": { "input": 0.05, "output": 0.4, "cacheRead": 0.005, "cacheWrite5m": 0.05, "cacheWrite1h": 0.05, "webSearchPerRequest": 0.01 },
+    "gpt-4.1": { "input": 2, "output": 8, "cacheRead": 0.5, "cacheWrite5m": 2, "cacheWrite1h": 2, "webSearchPerRequest": 0.01 },
+    "gpt-4.1-mini": { "input": 0.4, "output": 1.6, "cacheRead": 0.1, "cacheWrite5m": 0.4, "cacheWrite1h": 0.4, "webSearchPerRequest": 0.01 },
+    "o3": { "input": 2, "output": 8, "cacheRead": 0.5, "cacheWrite5m": 2, "cacheWrite1h": 2, "webSearchPerRequest": 0.01 },
+    "o4-mini": { "input": 1.1, "output": 4.4, "cacheRead": 0.275, "cacheWrite5m": 1.1, "cacheWrite1h": 1.1, "webSearchPerRequest": 0.01 }
+  },
+  "notes": [
+    "Standard-tier list prices, USD per 1M tokens, read from developers.openai.com/api/docs/pricing on 2026-10-09 (fetched twice, rows matched). gpt-5.3-codex comes from the page's Specialized models section.",
+    "Codex reports cached_input_tokens and cache_write_input_tokens as subsets of input_tokens; the adapter maps them to cacheRead and cacheWrite5m and bills the rest of input_tokens as input.",
+    "OpenAI has one cache TTL per model (30m for GPT-5.6 and later), not Anthropic's 5m/1h pair, so both write columns hold the same rate. GPT-5.6 and later charge cache writes at 1.25x uncached input (developers.openai.com/api/docs/guides/prompt-caching). GPT-5.5 and earlier have no write premium, so their write columns equal the input rate.",
+    "longContext applies above 272K input tokens per request (the page says: 'Long context: >272K input tokens').",
+    "fast holds the page's Fast-mode rates (renamed from Priority on 2026-07-30), applied when Codex reports service_tier fast or priority. The page lists no Fast cache-write rate, so it is 1.25x Fast input for GPT-5.6 and later, which is how the Standard and Batch tables are built, and equals Fast input for gpt-5.5 and gpt-5.3-codex. The page also lists Fast long-context rates; core applies Fast short-context rates to every Fast request, so a Fast request above 272K is under-priced.",
+    "The Ultrafast tier (gpt-6-astra, gpt-6.1-sol), Batch/Flex rates and the 10% regional-processing uplift are not represented. Codex rollouts never report regional processing.",
+    "webSearchPerRequest: web search costs $10.00 per 1k calls; search content tokens are billed at model rates and are already in the usage counts.",
+    "Unpriced on purpose, because there is no official API list price: gpt-reserve (Codex's reserve fallback allowance once plan limits run out), codex-auto-review (the Guardian approval reviewer). gpt-5.3-codex-spark, gpt-5-codex, gpt-5.1-codex, gpt-5.1-codex-max, gpt-5.1-codex-mini, gpt-5.2-codex and codex-mini-latest are not on the current pricing page either. All of them are priced at $0 and listed in unpricedModels. Third-party calculators quote prices for some of them; those are not used.",
+    "Only exact model ids are listed, no prefix keys. A prefix such as gpt-5-* would price gpt-5-codex at gpt-5 rates, which would be a guess.",
+    "GPT-5.6 Sol's price is promotional, 'available at least through November 21, 2026' per the pricing page. Re-check after that date."
+  ]
+}

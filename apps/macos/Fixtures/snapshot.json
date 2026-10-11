@@ -1,0 +1,2294 @@
+{
+  "v": 1,
+  "generatedAt": "2026-10-09T14:30:00.000Z",
+  "days": 7,
+  "fleet": {
+    "generatedAt": "2026-10-09T14:30:00.000Z",
+    "sessions": [
+      {
+        "agent": "claude-code",
+        "sessionId": "7f3a91c2-0b4e-4d8a-9a51-2c6f1e8d4b10",
+        "pid": 48211,
+        "cwd": "/Users/you/code/api-refactor",
+        "name": "api-refactor",
+        "status": "busy",
+        "statusSince": "2026-10-09T14:26:48.000Z",
+        "entrypoint": "claude-desktop",
+        "version": "2.1.293",
+        "model": "claude-opus-5-5",
+        "effort": "high",
+        "startedAt": "2026-10-09T09:30:00.000Z",
+        "lastActivity": "2026-10-09T14:29:56.000Z",
+        "source": "agents --json",
+        "costUsd": 18.42,
+        "context": {
+          "agent": "claude-code",
+          "sessionId": "7f3a91c2-0b4e-4d8a-9a51-2c6f1e8d4b10",
+          "tokens": 412300,
+          "window": 1000000,
+          "windowSource": "agent",
+          "percent": 41.2,
+          "autoCompactAtPercent": 96.7,
+          "observedAt": "2026-10-09T14:29:20.000Z",
+          "quality": "official",
+          "source": "tap"
+        }
+      },
+      {
+        "agent": "claude-code",
+        "sessionId": "2b9e0f14-6c3d-47a1-b8e9-5d4c2a1f7e03",
+        "pid": 48390,
+        "cwd": "/Users/you/code/signalbox",
+        "name": "docs sweep",
+        "status": "waiting",
+        "statusSince": "2026-10-09T14:25:29.000Z",
+        "waitingFor": "permission prompt",
+        "entrypoint": "claude-desktop",
+        "version": "2.1.293",
+        "model": "claude-sonnet-5-5",
+        "effort": "medium",
+        "startedAt": "2026-10-09T12:30:00.000Z",
+        "lastActivity": "2026-10-09T14:25:29.000Z",
+        "source": "agents --json",
+        "costUsd": 3.17,
+        "context": {
+          "agent": "claude-code",
+          "sessionId": "2b9e0f14-6c3d-47a1-b8e9-5d4c2a1f7e03",
+          "tokens": 88400,
+          "window": 1000000,
+          "windowSource": "model-table",
+          "percent": 8.8,
+          "autoCompactAtPercent": 96.7,
+          "observedAt": "2026-10-09T14:26:00.000Z",
+          "quality": "estimated",
+          "source": "transcript"
+        }
+      },
+      {
+        "agent": "claude-code",
+        "sessionId": "c41d2e77-5a90-4f3b-8e2d-91b0a7c3f562",
+        "pid": 47002,
+        "cwd": "/Users/you/code/web-app",
+        "status": "idle",
+        "statusSince": "2026-10-09T14:04:00.000Z",
+        "entrypoint": "cli",
+        "version": "2.1.293",
+        "model": "claude-opus-5-5",
+        "effort": "xhigh",
+        "startedAt": "2026-10-09T07:30:00.000Z",
+        "lastActivity": "2026-10-09T14:04:00.000Z",
+        "source": "registry",
+        "costUsd": 41.9,
+        "context": {
+          "agent": "claude-code",
+          "sessionId": "c41d2e77-5a90-4f3b-8e2d-91b0a7c3f562",
+          "tokens": 902100,
+          "window": 1000000,
+          "windowSource": "agent",
+          "percent": 90.2,
+          "autoCompactAtPercent": 96.7,
+          "observedAt": "2026-10-09T14:04:00.000Z",
+          "quality": "official",
+          "source": "tap"
+        }
+      },
+      {
+        "agent": "claude-code",
+        "sessionId": "a0c7e2d9-41b6-4f85-b3a0-8e9d1c2f6a47",
+        "cwd": "/Users/you/code/signalbox",
+        "name": "nightly-triage",
+        "status": "busy",
+        "statusSince": "2026-10-09T13:49:00.000Z",
+        "entrypoint": "sdk",
+        "version": "2.1.293",
+        "model": "claude-haiku-4-5",
+        "startedAt": "2026-10-09T13:49:00.000Z",
+        "lastActivity": "2026-10-09T14:29:42.000Z",
+        "source": "agents --json"
+      },
+      {
+        "agent": "codex",
+        "sessionId": "rollout-2026-10-09T08-12-44-019a",
+        "pid": 51220,
+        "cwd": "/Users/you/code/infra",
+        "status": "idle",
+        "statusSince": "2026-10-09T14:21:00.000Z",
+        "entrypoint": "cli",
+        "version": "0.71.0",
+        "model": "gpt-5.5-codex",
+        "effort": "medium",
+        "startedAt": "2026-10-09T11:30:00.000Z",
+        "lastActivity": "2026-10-09T14:21:00.000Z",
+        "source": "codex sessions",
+        "context": {
+          "agent": "codex",
+          "sessionId": "rollout-2026-10-09T08-12-44-019a",
+          "tokens": 128000,
+          "window": 272000,
+          "windowSource": "agent",
+          "observedAt": "2026-10-09T14:21:00.000Z",
+          "quality": "estimated",
+          "source": "rollout"
+        }
+      },
+      {
+        "agent": "claude-code",
+        "sessionId": "e8a5c3b1-9d72-4e60-a4f8-0c1b3d5e7f29",
+        "cwd": "/Users/you/code/api-refactor",
+        "name": "release notes",
+        "status": "ended",
+        "statusSince": "2026-10-09T11:30:00.000Z",
+        "entrypoint": "cli",
+        "version": "2.1.293",
+        "model": "claude-opus-5-5",
+        "effort": "medium",
+        "startedAt": "2026-10-09T08:30:00.000Z",
+        "lastActivity": "2026-10-09T11:30:00.000Z",
+        "source": "registry",
+        "costUsd": 24.11
+      }
+    ],
+    "limits": [
+      {
+        "agent": "claude-code",
+        "kind": "five_hour",
+        "usedPercent": 63,
+        "resetsAt": "2026-10-09T16:44:00.000Z",
+        "windowMinutes": 300,
+        "observedAt": "2026-10-09T14:29:20.000Z",
+        "plan": "Max 20x",
+        "sessionId": "7f3a91c2-0b4e-4d8a-9a51-2c6f1e8d4b10",
+        "source": "tap"
+      },
+      {
+        "agent": "claude-code",
+        "kind": "seven_day",
+        "usedPercent": 41,
+        "resetsAt": "2026-10-12T19:30:00.000Z",
+        "windowMinutes": 10080,
+        "observedAt": "2026-10-09T14:29:20.000Z",
+        "plan": "Max 20x",
+        "sessionId": "7f3a91c2-0b4e-4d8a-9a51-2c6f1e8d4b10",
+        "source": "tap"
+      },
+      {
+        "agent": "claude-code",
+        "kind": "seven_day_fable",
+        "usedPercent": 88,
+        "resetsAt": "2026-10-12T19:30:00.000Z",
+        "windowMinutes": 10080,
+        "observedAt": "2026-10-09T13:43:00.000Z",
+        "sessionId": "c41d2e77-5a90-4f3b-8e2d-91b0a7c3f562",
+        "source": "tap"
+      },
+      {
+        "agent": "codex",
+        "kind": "codex.primary",
+        "usedPercent": 22,
+        "resetsAt": "2026-10-09T17:32:00.000Z",
+        "windowMinutes": 300,
+        "observedAt": "2026-10-09T14:21:00.000Z",
+        "plan": "pro",
+        "sessionId": "rollout-2026-10-09T08-12-44-019a",
+        "source": "rollout"
+      },
+      {
+        "agent": "codex",
+        "kind": "codex.secondary",
+        "usedPercent": 58,
+        "resetsAt": "2026-10-13T16:30:00.000Z",
+        "windowMinutes": 10080,
+        "observedAt": "2026-10-09T14:21:00.000Z",
+        "plan": "pro",
+        "sessionId": "rollout-2026-10-09T08-12-44-019a",
+        "source": "rollout"
+      }
+    ],
+    "compactions": [
+      {
+        "agent": "claude-code",
+        "sessionId": "c41d2e77-5a90-4f3b-8e2d-91b0a7c3f562",
+        "ts": "2026-10-09T12:24:00.000Z",
+        "trigger": "auto",
+        "preTokens": 967400
+      },
+      {
+        "agent": "claude-code",
+        "sessionId": "7f3a91c2-0b4e-4d8a-9a51-2c6f1e8d4b10",
+        "ts": "2026-10-09T09:50:00.000Z",
+        "trigger": "manual",
+        "preTokens": 512800
+      },
+      {
+        "agent": "claude-code",
+        "sessionId": "e8a5c3b1-9d72-4e60-a4f8-0c1b3d5e7f29",
+        "ts": "2026-10-08T11:30:00.000Z",
+        "trigger": "auto",
+        "preTokens": 966900
+      },
+      {
+        "agent": "codex",
+        "sessionId": "rollout-2026-10-09T08-12-44-019a",
+        "ts": "2026-10-07T14:30:00.000Z",
+        "trigger": "unknown"
+      }
+    ],
+    "health": [
+      {
+        "name": "claude-code:agents-json",
+        "stability": "preview",
+        "ok": true,
+        "detail": "4 sessions from `claude agents --json` (0.4s)"
+      },
+      {
+        "name": "claude-code:registry",
+        "stability": "internal",
+        "ok": true,
+        "detail": "4 registry files; keys only"
+      },
+      {
+        "name": "claude-code:transcripts",
+        "stability": "internal",
+        "ok": true,
+        "detail": "312 transcript files in range"
+      },
+      {
+        "name": "claude-code:cost-state",
+        "stability": "internal",
+        "ok": true,
+        "detail": "52 ledger rows in 32 transcripts"
+      },
+      {
+        "name": "claude-code:spool",
+        "stability": "preview",
+        "ok": true,
+        "detail": "3 sessions reporting via signalbox-tap"
+      },
+      {
+        "name": "claude-app:sessions",
+        "stability": "internal",
+        "ok": true,
+        "detail": "21 session record files in /Users/you/Library/Application Support/Claude/claude-code-sessions (allow-listed local_*.json names, read-only); last history: 21 records read, 15 matched a transcript, 6 without a transcript, 7 archived, 0 skipped (not a regular file or over 1 MiB), 0 unreadable"
+      },
+      {
+        "name": "codex:rollouts",
+        "stability": "internal",
+        "ok": true,
+        "detail": "41 rollout files in range"
+      },
+      {
+        "name": "gemini-cli:telemetry",
+        "stability": "documented",
+        "ok": false,
+        "detail": "Gemini CLI not detected on this machine"
+      }
+    ]
+  },
+  "report": {
+    "generatedAt": "2026-10-09T14:30:00.000Z",
+    "range": {
+      "since": "2026-10-03T00:00:00.000Z",
+      "until": "2026-10-09T14:30:00.000Z"
+    },
+    "totals": {
+      "tokens": {
+        "input": 24015150,
+        "output": 2675075,
+        "cacheRead": 1412028840,
+        "cacheWrite5m": 27711125,
+        "cacheWrite1h": 7069973,
+        "reasoning": 353797
+      },
+      "cost": {
+        "input": 9.929878999999996,
+        "output": 28.889825000000005,
+        "cacheRead": 256.98356110000003,
+        "cacheWrite5m": 130.64168000000004,
+        "cacheWrite1h": 56.55978399999999,
+        "webSearch": 0.39000000000000007,
+        "total": 483.3947291
+      },
+      "responses": 9732,
+      "placeholderResponses": 4573,
+      "unpricedTokens": 118330999,
+      "unpricedModels": [
+        "gpt-5.5-codex"
+      ],
+      "processedTokens": 1473500163,
+      "freshTokens": 61471323,
+      "cacheHitRatio": 0.9600249897287583,
+      "savedByCachingUsd": 4882.687660899998
+    },
+    "byAgent": [
+      {
+        "key": "claude-code",
+        "tokens": {
+          "input": 9805222,
+          "output": 1793479,
+          "cacheRead": 1308789365,
+          "cacheWrite5m": 27711125,
+          "cacheWrite1h": 7069973
+        },
+        "cost": {
+          "input": 9.929878999999996,
+          "output": 28.889825000000005,
+          "cacheRead": 256.98356110000003,
+          "cacheWrite5m": 130.64168000000004,
+          "cacheWrite1h": 56.55978399999999,
+          "webSearch": 0.39000000000000007,
+          "total": 483.3947291
+        },
+        "responses": 9036,
+        "placeholderResponses": 4573,
+        "unpricedTokens": 0,
+        "unpricedModels": []
+      },
+      {
+        "key": "codex",
+        "tokens": {
+          "input": 14209928,
+          "output": 881596,
+          "cacheRead": 103239475,
+          "cacheWrite5m": 0,
+          "cacheWrite1h": 0,
+          "reasoning": 353797
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite5m": 0,
+          "cacheWrite1h": 0,
+          "webSearch": 0,
+          "total": 0
+        },
+        "responses": 696,
+        "placeholderResponses": 0,
+        "unpricedTokens": 118330999,
+        "unpricedModels": [
+          "gpt-5.5-codex"
+        ]
+      }
+    ],
+    "byModel": [
+      {
+        "key": "claude-opus-5-5",
+        "tokens": {
+          "input": 39650,
+          "output": 1257240,
+          "cacheRead": 1261046246,
+          "cacheWrite5m": 24545547,
+          "cacheWrite1h": 7069973
+        },
+        "cost": {
+          "input": 0.15860000000000005,
+          "output": 25.144799999999993,
+          "cacheRead": 252.20924919999996,
+          "cacheWrite5m": 122.72773500000004,
+          "cacheWrite1h": 56.55978399999999,
+          "webSearch": 0.39000000000000007,
+          "total": 457.1901681999999
+        },
+        "responses": 6252,
+        "placeholderResponses": 4174,
+        "unpricedTokens": 0,
+        "unpricedModels": []
+      },
+      {
+        "key": "claude-sonnet-5-5",
+        "tokens": {
+          "input": 5707,
+          "output": 212766,
+          "cacheRead": 47743119,
+          "cacheWrite5m": 3165578,
+          "cacheWrite1h": 0
+        },
+        "cost": {
+          "input": 0.011413999999999997,
+          "output": 2.12766,
+          "cacheRead": 4.7743119,
+          "cacheWrite5m": 7.913945,
+          "cacheWrite1h": 0,
+          "webSearch": 0,
+          "total": 14.827330900000002
+        },
+        "responses": 494,
+        "placeholderResponses": 399,
+        "unpricedTokens": 0,
+        "unpricedModels": []
+      },
+      {
+        "key": "claude-haiku-4-5",
+        "tokens": {
+          "input": 9759865,
+          "output": 323473,
+          "cacheRead": 0,
+          "cacheWrite5m": 0,
+          "cacheWrite1h": 0
+        },
+        "cost": {
+          "input": 9.759865,
+          "output": 1.6173649999999997,
+          "cacheRead": 0,
+          "cacheWrite5m": 0,
+          "cacheWrite1h": 0,
+          "webSearch": 0,
+          "total": 11.377229999999999
+        },
+        "responses": 2290,
+        "placeholderResponses": 0,
+        "unpricedTokens": 0,
+        "unpricedModels": []
+      },
+      {
+        "key": "gpt-5.5-codex",
+        "tokens": {
+          "input": 14209928,
+          "output": 881596,
+          "cacheRead": 103239475,
+          "cacheWrite5m": 0,
+          "cacheWrite1h": 0,
+          "reasoning": 353797
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite5m": 0,
+          "cacheWrite1h": 0,
+          "webSearch": 0,
+          "total": 0
+        },
+        "responses": 696,
+        "placeholderResponses": 0,
+        "unpricedTokens": 118330999,
+        "unpricedModels": [
+          "gpt-5.5-codex"
+        ]
+      }
+    ],
+    "byProject": [
+      {
+        "key": "/Users/you/code/api-refactor",
+        "tokens": {
+          "input": 3923812,
+          "output": 779098,
+          "cacheRead": 680813713,
+          "cacheWrite5m": 14196034,
+          "cacheWrite1h": 3181489
+        },
+        "cost": {
+          "input": 3.981133,
+          "output": 13.215595,
+          "cacheRead": 135.2078803,
+          "cacheWrite5m": 69.39738249999999,
+          "cacheWrite1h": 25.451912,
+          "webSearch": 0.17,
+          "total": 247.4239028
+        },
+        "responses": 4314,
+        "placeholderResponses": 2426,
+        "unpricedTokens": 0,
+        "unpricedModels": []
+      },
+      {
+        "key": "/Users/you/code/web-app",
+        "tokens": {
+          "input": 2941073,
+          "output": 517849,
+          "cacheRead": 353187007,
+          "cacheWrite5m": 7280129,
+          "cacheWrite1h": 2120992
+        },
+        "cost": {
+          "input": 2.9769859999999997,
+          "output": 8.26305,
+          "cacheRead": 69.2051078,
+          "cacheWrite5m": 34.02646,
+          "cacheWrite1h": 16.967935999999998,
+          "webSearch": 0.11,
+          "total": 131.54953980000002
+        },
+        "responses": 2518,
+        "placeholderResponses": 1189,
+        "unpricedTokens": 0,
+        "unpricedModels": []
+      },
+      {
+        "key": "/Users/you/code/signalbox",
+        "tokens": {
+          "input": 2940337,
+          "output": 496532,
+          "cacheRead": 274788645,
+          "cacheWrite5m": 6234962,
+          "cacheWrite1h": 1767492
+        },
+        "cost": {
+          "input": 2.9717600000000006,
+          "output": 7.41118,
+          "cacheRead": 52.570573,
+          "cacheWrite5m": 27.217837499999998,
+          "cacheWrite1h": 14.139935999999999,
+          "webSearch": 0.11,
+          "total": 104.4212865
+        },
+        "responses": 2204,
+        "placeholderResponses": 958,
+        "unpricedTokens": 0,
+        "unpricedModels": []
+      },
+      {
+        "key": "/Users/you/code/infra",
+        "tokens": {
+          "input": 14209928,
+          "output": 881596,
+          "cacheRead": 103239475,
+          "cacheWrite5m": 0,
+          "cacheWrite1h": 0,
+          "reasoning": 353797
+        },
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite5m": 0,
+          "cacheWrite1h": 0,
+          "webSearch": 0,
+          "total": 0
+        },
+        "responses": 696,
+        "placeholderResponses": 0,
+        "unpricedTokens": 118330999,
+        "unpricedModels": [
+          "gpt-5.5-codex"
+        ]
+      }
+    ],
+    "byKind": [
+      {
+        "key": "workflow",
+        "tokens": {
+          "input": 9861,
+          "output": 403891,
+          "cacheRead": 788996030,
+          "cacheWrite5m": 20664181,
+          "cacheWrite1h": 0
+        },
+        "cost": {
+          "input": 0.039444,
+          "output": 8.07782,
+          "cacheRead": 157.799206,
+          "cacheWrite5m": 103.32090500000002,
+          "cacheWrite1h": 0,
+          "webSearch": 0,
+          "total": 269.237375
+        },
+        "responses": 3851,
+        "placeholderResponses": 3636,
+        "unpricedTokens": 0,
+        "unpricedModels": []
+      },
+      {
+        "key": "main",
+        "tokens": {
+          "input": 14235749,
+          "output": 1607036,
+          "cacheRead": 478255518,
+          "cacheWrite5m": 0,
+          "cacheWrite1h": 7069973,
+          "reasoning": 353797
+        },
+        "cost": {
+          "input": 0.10328400000000001,
+          "output": 14.5088,
+          "cacheRead": 75.0032086,
+          "cacheWrite5m": 0,
+          "cacheWrite1h": 56.55978399999999,
+          "webSearch": 0.39000000000000007,
+          "total": 146.5650766
+        },
+        "responses": 2477,
+        "placeholderResponses": 4,
+        "unpricedTokens": 118330999,
+        "unpricedModels": [
+          "gpt-5.5-codex"
+        ]
+      },
+      {
+        "key": "subagent",
+        "tokens": {
+          "input": 9675,
+          "output": 340675,
+          "cacheRead": 144777292,
+          "cacheWrite5m": 7046944,
+          "cacheWrite1h": 0
+        },
+        "cost": {
+          "input": 0.027286000000000005,
+          "output": 4.685840000000001,
+          "cacheRead": 24.1811465,
+          "cacheWrite5m": 27.320775000000005,
+          "cacheWrite1h": 0,
+          "webSearch": 0,
+          "total": 56.21504749999998
+        },
+        "responses": 1114,
+        "placeholderResponses": 933,
+        "unpricedTokens": 0,
+        "unpricedModels": []
+      },
+      {
+        "key": "auxiliary",
+        "tokens": {
+          "input": 9759865,
+          "output": 323473,
+          "cacheRead": 0,
+          "cacheWrite5m": 0,
+          "cacheWrite1h": 0
+        },
+        "cost": {
+          "input": 9.759865,
+          "output": 1.6173649999999997,
+          "cacheRead": 0,
+          "cacheWrite5m": 0,
+          "cacheWrite1h": 0,
+          "webSearch": 0,
+          "total": 11.377229999999999
+        },
+        "responses": 2290,
+        "placeholderResponses": 0,
+        "unpricedTokens": 0,
+        "unpricedModels": []
+      }
+    ],
+    "byDay": [
+      {
+        "key": "2026-10-03",
+        "tokens": {
+          "input": 556403,
+          "output": 97911,
+          "cacheRead": 72222147,
+          "cacheWrite5m": 1480485,
+          "cacheWrite1h": 401960
+        },
+        "cost": {
+          "input": 0.563248,
+          "output": 1.58138,
+          "cacheRead": 14.216792400000001,
+          "cacheWrite5m": 7.0250900000000005,
+          "cacheWrite1h": 3.21568,
+          "webSearch": 0.03,
+          "total": 26.6321904
+        },
+        "responses": 499,
+        "placeholderResponses": 249,
+        "unpricedTokens": 0,
+        "unpricedModels": [],
+        "byModel": [
+          {
+            "key": "claude-opus-5-5",
+            "tokens": {
+              "input": 2191,
+              "output": 69407,
+              "cacheRead": 69945777,
+              "cacheWrite5m": 1329551,
+              "cacheWrite1h": 401960
+            },
+            "cost": {
+              "input": 0.008764000000000003,
+              "output": 1.3881400000000002,
+              "cacheRead": 13.989155400000001,
+              "cacheWrite5m": 6.647755,
+              "cacheWrite1h": 3.21568,
+              "webSearch": 0.03,
+              "total": 25.279494399999997
+            },
+            "responses": 345,
+            "placeholderResponses": 229,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "claude-sonnet-5-5",
+            "tokens": {
+              "input": 272,
+              "output": 10144,
+              "cacheRead": 2276370,
+              "cacheWrite5m": 150934,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 0.000544,
+              "output": 0.10144,
+              "cacheRead": 0.22763700000000003,
+              "cacheWrite5m": 0.377335,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 0.7069559999999999
+            },
+            "responses": 24,
+            "placeholderResponses": 20,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "claude-haiku-4-5",
+            "tokens": {
+              "input": 553940,
+              "output": 18360,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 0.55394,
+              "output": 0.09179999999999999,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 0.64574
+            },
+            "responses": 130,
+            "placeholderResponses": 0,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          }
+        ],
+        "byKind": [
+          {
+            "key": "workflow",
+            "tokens": {
+              "input": 557,
+              "output": 22813,
+              "cacheRead": 44565352,
+              "cacheWrite5m": 1167188,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 0.002228,
+              "output": 0.45626,
+              "cacheRead": 8.9130704,
+              "cacheWrite5m": 5.83594,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 15.207498399999999
+            },
+            "responses": 218,
+            "placeholderResponses": 206,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "main",
+            "tokens": {
+              "input": 1468,
+              "output": 41244,
+              "cacheRead": 21321335,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 401960
+            },
+            "cost": {
+              "input": 0.0058720000000000005,
+              "output": 0.82488,
+              "cacheRead": 4.264267,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 3.21568,
+              "webSearch": 0.03,
+              "total": 8.340698999999999
+            },
+            "responses": 101,
+            "placeholderResponses": 0,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "subagent",
+            "tokens": {
+              "input": 438,
+              "output": 15494,
+              "cacheRead": 6335460,
+              "cacheWrite5m": 313297,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 0.001208,
+              "output": 0.20844000000000001,
+              "cacheRead": 1.039455,
+              "cacheWrite5m": 1.1891500000000002,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 2.438253
+            },
+            "responses": 50,
+            "placeholderResponses": 43,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "auxiliary",
+            "tokens": {
+              "input": 553940,
+              "output": 18360,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 0.55394,
+              "output": 0.09179999999999999,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 0.64574
+            },
+            "responses": 130,
+            "placeholderResponses": 0,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          }
+        ]
+      },
+      {
+        "key": "2026-10-04",
+        "tokens": {
+          "input": 1447577,
+          "output": 161154,
+          "cacheRead": 85384414,
+          "cacheWrite5m": 1739243,
+          "cacheWrite1h": 386124,
+          "reasoning": 23023
+        },
+        "cost": {
+          "input": 0.530154,
+          "output": 1.690155,
+          "cacheRead": 15.448477200000005,
+          "cacheWrite5m": 8.224185,
+          "cacheWrite1h": 3.088992,
+          "webSearch": 0.03,
+          "total": 29.011963199999997
+        },
+        "responses": 577,
+        "placeholderResponses": 286,
+        "unpricedTokens": 7700263,
+        "unpricedModels": [
+          "gpt-5.5-codex"
+        ],
+        "byModel": [
+          {
+            "key": "claude-opus-5-5",
+            "tokens": {
+              "input": 2311,
+              "output": 73852,
+              "cacheRead": 75818556,
+              "cacheWrite5m": 1550431,
+              "cacheWrite1h": 386124
+            },
+            "cost": {
+              "input": 0.009243999999999999,
+              "output": 1.47704,
+              "cacheRead": 15.163711200000003,
+              "cacheWrite5m": 7.752155,
+              "cacheWrite1h": 3.088992,
+              "webSearch": 0.03,
+              "total": 27.521142199999996
+            },
+            "responses": 379,
+            "placeholderResponses": 262,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "claude-sonnet-5-5",
+            "tokens": {
+              "input": 340,
+              "output": 12690,
+              "cacheRead": 2847660,
+              "cacheWrite5m": 188812,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 0.00068,
+              "output": 0.1269,
+              "cacheRead": 0.284766,
+              "cacheWrite5m": 0.47203,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 0.884376
+            },
+            "responses": 30,
+            "placeholderResponses": 24,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "claude-haiku-4-5",
+            "tokens": {
+              "input": 520230,
+              "output": 17243,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 0.52023,
+              "output": 0.086215,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 0.606445
+            },
+            "responses": 123,
+            "placeholderResponses": 0,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "gpt-5.5-codex",
+            "tokens": {
+              "input": 924696,
+              "output": 57369,
+              "cacheRead": 6718198,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0,
+              "reasoning": 23023
+            },
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 0
+            },
+            "responses": 45,
+            "placeholderResponses": 0,
+            "unpricedTokens": 7700263,
+            "unpricedModels": [
+              "gpt-5.5-codex"
+            ]
+          }
+        ],
+        "byKind": [
+          {
+            "key": "workflow",
+            "tokens": {
+              "input": 600,
+              "output": 24579,
+              "cacheRead": 48014456,
+              "cacheWrite5m": 1257521,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 0.0024000000000000002,
+              "output": 0.49158,
+              "cacheRead": 9.602891200000002,
+              "cacheWrite5m": 6.287605,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 16.3844762
+            },
+            "responses": 235,
+            "placeholderResponses": 222,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "main",
+            "tokens": {
+              "input": 926107,
+              "output": 96989,
+              "cacheRead": 27199561,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 386124,
+              "reasoning": 23023
+            },
+            "cost": {
+              "input": 0.005644000000000001,
+              "output": 0.7924,
+              "cacheRead": 4.0962726,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 3.088992,
+              "webSearch": 0.03,
+              "total": 8.013308599999998
+            },
+            "responses": 142,
+            "placeholderResponses": 0,
+            "unpricedTokens": 7700263,
+            "unpricedModels": [
+              "gpt-5.5-codex"
+            ]
+          },
+          {
+            "key": "subagent",
+            "tokens": {
+              "input": 640,
+              "output": 22343,
+              "cacheRead": 10170397,
+              "cacheWrite5m": 481722,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 0.0018800000000000002,
+              "output": 0.31995999999999997,
+              "cacheRead": 1.7493134,
+              "cacheWrite5m": 1.9365800000000002,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 4.007733400000001
+            },
+            "responses": 77,
+            "placeholderResponses": 64,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "auxiliary",
+            "tokens": {
+              "input": 520230,
+              "output": 17243,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 0.52023,
+              "output": 0.086215,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 0.606445
+            },
+            "responses": 123,
+            "placeholderResponses": 0,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          }
+        ]
+      },
+      {
+        "key": "2026-10-05",
+        "tokens": {
+          "input": 5068533,
+          "output": 553671,
+          "cacheRead": 323812789,
+          "cacheWrite5m": 6776013,
+          "cacheWrite1h": 1187237,
+          "reasoning": 81126
+        },
+        "cost": {
+          "input": 1.833955,
+          "output": 5.700274999999998,
+          "cacheRead": 59.05295560000001,
+          "cacheWrite5m": 32.263862499999995,
+          "cacheWrite1h": 9.497896,
+          "webSearch": 0.07,
+          "total": 108.41894409999999
+        },
+        "responses": 2111,
+        "placeholderResponses": 1141,
+        "unpricedTokens": 27133406,
+        "unpricedModels": [
+          "gpt-5.5-codex"
+        ],
+        "byModel": [
+          {
+            "key": "claude-opus-5-5",
+            "tokens": {
+              "input": 7535,
+              "output": 248361,
+              "cacheRead": 290389673,
+              "cacheWrite5m": 6129532,
+              "cacheWrite1h": 1187237
+            },
+            "cost": {
+              "input": 0.03013999999999999,
+              "output": 4.967219999999999,
+              "cacheRead": 58.07793460000001,
+              "cacheWrite5m": 30.647659999999995,
+              "cacheWrite1h": 9.497896,
+              "webSearch": 0.07,
+              "total": 103.2908506
+            },
+            "responses": 1428,
+            "placeholderResponses": 1060,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "claude-sonnet-5-5",
+            "tokens": {
+              "input": 1166,
+              "output": 43452,
+              "cacheRead": 9750210,
+              "cacheWrite5m": 646481,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 0.002332,
+              "output": 0.43452,
+              "cacheRead": 0.975021,
+              "cacheWrite5m": 1.6162025,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 3.0280755
+            },
+            "responses": 100,
+            "placeholderResponses": 81,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "claude-haiku-4-5",
+            "tokens": {
+              "input": 1801483,
+              "output": 59707,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 1.8014830000000002,
+              "output": 0.298535,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 2.100018
+            },
+            "responses": 423,
+            "placeholderResponses": 0,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "gpt-5.5-codex",
+            "tokens": {
+              "input": 3258349,
+              "output": 202151,
+              "cacheRead": 23672906,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0,
+              "reasoning": 81126
+            },
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 0
+            },
+            "responses": 160,
+            "placeholderResponses": 0,
+            "unpricedTokens": 27133406,
+            "unpricedModels": [
+              "gpt-5.5-codex"
+            ]
+          }
+        ],
+        "byKind": [
+          {
+            "key": "workflow",
+            "tokens": {
+              "input": 2685,
+              "output": 109985,
+              "cacheRead": 214855025,
+              "cacheWrite5m": 5627155,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 0.010740000000000001,
+              "output": 2.1997,
+              "cacheRead": 42.971005000000005,
+              "cacheWrite5m": 28.135775,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 73.31722
+            },
+            "responses": 1048,
+            "placeholderResponses": 989,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "main",
+            "tokens": {
+              "input": 3262685,
+              "output": 323971,
+              "cacheRead": 86648117,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 1187237,
+              "reasoning": 81126
+            },
+            "cost": {
+              "input": 0.017344,
+              "output": 2.4364,
+              "cacheRead": 12.595042199999998,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 9.497896,
+              "webSearch": 0.07,
+              "total": 24.6166822
+            },
+            "responses": 460,
+            "placeholderResponses": 1,
+            "unpricedTokens": 27133406,
+            "unpricedModels": [
+              "gpt-5.5-codex"
+            ]
+          },
+          {
+            "key": "subagent",
+            "tokens": {
+              "input": 1680,
+              "output": 60008,
+              "cacheRead": 22309647,
+              "cacheWrite5m": 1148858,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 0.0043879999999999995,
+              "output": 0.76564,
+              "cacheRead": 3.4869084,
+              "cacheWrite5m": 4.1280875,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 8.3850239
+            },
+            "responses": 180,
+            "placeholderResponses": 151,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "auxiliary",
+            "tokens": {
+              "input": 1801483,
+              "output": 59707,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 1.8014830000000002,
+              "output": 0.298535,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 2.100018
+            },
+            "responses": 423,
+            "placeholderResponses": 0,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          }
+        ]
+      },
+      {
+        "key": "2026-10-06",
+        "tokens": {
+          "input": 3911467,
+          "output": 437860,
+          "cacheRead": 232293617,
+          "cacheWrite5m": 4341136,
+          "cacheWrite1h": 1440657,
+          "reasoning": 36714
+        },
+        "cost": {
+          "input": 2.460166,
+          "output": 5.378994999999999,
+          "cacheRead": 43.550397100000005,
+          "cacheWrite5m": 20.4365075,
+          "cacheWrite1h": 11.525255999999999,
+          "webSearch": 0.07,
+          "total": 83.4213216
+        },
+        "responses": 1780,
+        "placeholderResponses": 713,
+        "unpricedTokens": 12279382,
+        "unpricedModels": [
+          "gpt-5.5-codex"
+        ],
+        "byModel": [
+          {
+            "key": "claude-opus-5-5",
+            "tokens": {
+              "input": 7456,
+              "output": 231767,
+              "cacheRead": 213923667,
+              "cacheWrite5m": 3833467,
+              "cacheWrite1h": 1440657
+            },
+            "cost": {
+              "input": 0.029823999999999993,
+              "output": 4.635339999999999,
+              "cacheRead": 42.78473340000001,
+              "cacheWrite5m": 19.167335,
+              "cacheWrite1h": 11.525255999999999,
+              "webSearch": 0.07,
+              "total": 78.2124884
+            },
+            "responses": 1058,
+            "placeholderResponses": 649,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "claude-haiku-4-5",
+            "tokens": {
+              "input": 2428510,
+              "output": 80487,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 2.42851,
+              "output": 0.402435,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 2.830945
+            },
+            "responses": 570,
+            "placeholderResponses": 0,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "claude-sonnet-5-5",
+            "tokens": {
+              "input": 916,
+              "output": 34122,
+              "cacheRead": 7656637,
+              "cacheWrite5m": 507669,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 0.0018320000000000003,
+              "output": 0.34122,
+              "cacheRead": 0.7656637000000001,
+              "cacheWrite5m": 1.2691725,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 2.3778882
+            },
+            "responses": 80,
+            "placeholderResponses": 64,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "gpt-5.5-codex",
+            "tokens": {
+              "input": 1474585,
+              "output": 91484,
+              "cacheRead": 10713313,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0,
+              "reasoning": 36714
+            },
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 0
+            },
+            "responses": 72,
+            "placeholderResponses": 0,
+            "unpricedTokens": 12279382,
+            "unpricedModels": [
+              "gpt-5.5-codex"
+            ]
+          }
+        ],
+        "byKind": [
+          {
+            "key": "workflow",
+            "tokens": {
+              "input": 1508,
+              "output": 61786,
+              "cacheRead": 120697948,
+              "cacheWrite5m": 3161137,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 0.006032,
+              "output": 1.23572,
+              "cacheRead": 24.1395896,
+              "cacheWrite5m": 15.805685,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 41.1870266
+            },
+            "responses": 588,
+            "placeholderResponses": 555,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "main",
+            "tokens": {
+              "input": 1479846,
+              "output": 239308,
+              "cacheRead": 87130776,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 1440657,
+              "reasoning": 36714
+            },
+            "cost": {
+              "input": 0.021044,
+              "output": 2.95648,
+              "cacheRead": 15.2834926,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 11.525255999999999,
+              "webSearch": 0.07,
+              "total": 29.856272599999997
+            },
+            "responses": 435,
+            "placeholderResponses": 1,
+            "unpricedTokens": 12279382,
+            "unpricedModels": [
+              "gpt-5.5-codex"
+            ]
+          },
+          {
+            "key": "subagent",
+            "tokens": {
+              "input": 1603,
+              "output": 56279,
+              "cacheRead": 24464893,
+              "cacheWrite5m": 1179999,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 0.00458,
+              "output": 0.7843600000000001,
+              "cacheRead": 4.1273149,
+              "cacheWrite5m": 4.6308225,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 9.547077400000001
+            },
+            "responses": 187,
+            "placeholderResponses": 157,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "auxiliary",
+            "tokens": {
+              "input": 2428510,
+              "output": 80487,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 2.42851,
+              "output": 0.402435,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 2.830945
+            },
+            "responses": 570,
+            "placeholderResponses": 0,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          }
+        ]
+      },
+      {
+        "key": "2026-10-07",
+        "tokens": {
+          "input": 5151777,
+          "output": 563744,
+          "cacheRead": 249575661,
+          "cacheWrite5m": 4520439,
+          "cacheWrite1h": 1572922,
+          "reasoning": 80599
+        },
+        "cost": {
+          "input": 1.94001,
+          "output": 5.768115000000002,
+          "cacheRead": 43.99315340000001,
+          "cacheWrite5m": 20.582945,
+          "cacheWrite1h": 12.583376000000001,
+          "webSearch": 0.08,
+          "total": 84.9475994
+        },
+        "responses": 1797,
+        "placeholderResponses": 723,
+        "unpricedTokens": 26957051,
+        "unpricedModels": [
+          "gpt-5.5-codex"
+        ],
+        "byModel": [
+          {
+            "key": "claude-opus-5-5",
+            "tokens": {
+              "input": 7983,
+              "output": 245476,
+              "cacheRead": 213874915,
+              "cacheWrite5m": 3712739,
+              "cacheWrite1h": 1572922
+            },
+            "cost": {
+              "input": 0.031932,
+              "output": 4.909520000000001,
+              "cacheRead": 42.774983000000006,
+              "cacheWrite5m": 18.563695,
+              "cacheWrite1h": 12.583376000000001,
+              "webSearch": 0.08,
+              "total": 78.94350600000001
+            },
+            "responses": 1065,
+            "placeholderResponses": 621,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "claude-sonnet-5-5",
+            "tokens": {
+              "input": 1456,
+              "output": 54288,
+              "cacheRead": 12181704,
+              "cacheWrite5m": 807700,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 0.0029119999999999997,
+              "output": 0.54288,
+              "cacheRead": 1.2181704,
+              "cacheWrite5m": 2.01925,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 3.7832124
+            },
+            "responses": 126,
+            "placeholderResponses": 102,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "claude-haiku-4-5",
+            "tokens": {
+              "input": 1905166,
+              "output": 63143,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 1.9051660000000001,
+              "output": 0.31571499999999997,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 2.220881
+            },
+            "responses": 447,
+            "placeholderResponses": 0,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "gpt-5.5-codex",
+            "tokens": {
+              "input": 3237172,
+              "output": 200837,
+              "cacheRead": 23519042,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0,
+              "reasoning": 80599
+            },
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 0
+            },
+            "responses": 159,
+            "placeholderResponses": 0,
+            "unpricedTokens": 26957051,
+            "unpricedModels": [
+              "gpt-5.5-codex"
+            ]
+          }
+        ],
+        "byKind": [
+          {
+            "key": "workflow",
+            "tokens": {
+              "input": 1362,
+              "output": 55787,
+              "cacheRead": 108977492,
+              "cacheWrite5m": 2854172,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 0.005448,
+              "output": 1.11574,
+              "cacheRead": 21.7954984,
+              "cacheWrite5m": 14.270859999999999,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 37.1875464
+            },
+            "responses": 532,
+            "placeholderResponses": 503,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "main",
+            "tokens": {
+              "input": 3242916,
+              "output": 362233,
+              "cacheRead": 106952289,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 1572922,
+              "reasoning": 80599
+            },
+            "cost": {
+              "input": 0.022976,
+              "output": 3.22792,
+              "cacheRead": 16.6866494,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 12.583376000000001,
+              "webSearch": 0.08,
+              "total": 32.600921400000004
+            },
+            "responses": 555,
+            "placeholderResponses": 1,
+            "unpricedTokens": 26957051,
+            "unpricedModels": [
+              "gpt-5.5-codex"
+            ]
+          },
+          {
+            "key": "subagent",
+            "tokens": {
+              "input": 2333,
+              "output": 82581,
+              "cacheRead": 33645880,
+              "cacheWrite5m": 1666267,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 0.0064199999999999995,
+              "output": 1.10874,
+              "cacheRead": 5.511005600000001,
+              "cacheWrite5m": 6.312085,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 12.9382506
+            },
+            "responses": 263,
+            "placeholderResponses": 219,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "auxiliary",
+            "tokens": {
+              "input": 1905166,
+              "output": 63143,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 1.9051660000000001,
+              "output": 0.31571499999999997,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 2.220881
+            },
+            "responses": 447,
+            "placeholderResponses": 0,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          }
+        ]
+      },
+      {
+        "key": "2026-10-08",
+        "tokens": {
+          "input": 4403265,
+          "output": 533802,
+          "cacheRead": 274477173,
+          "cacheWrite5m": 5031868,
+          "cacheWrite1h": 1552009,
+          "reasoning": 82091
+        },
+        "cost": {
+          "input": 1.1321970000000001,
+          "output": 5.7350200000000005,
+          "cacheRead": 49.421116600000005,
+          "cacheWrite5m": 24.026515,
+          "cacheWrite1h": 12.416072,
+          "webSearch": 0.08,
+          "total": 92.81092060000002
+        },
+        "responses": 1705,
+        "placeholderResponses": 823,
+        "unpricedTokens": 27456220,
+        "unpricedModels": [
+          "gpt-5.5-codex"
+        ],
+        "byModel": [
+          {
+            "key": "claude-opus-5-5",
+            "tokens": {
+              "input": 8410,
+              "output": 262434,
+              "cacheRead": 243688542,
+              "cacheWrite5m": 4578738,
+              "cacheWrite1h": 1552009
+            },
+            "cost": {
+              "input": 0.03364,
+              "output": 5.24868,
+              "cacheRead": 48.7377084,
+              "cacheWrite5m": 22.89369,
+              "cacheWrite1h": 12.416072,
+              "webSearch": 0.08,
+              "total": 89.40979040000002
+            },
+            "responses": 1217,
+            "placeholderResponses": 767,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "claude-sonnet-5-5",
+            "tokens": {
+              "input": 817,
+              "output": 30456,
+              "cacheRead": 6834082,
+              "cacheWrite5m": 453130,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 0.001634,
+              "output": 0.30456,
+              "cacheRead": 0.6834082,
+              "cacheWrite5m": 1.132825,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 2.1224272
+            },
+            "responses": 70,
+            "placeholderResponses": 56,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "claude-haiku-4-5",
+            "tokens": {
+              "input": 1096923,
+              "output": 36356,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 1.096923,
+              "output": 0.18178,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 1.2787030000000001
+            },
+            "responses": 257,
+            "placeholderResponses": 0,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "gpt-5.5-codex",
+            "tokens": {
+              "input": 3297115,
+              "output": 204556,
+              "cacheRead": 23954549,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0,
+              "reasoning": 82091
+            },
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 0
+            },
+            "responses": 161,
+            "placeholderResponses": 0,
+            "unpricedTokens": 27456220,
+            "unpricedModels": [
+              "gpt-5.5-codex"
+            ]
+          }
+        ],
+        "byKind": [
+          {
+            "key": "workflow",
+            "tokens": {
+              "input": 1698,
+              "output": 69535,
+              "cacheRead": 135836968,
+              "cacheWrite5m": 3557635,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 0.006791999999999999,
+              "output": 1.3907,
+              "cacheRead": 27.1673936,
+              "cacheWrite5m": 17.788175,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 46.3530606
+            },
+            "responses": 663,
+            "placeholderResponses": 626,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "main",
+            "tokens": {
+              "input": 3302783,
+              "output": 363805,
+              "cacheRead": 106278536,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 1552009,
+              "reasoning": 82091
+            },
+            "cost": {
+              "input": 0.022672,
+              "output": 3.1849800000000004,
+              "cacheRead": 16.464797400000002,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 12.416072,
+              "webSearch": 0.08,
+              "total": 32.1685214
+            },
+            "responses": 552,
+            "placeholderResponses": 1,
+            "unpricedTokens": 27456220,
+            "unpricedModels": [
+              "gpt-5.5-codex"
+            ]
+          },
+          {
+            "key": "subagent",
+            "tokens": {
+              "input": 1861,
+              "output": 64106,
+              "cacheRead": 32361669,
+              "cacheWrite5m": 1474233,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 0.005810000000000001,
+              "output": 0.97756,
+              "cacheRead": 5.788925600000001,
+              "cacheWrite5m": 6.23834,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 13.010635599999999
+            },
+            "responses": 233,
+            "placeholderResponses": 196,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "auxiliary",
+            "tokens": {
+              "input": 1096923,
+              "output": 36356,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 1.096923,
+              "output": 0.18178,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 1.2787030000000001
+            },
+            "responses": 257,
+            "placeholderResponses": 0,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          }
+        ]
+      },
+      {
+        "key": "2026-10-09",
+        "tokens": {
+          "input": 3476128,
+          "output": 326933,
+          "cacheRead": 174263039,
+          "cacheWrite5m": 3821941,
+          "cacheWrite1h": 529064,
+          "reasoning": 50244
+        },
+        "cost": {
+          "input": 1.4701490000000002,
+          "output": 3.0358849999999995,
+          "cacheRead": 31.300668800000004,
+          "cacheWrite5m": 18.082575000000002,
+          "cacheWrite1h": 4.232512,
+          "webSearch": 0.03,
+          "total": 58.1517898
+        },
+        "responses": 1263,
+        "placeholderResponses": 638,
+        "unpricedTokens": 16804677,
+        "unpricedModels": [
+          "gpt-5.5-codex"
+        ],
+        "byModel": [
+          {
+            "key": "claude-opus-5-5",
+            "tokens": {
+              "input": 3764,
+              "output": 125943,
+              "cacheRead": 153405116,
+              "cacheWrite5m": 3411089,
+              "cacheWrite1h": 529064
+            },
+            "cost": {
+              "input": 0.015055999999999998,
+              "output": 2.51886,
+              "cacheRead": 30.681023200000002,
+              "cacheWrite5m": 17.055445,
+              "cacheWrite1h": 4.232512,
+              "webSearch": 0.03,
+              "total": 54.5328962
+            },
+            "responses": 760,
+            "placeholderResponses": 586,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "claude-sonnet-5-5",
+            "tokens": {
+              "input": 740,
+              "output": 27614,
+              "cacheRead": 6196456,
+              "cacheWrite5m": 410852,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 0.00148,
+              "output": 0.27614,
+              "cacheRead": 0.6196456,
+              "cacheWrite5m": 1.02713,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 1.9243956
+            },
+            "responses": 64,
+            "placeholderResponses": 52,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "claude-haiku-4-5",
+            "tokens": {
+              "input": 1453613,
+              "output": 48177,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 1.4536130000000003,
+              "output": 0.240885,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 1.6944979999999998
+            },
+            "responses": 340,
+            "placeholderResponses": 0,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "gpt-5.5-codex",
+            "tokens": {
+              "input": 2018011,
+              "output": 125199,
+              "cacheRead": 14661467,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0,
+              "reasoning": 50244
+            },
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 0
+            },
+            "responses": 99,
+            "placeholderResponses": 0,
+            "unpricedTokens": 16804677,
+            "unpricedModels": [
+              "gpt-5.5-codex"
+            ]
+          }
+        ],
+        "byKind": [
+          {
+            "key": "workflow",
+            "tokens": {
+              "input": 1451,
+              "output": 59406,
+              "cacheRead": 116048789,
+              "cacheWrite5m": 3039373,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 0.005804,
+              "output": 1.18812,
+              "cacheRead": 23.209757800000002,
+              "cacheWrite5m": 15.196864999999999,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 39.600546800000004
+            },
+            "responses": 567,
+            "placeholderResponses": 535,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "main",
+            "tokens": {
+              "input": 2019944,
+              "output": 179486,
+              "cacheRead": 42724904,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 529064,
+              "reasoning": 50244
+            },
+            "cost": {
+              "input": 0.007732,
+              "output": 1.08574,
+              "cacheRead": 5.6126874,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 4.232512,
+              "webSearch": 0.03,
+              "total": 10.9686714
+            },
+            "responses": 232,
+            "placeholderResponses": 0,
+            "unpricedTokens": 16804677,
+            "unpricedModels": [
+              "gpt-5.5-codex"
+            ]
+          },
+          {
+            "key": "subagent",
+            "tokens": {
+              "input": 1120,
+              "output": 39864,
+              "cacheRead": 15489346,
+              "cacheWrite5m": 782568,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 0.003,
+              "output": 0.52114,
+              "cacheRead": 2.4782235999999997,
+              "cacheWrite5m": 2.8857099999999996,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 5.8880736
+            },
+            "responses": 124,
+            "placeholderResponses": 103,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "auxiliary",
+            "tokens": {
+              "input": 1453613,
+              "output": 48177,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0
+            },
+            "cost": {
+              "input": 1.4536130000000003,
+              "output": 0.240885,
+              "cacheRead": 0,
+              "cacheWrite5m": 0,
+              "cacheWrite1h": 0,
+              "webSearch": 0,
+              "total": 1.6944979999999998
+            },
+            "responses": 340,
+            "placeholderResponses": 0,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          }
+        ]
+      }
+    ],
+    "reconciliation": [
+      {
+        "agent": "claude-code",
+        "sessionId": "7f3a91c2-0b4e-4d8a-9a51-2c6f1e8d4b10",
+        "project": "/Users/you/code/api-refactor",
+        "transcriptUsd": 142.18,
+        "ledgerUsd": 167.4,
+        "k": 0.849,
+        "placeholderShare": 0.71
+      },
+      {
+        "agent": "claude-code",
+        "sessionId": "c41d2e77-5a90-4f3b-8e2d-91b0a7c3f562",
+        "project": "/Users/you/code/web-app",
+        "transcriptUsd": 88.06,
+        "ledgerUsd": 89.12,
+        "k": 0.988,
+        "placeholderShare": 0.02
+      },
+      {
+        "agent": "claude-code",
+        "sessionId": "2b9e0f14-6c3d-47a1-b8e9-5d4c2a1f7e03",
+        "project": "/Users/you/code/signalbox",
+        "transcriptUsd": 51.3,
+        "ledgerUsd": 96.8,
+        "k": 0.53,
+        "placeholderShare": 0.93
+      },
+      {
+        "agent": "claude-code",
+        "sessionId": "e8a5c3b1-9d72-4e60-a4f8-0c1b3d5e7f29",
+        "project": "/Users/you/code/api-refactor",
+        "transcriptUsd": 23.94,
+        "ledgerUsd": 24.11,
+        "k": 0.993,
+        "placeholderShare": 0.01
+      },
+      {
+        "agent": "claude-code",
+        "sessionId": "51f0d9a6-3e8b-4c27-9f14-6a2e8b0c4d75",
+        "project": "/Users/you/code/web-app",
+        "transcriptUsd": 12.4,
+        "placeholderShare": 0.88
+      },
+      {
+        "agent": "codex",
+        "sessionId": "rollout-2026-10-09T08-12-44-019a",
+        "project": "/Users/you/code/infra",
+        "transcriptUsd": 0,
+        "placeholderShare": 0
+      }
+    ],
+    "estimate": {
+      "recordedUsd": 483.3947291,
+      "estimatedLowUsd": 551.0699911739999,
+      "estimatedHighUsd": 623.579200539,
+      "method": "Ledger where a session has one, otherwise transcript ÷ per-model coverage k (claude-opus-5-5 k≈0.85); live sessions use the larger of transcript and live cost."
+    },
+    "priceTables": [
+      {
+        "provider": "anthropic",
+        "asOf": "2026-10-09",
+        "sourceUrl": "https://platform.claude.com/docs/en/about-claude/pricing"
+      }
+    ],
+    "notes": [
+      "Subagent and workflow output is a lower bound: many responses keep the streaming placeholder.",
+      "gpt-5.5-codex has no price row and is counted as $0 (unpriced)."
+    ]
+  },
+  "health": [
+    {
+      "name": "claude-code:agents-json",
+      "stability": "preview",
+      "ok": true,
+      "detail": "4 sessions from `claude agents --json` (0.4s)"
+    },
+    {
+      "name": "claude-code:registry",
+      "stability": "internal",
+      "ok": true,
+      "detail": "4 registry files; keys only"
+    },
+    {
+      "name": "claude-code:transcripts",
+      "stability": "internal",
+      "ok": true,
+      "detail": "312 transcript files in range"
+    },
+    {
+      "name": "claude-code:cost-state",
+      "stability": "internal",
+      "ok": true,
+      "detail": "52 ledger rows in 32 transcripts"
+    },
+    {
+      "name": "claude-code:spool",
+      "stability": "preview",
+      "ok": true,
+      "detail": "3 sessions reporting via signalbox-tap"
+    },
+    {
+      "name": "claude-app:sessions",
+      "stability": "internal",
+      "ok": true,
+      "detail": "21 session record files in /Users/you/Library/Application Support/Claude/claude-code-sessions (allow-listed local_*.json names, read-only); last history: 21 records read, 15 matched a transcript, 6 without a transcript, 7 archived, 0 skipped (not a regular file or over 1 MiB), 0 unreadable"
+    },
+    {
+      "name": "codex:rollouts",
+      "stability": "internal",
+      "ok": true,
+      "detail": "41 rollout files in range"
+    },
+    {
+      "name": "gemini-cli:telemetry",
+      "stability": "documented",
+      "ok": false,
+      "detail": "Gemini CLI not detected on this machine"
+    }
+  ]
+}

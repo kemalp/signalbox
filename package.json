@@ -1,0 +1,31 @@
+{
+  "name": "signalbox",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local control room for AI coding agents (Claude Code first; Codex, Gemini next). Credential-free, nothing leaves your machine.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "report": "bun apps/cli/src/main.ts report",
+    "doctor": "bun apps/cli/src/main.ts doctor",
+    "serve": "bun apps/cli/src/main.ts serve",
+    "watch": "bun apps/cli/src/main.ts watch --ndjson",
+    "snapshot": "bun apps/cli/src/main.ts snapshot --json",
+    "commands": "bun apps/cli/src/main.ts commands",
+    "build:cli": "sh scripts/build-cli.sh"
+  },
+  "dependencies": {
+    "preact": "^10.29.8",
+    "uplot": "^1.6.32"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.2",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "provider": "anthropic",
+  "asOf": "2026-10-10",
+  "sourceUrl": "https://platform.claude.com/docs/en/build-with-claude/context-windows",
+  "models": {
+    "claude-fable-5-1": { "contextWindow": 1000000, "maxOutput": 128000, "asOf": "2026-10-10", "sourceUrl": "https://platform.claude.com/docs/en/models/overview" },
+    "claude-mythos-5-1": { "contextWindow": 1000000, "maxOutput": 128000, "asOf": "2026-10-10", "sourceUrl": "https://platform.claude.com/docs/en/build-with-claude/context-windows" },
+    "claude-fable-5": { "contextWindow": 1000000, "maxOutput": 128000, "asOf": "2026-10-10", "sourceUrl": "https://platform.claude.com/docs/en/build-with-claude/context-windows" },
+    "claude-mythos-5": { "contextWindow": 1000000, "maxOutput": 128000, "asOf": "2026-10-10", "sourceUrl": "https://platform.claude.com/docs/en/build-with-claude/context-windows" },
+
+    "claude-opus-5-5": { "contextWindow": 1000000, "maxOutput": 128000, "asOf": "2026-10-10", "sourceUrl": "https://platform.claude.com/docs/en/models/overview" },
+    "claude-opus-5": { "contextWindow": 1000000, "maxOutput": 128000, "asOf": "2026-10-10", "sourceUrl": "https://platform.claude.com/docs/en/build-with-claude/context-windows" },
+    "claude-opus-4-8": { "contextWindow": 1000000, "maxOutput": 128000, "asOf": "2026-10-10", "sourceUrl": "https://platform.claude.com/docs/en/build-with-claude/context-windows" },
+    "claude-opus-4-7": { "contextWindow": 1000000, "maxOutput": 128000, "asOf": "2026-10-10", "sourceUrl": "https://platform.claude.com/docs/en/build-with-claude/context-windows" },
+    "claude-opus-4-6": { "contextWindow": 1000000, "maxOutput": 128000, "asOf": "2026-10-10", "sourceUrl": "https://platform.claude.com/docs/en/build-with-claude/context-windows" },
+    "claude-opus-4-5*": { "contextWindow": 200000, "maxOutput": 64000, "asOf": "2026-10-10", "sourceUrl": "https://platform.claude.com/docs/en/models/opus-4-5/overview" },
+    "claude-opus-4-1*": { "contextWindow": 200000, "asOf": "2026-10-10", "sourceUrl": "https://platform.claude.com/docs/en/build-with-claude/context-windows" },
+    "claude-opus-4-0": { "contextWindow": 200000, "asOf": "2026-10-10", "sourceUrl": "https://platform.claude.com/docs/en/build-with-claude/context-windows" },
+    "claude-opus-4-20250514": { "contextWindow": 200000, "asOf": "2026-10-10", "sourceUrl": "https://platform.claude.com/docs/en/build-with-claude/context-windows" },
+
+    "claude-sonnet-5-5": { "contextWindow": 1000000, "maxOutput": 128000, "asOf": "2026-10-10", "sourceUrl": "https://platform.claude.com/docs/en/models/overview" },
+    "claude-sonnet-5": { "contextWindow": 1000000, "maxOutput": 128000, "asOf": "2026-10-10", "sourceUrl": "https://platform.claude.com/docs/en/build-with-claude/context-windows" },
+    "claude-sonnet-4-6": { "contextWindow": 1000000, "maxOutput": 128000, "asOf": "2026-10-10", "sourceUrl": "https://platform.claude.com/docs/en/build-with-claude/context-windows" },
+    "claude-sonnet-4-5*": { "contextWindow": 200000, "maxOutput": 64000, "asOf": "2026-10-10", "sourceUrl": "https://platform.claude.com/docs/en/models/sonnet-4-5/overview" },
+    "claude-sonnet-4-0": { "contextWindow": 200000, "asOf": "2026-10-10", "sourceUrl": "https://platform.claude.com/docs/en/build-with-claude/context-windows" },
+    "claude-sonnet-4-20250514": { "contextWindow": 200000, "asOf": "2026-10-10", "sourceUrl": "https://platform.claude.com/docs/en/build-with-claude/context-windows" },
+
+    "claude-haiku-5-5": { "contextWindow": 1000000, "maxOutput": 128000, "asOf": "2026-10-10", "sourceUrl": "https://platform.claude.com/docs/en/models/overview" },
+    "claude-haiku-4-5*": { "contextWindow": 200000, "maxOutput": 64000, "asOf": "2026-10-10", "sourceUrl": "https://platform.claude.com/docs/en/models/haiku-4-5/overview" },
+    "claude-3-5-haiku*": { "contextWindow": 200000, "asOf": "2026-10-10", "sourceUrl": "https://platform.claude.com/docs/en/build-with-claude/context-windows" }
+  },
+  "agents": {
+    "claude-code": {
+      "stability": "internal",
+      "observedIn": "Claude Code 2.1.293",
+      "asOf": "2026-10-10",
+      "source": "Observed on this machine: the Claude desktop app's context indicator and the Agent SDK's getContextUsage() for a claude-opus-5-5 session.",
+      "idTags": { "[1m]": 1000000 },
+      "autoCompact": [{ "contextWindow": 1000000, "thresholdTokens": 967000, "observedModel": "claude-opus-5-5" }],
+      "notes": [
+        "The desktop app reported contextWindow 1,000,000 for claude-opus-5-5 (the documented size) and auto-compact at 97%; getContextUsage() reported autoCompactThreshold 967,000 of 1,000,000 (96.7%).",
+        "967,000 is the window minus 33,000, so the threshold follows the window rather than the model. It is applied as a marker to Claude Code sessions whose window is 1,000,000. No other window has been observed, so other windows get no marker.",
+        "A user override (auto-compact turned off, or a custom threshold) is not visible in the files Signalbox reads, so the marker shows the default.",
+        "A '[1m]' suffix on a model id (Claude Code's form for a 1M-window variant, e.g. 'sonnet[1m]') means a 1,000,000-token window, whatever the base model's documented size."
+      ]
+    }
+  },
+  "notes": [
+    "Context windows and synchronous max output from the official docs, fetched 2026-10-10: the models overview and the per-model pages for Opus 4.5, Sonnet 4.5 and Haiku 4.5, and the context-windows page, which lists every 1M-token model (all with 128k max output) and says that other Claude models have a 200k-token window.",
+    "For every 1M-token model, 1M is the default: no beta header is needed.",
+    "Opus 4.1, Opus 4, Sonnet 4 and Haiku 3.5 are retired, and their pages are gone. Their window comes from the context-windows page's 'other Claude models' statement; their max output is not documented any more, so it is left out.",
+    "Keys match the price table: exact ids, or prefixes ending in '*' for dated snapshots (longest match wins). An unknown model has no window: it is never guessed."
+  ]
+}

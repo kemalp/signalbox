@@ -1,0 +1,6 @@
+{
+  "name": "signalbox-tap",
+  "version": "0.1.0",
+  "description": "Read-only: writes this session's context, rate-limit and cost figures to Signalbox's local spool. No network, no commands, no prompts.",
+  "author": { "name": "Signalbox" }
+}

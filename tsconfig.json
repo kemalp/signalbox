@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "Preserve",
+    "moduleResolution": "bundler",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": ["bun"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": false,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
+    "baseUrl": ".",
+    "paths": {
+      "@signalbox/core": ["packages/core/src/index.ts"],
+      "@signalbox/adapter-claude": ["packages/adapter-claude/src/index.ts"],
+      "@signalbox/adapter-codex": ["packages/adapter-codex/src/index.ts"],
+      "@signalbox/web": ["apps/web/src/index.ts"]
+    }
+  },
+  "include": ["packages/*/src/**/*", "packages/*/test/**/*", "apps/*/src/**/*", "apps/*/test/**/*"]
+}

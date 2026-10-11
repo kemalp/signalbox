@@ -1,0 +1,3 @@
+# Claude Code lays its generated API types here each time it loads the mod.
+# Never commit vendored Claude Code types.
+.claude-plugin/types/

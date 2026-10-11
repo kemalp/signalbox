@@ -1,0 +1,3692 @@
+{
+  "agent": "claude-code",
+  "displayName": "Claude Code",
+  "verifiedVersion": "2.1.293",
+  "asOf": "2026-10-10",
+  "sources": [
+    "https://code.claude.com/docs/en/commands",
+    "https://code.claude.com/docs/en/cli-reference",
+    "https://code.claude.com/docs/en/desktop",
+    "https://code.claude.com/docs/en/remote-control",
+    "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md"
+  ],
+  "commands": [
+    {
+      "name": "/add-dir",
+      "args": "<path>",
+      "summary": "Give this session file access to another folder.",
+      "details": "Adds a working directory so Claude can read and edit files there for the rest of the session. Most .claude configuration inside that folder is not picked up. Without a terminal it is only offered to cloud, SSH and other remote-hosted sessions.",
+      "category": "session",
+      "surfaces": {
+        "terminal": true,
+        "desktop": "partial",
+        "headless": "partial",
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Changes what a live session can reach; run it in that session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/advisor",
+      "args": "[model|off]",
+      "summary": "Let Claude consult a second, stronger model at key points of a task.",
+      "details": "Name the advisor (fable, opus, sonnet or a full model id), or pass off to stop using one. Bare, the terminal opens a picker and other surfaces print the current choice. Experimental: it appears only when the advisor is turned on for your account, and only on the Anthropic API.",
+      "category": "model",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "sideEffects": "In a terminal session it saves the advisor as your default for every session (advisorModel in ~/.claude/settings.json). Only from Remote Control does it change just this session. Advisor calls add to usage.",
+      "signalbox": {
+        "status": "planned",
+        "note": "`/advisor <model>` or `/advisor off` through the opt-in session mod, labelled as changing your default advisor."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/agents",
+      "summary": "Removed: now only says to ask Claude, or edit the agents folders, to manage subagents.",
+      "details": "Up to 2.1.197 this opened a subagent manager. In 2.1.293 it is hidden and only prints a reminder about .claude/agents/ and ~/.claude/agents/.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Signalbox doesn't manage subagent files. For background sessions see Sessions or `claude agents`."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/artifact-capabilities",
+      "summary": "Skill: reference for what a published artifact page can do at runtime.",
+      "details": "Bundled skill Claude normally loads by itself before building an artifact that needs live data, storage or downloads. Only where artifacts are available.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Reference material for Claude; nothing for Signalbox to run."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/artifact-components",
+      "summary": "Skill: embed reusable components in an artifact.",
+      "details": "Bundled skill present in the 2.1.293 binary but not on the commands page. Only enabled where artifacts and its feature flag are on.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": "unknown",
+        "headless": "unknown",
+        "remoteControl": "unknown"
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Reference material for Claude; nothing for Signalbox to run."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      }
+    },
+    {
+      "name": "/artifact-diagramming",
+      "summary": "Skill: diagram guidance for artifacts, with inline SVG that reads in both themes.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Reference material for Claude; nothing for Signalbox to run."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/artifacts",
+      "summary": "Browse artifacts you own or that are shared with you; attach, open or copy a link.",
+      "details": "Only where artifacts are available. Enter attaches the chosen artifact to the session.",
+      "category": "integrations",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/auto-mode-setup",
+      "summary": "Draft auto-mode environment notes from your project, review, save to settings.",
+      "details": "Looks at the project and recent sessions to describe your environment for the auto-mode classifier, then lets you review the draft. Needs a Pro, Max or Team plan. Headless and Remote Control get a flag-driven form instead of the dialog.",
+      "category": "config",
+      "surfaces": {
+        "terminal": true,
+        "desktop": "partial",
+        "headless": "partial",
+        "remoteControl": true
+      },
+      "sideEffects": "Writes autoMode entries to your user settings.",
+      "signalbox": {
+        "status": "never",
+        "note": "Changes what auto mode lets Claude do without asking; Signalbox won't send it."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/autocompact",
+      "args": "[auto|<tokens>]",
+      "summary": "Set how full the context window gets before Claude Code compacts on its own.",
+      "details": "Give a size such as 500k, or auto to go back to the default window for your model. Bare, the terminal opens a dialog and other surfaces print the current window.",
+      "category": "context",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "sideEffects": "Saved in your user settings for the current model only, so later sessions on that model use it too. Other models keep their own window.",
+      "signalbox": {
+        "status": "planned",
+        "note": "Sessions shows where auto-compact kicks in when known. A slider marked as applying to this model in every session, sent as `/autocompact <N>` through the opt-in session mod, is planned."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/autofix-pr",
+      "args": "[prompt]",
+      "summary": "Start a cloud session that watches this branch's PR and pushes fixes.",
+      "details": "Finds the PR for the checked-out branch with gh and, by default, works on every failing check and review comment; a prompt narrows that. You need the gh CLI installed and cloud sessions turned on for your account.",
+      "category": "integrations",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "sideEffects": "Creates a cloud session that pushes commits to your PR branch.",
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/background",
+      "aliases": [
+        "/bg"
+      ],
+      "args": "[prompt]",
+      "summary": "Hand this session off to run in the background and get your terminal back.",
+      "details": "Optionally sends one more instruction first. Follow it later with `claude agents`, `claude attach` or `claude logs`. Use /fork to copy the session instead of moving it.",
+      "category": "navigation",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Background sessions show up in Sessions; detaching happens in the terminal."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/batch",
+      "args": "<instruction>",
+      "summary": "Skill: plan a large change, then run parallel worktree agents that each ship a part.",
+      "details": "It studies the codebase, breaks the job into 5 to 30 pieces that don't depend on each other, and asks you to approve the plan. After you approve, each unit gets a background subagent in its own worktree that implements, tests and publishes its change. Needs a git repository or a WorktreeCreate hook.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "sideEffects": "Creates worktrees and background agents; each one publishes its change, usually as a PR.",
+      "signalbox": {
+        "status": "no",
+        "note": "Long multi-agent job; start it in the session. Its agents appear in Sessions."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/branch",
+      "args": "[name]",
+      "summary": "Branch the conversation here and switch to the copy; the original stays resumable.",
+      "details": "Use it to try another direction without losing the conversation as it stands. /fork copies into a separate background session instead; /subtask hands a side task to a subagent.",
+      "category": "session",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/brief",
+      "summary": "Toggle brief-only mode, where Claude talks to you through a message tool.",
+      "details": "Present in the 2.1.293 binary but not in the docs. Only enabled when a server-side setting allows it; otherwise it says the tool is not enabled for your account.",
+      "category": "other",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      }
+    },
+    {
+      "name": "/btw",
+      "args": "[question]",
+      "summary": "Ask a quick question on the side; the answer stays out of the main conversation.",
+      "details": "With no question it shows your recent side questions. In the desktop app it opens a side chat.",
+      "category": "session",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/bug",
+      "aliases": [
+        "/share"
+      ],
+      "args": "[report]",
+      "summary": "Report a bug, optionally with session history, after a consent screen.",
+      "details": "You choose how much history to include. Signed in to Anthropic, the report goes to Anthropic; otherwise it is saved under ~/.claude/feedback-bundles/ for you to forward.",
+      "category": "debug",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "sideEffects": "Can send parts of your conversation to Anthropic.",
+      "signalbox": {
+        "status": "never",
+        "note": "Shares conversation data; only you should send it, from the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/cd",
+      "args": "<path>",
+      "summary": "Switch this session to a different folder without losing the conversation.",
+      "details": "Unlike /add-dir, the session's working directory changes and settings from the new folder apply.",
+      "category": "navigation",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/chrome",
+      "summary": "Open settings for Claude in Chrome, the browser extension Claude can drive.",
+      "category": "integrations",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/claim-credit",
+      "summary": "Open the offer page advertised when Claude Code started.",
+      "details": "Hidden; only when an offer is active. Present in the 2.1.293 binary but not in the docs.",
+      "category": "account",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      }
+    },
+    {
+      "name": "/claude-api",
+      "args": "[migrate|upgrade|managed-agents-onboard|prompt-audit|cost-optimize|build-eval|hillclimb|preserved-thinking-migration]",
+      "summary": "Skill: brings in Claude API and Managed Agents docs that match your code's language.",
+      "details": "Also loads by itself when code imports the Anthropic SDK. It can't be typed from a Remote Control client, though Claude can still load it there.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Reference material for Claude; nothing for Signalbox to run."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/claude-code-docs",
+      "args": "[question]",
+      "summary": "Skill: answer questions about Claude Code features and settings.",
+      "details": "Bundled skill present in the 2.1.293 binary but not on the commands page. It reads the official docs and is told which build is running.",
+      "category": "info",
+      "surfaces": {
+        "terminal": true,
+        "desktop": "unknown",
+        "headless": "unknown",
+        "remoteControl": "unknown"
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Ask it in a session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      }
+    },
+    {
+      "name": "/claude-in-chrome",
+      "args": "[task]",
+      "summary": "Skill: have Claude do a task in your Chrome browser.",
+      "details": "Clicks, fills forms, takes screenshots and reads console logs through the Claude in Chrome extension. Available when Chrome integration is on for the session, for example with --chrome.",
+      "category": "integrations",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": "unknown",
+        "remoteControl": true
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/clear",
+      "aliases": [
+        "/reset",
+        "/new"
+      ],
+      "args": "[name]",
+      "summary": "Start a new conversation with empty context; the old one stays resumable.",
+      "details": "Give it a name and the old conversation shows under that name when you /resume. Project memory is kept. To keep going in the same conversation with less context, use /compact.",
+      "category": "session",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "sideEffects": "The session continues under a new conversation id and its cost counter starts again.",
+      "signalbox": {
+        "status": "no",
+        "note": "Drops the working context; run it yourself in the session. Signalbox keeps counting spend across the change."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/cloud-plugins",
+      "summary": "Decide whether plugins turned on here also load in your cloud sessions.",
+      "details": "Present in the 2.1.293 binary but not on the commands page; only enabled when plugin forwarding to cloud sessions is on.",
+      "category": "config",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      }
+    },
+    {
+      "name": "/code-review",
+      "aliases": [
+        "/review"
+      ],
+      "args": "[low|medium|high|xhigh|max|ultra] [--fix] [--comment] [--max-findings n|all|default] [pr#|branch|path]",
+      "summary": "Skill: review the diff, a PR, branch or path for bugs; can apply or post findings.",
+      "details": "The level sets how deep it goes; with none it reuses the last level you typed. --fix applies the findings, --comment posts them to the GitHub PR or GitLab MR, and ultra runs a cloud review (the same as /ultrareview).",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "sideEffects": "--fix edits files, --comment posts to your PR, and ultra uses cloud review runs or usage credits.",
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/color",
+      "args": "[red|blue|green|yellow|purple|orange|pink|cyan|default]",
+      "summary": "Set this session's prompt bar color; no argument picks a random one.",
+      "details": "default resets it. Over Remote Control, claude.ai/code shows the same color.",
+      "category": "session",
+      "surfaces": {
+        "terminal": true,
+        "desktop": "unknown",
+        "headless": true,
+        "remoteControl": true
+      },
+      "sideEffects": "Applies to this session only.",
+      "signalbox": {
+        "status": "planned",
+        "note": "A color chip on the session card, sent as `/color <c>` through the opt-in session mod."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/commit",
+      "args": "[guidance]",
+      "summary": "Skill: make a git commit with the repo's context and commit rules.",
+      "details": "Bundled skill in the 2.1.293 binary that is rolled out gradually and isn't on the commands page. Claude can also use it when a task reaches a commit.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": "unknown",
+        "headless": "unknown",
+        "remoteControl": "unknown"
+      },
+      "sideEffects": "Creates a git commit.",
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      }
+    },
+    {
+      "name": "/compact",
+      "args": "[instructions]",
+      "summary": "Summarize the conversation so far to free context; optional focus instructions.",
+      "details": "Runs a model call that replaces earlier messages with a summary; key rules, skills and memory files are carried over. Auto-compaction does the same when the window fills.",
+      "category": "context",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "sideEffects": "Uses a model call; earlier messages are no longer in context afterwards.",
+      "signalbox": {
+        "status": "planned",
+        "note": "Sessions already lists each compaction (manual or auto, tokens before). A 'compact now' button with a focus field is planned through the opt-in session mod."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/config",
+      "aliases": [
+        "/settings"
+      ],
+      "args": "[key=value ...]",
+      "summary": "Open settings, or set keys directly with key=value.",
+      "details": "The key=value form also works in -p and from the mobile app over Remote Control; `/config --help` lists the keys. It can't switch on settings that need a confirmation in the panel. In the desktop app it opens Settings and ignores arguments.",
+      "category": "config",
+      "surfaces": {
+        "terminal": true,
+        "desktop": "partial",
+        "headless": true,
+        "remoteControl": true
+      },
+      "sideEffects": "key=value writes your user settings, which affects every session.",
+      "signalbox": {
+        "status": "never",
+        "note": "Writes global Claude Code settings; Signalbox never changes agent config."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/context",
+      "args": "[all]",
+      "summary": "Show what's filling the context window, with tips to free space.",
+      "details": "The terminal draws a colored grid; other surfaces print text. It warns when the conversation is already over the window. all expands the per-item breakdown in fullscreen.",
+      "category": "context",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "signalbox": {
+        "status": "view",
+        "view": "sessions",
+        "note": "Each session row has a context gauge (tokens, window, percent, auto-compact point) from what the agent records, without running /context."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/copy",
+      "args": "[N]",
+      "summary": "Copy Claude's last (or Nth-latest) reply to the clipboard, or pick code blocks.",
+      "details": "When the reply has code blocks a picker lets you choose; w writes the selection to a file instead.",
+      "category": "session",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/daemon",
+      "summary": "Control the background worker service and the routines it runs.",
+      "details": "Present in the 2.1.293 binary but not in the docs; only turned on when the background worker registry is enabled for you.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      }
+    },
+    {
+      "name": "/dataviz",
+      "args": "[request]",
+      "summary": "Skill: chart and dashboard design guidance with a checked, colorblind-safe palette.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Reference material for Claude; nothing for Signalbox to run."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/debug",
+      "args": "[description]",
+      "summary": "Skill: turn on debug logging for this session and diagnose a problem from the log.",
+      "details": "Logging starts when you run it, unless the session was started with --debug. Add a description of the problem to narrow what it looks at.",
+      "category": "debug",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "sideEffects": "Writes a debug log for the session.",
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/deep-research",
+      "args": "<question>",
+      "summary": "Workflow: fan out web searches, cross-check sources, write a cited report.",
+      "details": "A bundled dynamic workflow that runs many subagents in the background; watch it with /workflows. Needs dynamic workflows to be enabled. Claude never starts it on its own; you have to type it.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": "unknown",
+        "headless": "unknown",
+        "remoteControl": "unknown"
+      },
+      "sideEffects": "Runs many subagents and web fetches, so it uses a lot of tokens.",
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/design",
+      "args": "[brief]",
+      "summary": "Skill: draft UI mockups or posters as artboards in a Claude Design artifact.",
+      "details": "Needs artifacts and the Design template on your account; not available on Bedrock, Vertex or Foundry.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/design-consent",
+      "summary": "Allow Claude agents to open and work with your Claude Design projects.",
+      "details": "Hidden from the menu. Present in the 2.1.293 binary but not on the commands page.",
+      "category": "account",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "never",
+        "note": "Account authorization; only you should grant it."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      }
+    },
+    {
+      "name": "/design-login",
+      "summary": "Authorize /design-sync to use your claude.ai account for design systems.",
+      "category": "account",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "never",
+        "note": "Account authorization; only you should grant it."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/design-revoke",
+      "summary": "Stop Claude agents from reaching your Claude Design projects.",
+      "details": "Hidden from the menu. Present in the 2.1.293 binary but not on the commands page.",
+      "category": "account",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "never",
+        "note": "Account authorization; only you should change it."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      }
+    },
+    {
+      "name": "/design-sync",
+      "args": "[hint]",
+      "summary": "Skill: convert your repo's React design system and upload it to Claude Design.",
+      "details": "The first sync goes through every component, which can take hours in a big repo. Needs claude.ai, so it is unavailable on third-party providers.",
+      "category": "integrations",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "sideEffects": "Uploads your component code to claude.ai/design.",
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/desktop",
+      "aliases": [
+        "/app"
+      ],
+      "summary": "Hand this session to the Claude desktop app and close the CLI.",
+      "details": "macOS and x64 Windows with a Claude subscription. From a shell, `claude --desktop` opens the app without starting a terminal session.",
+      "category": "navigation",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/diff",
+      "summary": "Review uncommitted changes and per-turn diffs, including Claude's edits.",
+      "category": "info",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Shows file contents; Signalbox doesn't read code or messages."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/doctor",
+      "aliases": [
+        "/checkup"
+      ],
+      "args": "[prompt-audit [path]]",
+      "summary": "Skill: check your setup (install, settings, extensions, CLAUDE.md) and fix issues.",
+      "details": "Proposes fixes and applies them after you confirm. prompt-audit reviews your instruction files instead.",
+      "category": "debug",
+      "surfaces": {
+        "terminal": true,
+        "desktop": "unknown",
+        "headless": true,
+        "remoteControl": true
+      },
+      "sideEffects": "Can change settings, extensions and memory files after you confirm.",
+      "signalbox": {
+        "status": "no",
+        "note": "Signalbox's Health view covers its own data sources, not Claude Code's install. Run /doctor in a session, or `claude doctor` for a read-only check."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/effort",
+      "args": "[level|auto|status|ultracode [on|off]]",
+      "summary": "Set reasoning effort (low to xhigh, max, auto); status prints the level.",
+      "details": "max lasts for this session only. ultracode switches ultracode on for the session at the current level. Changing effort mid-session can mean rebuilding the prompt cache.",
+      "category": "model",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "sideEffects": "In an interactive session a level such as /effort high becomes your default for this model in new sessions, and /effort auto clears it. max and ultracode on/off last for this session only. In -p nothing is saved.",
+      "signalbox": {
+        "status": "planned",
+        "note": "Sessions shows each session's effort. A segmented control sending `/effort <level>` through the opt-in session mod is planned, with a warning that it changes your default effort for this model, as /model does."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/exit",
+      "aliases": [
+        "/quit"
+      ],
+      "summary": "Quit Claude Code; in an attached background session it detaches instead.",
+      "category": "navigation",
+      "surfaces": {
+        "terminal": true,
+        "desktop": "unknown",
+        "headless": true,
+        "remoteControl": true
+      },
+      "signalbox": {
+        "status": "never",
+        "note": "Ends a session; Signalbox won't do that for you."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/explain-usage",
+      "summary": "Skill: explain where this session's tokens went, in plain words.",
+      "details": "Present in the 2.1.293 binary but not on the commands page; only enabled on some hosted surfaces.",
+      "category": "info",
+      "surfaces": {
+        "terminal": "unknown",
+        "desktop": "unknown",
+        "headless": "unknown",
+        "remoteControl": "unknown"
+      },
+      "signalbox": {
+        "status": "view",
+        "view": "usage",
+        "note": "Usage breaks spend down by model, project, day and kind from local transcripts."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      }
+    },
+    {
+      "name": "/export",
+      "args": "[filename]",
+      "summary": "Save the conversation as plain text to a file or the clipboard.",
+      "category": "session",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "sideEffects": "Writes the whole conversation to a file or the clipboard.",
+      "signalbox": {
+        "status": "never",
+        "note": "Holds message content, which Signalbox never reads or shows."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/fast",
+      "args": "[on|off]",
+      "summary": "Turn fast mode on or off: faster Opus replies at a higher price.",
+      "details": "Takes effect without waiting for the turn to end, though the running turn keeps its speed. Only Opus 5.5, Opus 5 and Opus 4.8 support it. Support in -p is limited.",
+      "category": "model",
+      "surfaces": {
+        "terminal": true,
+        "desktop": "partial",
+        "headless": "partial",
+        "remoteControl": true
+      },
+      "sideEffects": "In the terminal the choice carries over to new sessions. On Pro, Max, Team and Enterprise, fast mode is paid from usage credits, not your plan, and costs more per token.",
+      "signalbox": {
+        "status": "no",
+        "note": "Signalbox leaves this to you because it changes what you pay; on subscription plans it draws on usage credits. Run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/feedback",
+      "args": "[report]",
+      "summary": "Send product feedback through the same consent dialog as /bug.",
+      "details": "When Claude has drafted feedback for you, running it with no argument opens that drafts queue.",
+      "category": "debug",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "sideEffects": "Can send parts of your conversation to Anthropic.",
+      "signalbox": {
+        "status": "never",
+        "note": "Shares conversation data; only you should send it, from the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/fewer-permission-prompts",
+      "summary": "Skill: find safe read-only commands in your transcripts and allowlist them.",
+      "category": "config",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "sideEffects": "Writes allow rules to the project's .claude/settings.json.",
+      "signalbox": {
+        "status": "never",
+        "note": "Changes permission rules."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/focus",
+      "args": "[on|off]",
+      "summary": "Toggle focus view: just your prompt, a tool summary and the final reply.",
+      "details": "Fullscreen renderer only, and the choice persists across sessions. From a Remote Control client, on or off applies to the current session only.",
+      "category": "config",
+      "surfaces": {
+        "terminal": true,
+        "desktop": "unknown",
+        "headless": "partial",
+        "remoteControl": true
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/fork",
+      "args": "[prompt]",
+      "summary": "Make a copy of this chat that keeps running in the background while you carry on here.",
+      "details": "With a prompt the copy starts on it right away; it is told to use its own worktree before editing. When agent view is off, /fork starts a forked subagent instead.",
+      "category": "navigation",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "sideEffects": "Starts a new background session.",
+      "signalbox": {
+        "status": "no",
+        "note": "The copy appears in Sessions as a background session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/goal",
+      "args": "[condition|clear]",
+      "summary": "Set a goal: Claude keeps working across turns until the condition is met.",
+      "details": "With no argument it shows the current or last goal; clear, stop, off or cancel removes it.",
+      "category": "session",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "sideEffects": "Claude keeps taking turns until the goal is met, which adds usage.",
+      "signalbox": {
+        "status": "no",
+        "note": "Starts open-ended work; set it in the session. A session waiting on a goal proposal shows as waiting in Sessions."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/heapdump",
+      "summary": "Write a memory heap snapshot and breakdown to your Desktop.",
+      "details": "Not listed in the menu, so type the full name. When reporting a memory problem, share only the -diagnostics.json file, never the .heapsnapshot.",
+      "category": "debug",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": false
+      },
+      "sideEffects": "Writes a large file that can contain credentials and the full conversation.",
+      "signalbox": {
+        "status": "never",
+        "note": "The snapshot can hold credentials and the whole conversation."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/help",
+      "summary": "List the commands you can use, each with a short explanation.",
+      "category": "info",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "This guide plays that role in Signalbox, for every surface."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/hooks",
+      "summary": "Browse the hooks you have set up, grouped by the tool event they run on.",
+      "category": "config",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/ide",
+      "args": "[open]",
+      "summary": "See and manage the connection to your code editor.",
+      "category": "integrations",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/import",
+      "args": "[codex|gemini|cursor] [--dry-run] [--yes]",
+      "summary": "Bring config from Codex, Gemini CLI or Cursor into Claude Code.",
+      "details": "Covers instruction files, MCP servers, commands, subagents and skills. --dry-run previews; in -p it lists what it found and prints the command that confirms. Needs feature flags and isn't offered on third-party providers.",
+      "category": "config",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": false
+      },
+      "sideEffects": "Writes Claude Code config files unless --dry-run.",
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/init",
+      "summary": "Generate a starter CLAUDE.md for the project from the codebase.",
+      "details": "With CLAUDE_CODE_NEW_INIT=1 it also walks through skills, hooks and personal memory. It offers /import when it finds Codex or Gemini CLI config.",
+      "category": "context",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "sideEffects": "Writes CLAUDE.md.",
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/insights",
+      "summary": "Generate an HTML report on your recent sessions: projects, habits, problem spots.",
+      "details": "Analyzes the sessions on this machine with a model, so it costs usage. Cloud sessions don't have it.",
+      "category": "info",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "sideEffects": "Uses a model call and writes a report under ~/.claude/usage-data/.",
+      "signalbox": {
+        "status": "no",
+        "note": "Usage covers spend without a model call; run /insights yourself for the behaviour report."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/install-github-app",
+      "summary": "Set up the Claude GitHub App and an optional Actions workflow for a repo.",
+      "details": "github.com repositories only; on GitLab or Bitbucket it prints a notice and stops.",
+      "category": "integrations",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "sideEffects": "Installs a GitHub App and can add workflow files and secrets.",
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/install-slack-app",
+      "summary": "Install the Claude Slack app through a browser sign-in flow.",
+      "category": "integrations",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/keybindings",
+      "summary": "Edit your custom keyboard shortcuts in their config file.",
+      "category": "config",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/limit-reset",
+      "summary": "Use an available limit reset to refill your session limit and keep working.",
+      "details": "Hidden; offered only on some claude.ai plans, about once a week, and it still counts toward the weekly limit. Present in the 2.1.293 binary but not in the docs.",
+      "category": "account",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "never",
+        "note": "Spends a scarce reset; only you should decide that."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      }
+    },
+    {
+      "name": "/list-agents",
+      "aliases": [
+        "/peers"
+      ],
+      "summary": "Show who this session can message: subagents, teammates and other sessions.",
+      "details": "Only where cross-session messaging is enabled. Shows the name to use when messaging each one.",
+      "category": "info",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "signalbox": {
+        "status": "view",
+        "view": "sessions",
+        "note": "Sessions lists live and background sessions on this machine from `claude agents --json` and the session registry."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/login",
+      "summary": "Sign in to your Anthropic account, or switch accounts.",
+      "category": "account",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "never",
+        "note": "Handles credentials."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/logout",
+      "summary": "End your Anthropic sign-in on this machine.",
+      "category": "account",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "never",
+        "note": "Handles credentials."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/loop",
+      "aliases": [
+        "/proactive"
+      ],
+      "args": "[interval] [prompt]",
+      "summary": "Skill: repeat a prompt or command on an interval while the session stays open.",
+      "details": "Leave out the interval and Claude picks its own pace; leave out the prompt and it runs a maintenance prompt or your loop.md. For instance: `/loop 10m run the tests and report failures`.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": "unknown",
+        "headless": "partial",
+        "remoteControl": true
+      },
+      "sideEffects": "Each run is a model turn, so usage keeps adding up.",
+      "signalbox": {
+        "status": "no",
+        "note": "Recurring work; start it in the session. Limits shows how fast it uses the 5-hour window."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/low-priority",
+      "summary": "After hitting a session limit, keep going at lower priority; run again to stop.",
+      "details": "Hidden; offered only on some claude.ai plans. Present in the 2.1.293 binary but not in the docs.",
+      "category": "account",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Limits shows the window; this choice stays in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      }
+    },
+    {
+      "name": "/mcp",
+      "args": "[reconnect (<server>|all)|enable|disable [<server>|all]]",
+      "summary": "Manage MCP servers: list, sign in, reconnect, enable or disable.",
+      "details": "No argument opens the interactive list in a terminal and prints a status summary elsewhere. reconnect all tries again every server that failed or is waiting for sign-in.",
+      "category": "integrations",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "signalbox": {
+        "status": "planned",
+        "note": "Only `/mcp reconnect <server>` is a candidate for the opt-in session mod; Signalbox doesn't show MCP status yet."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/memory",
+      "summary": "Edit CLAUDE.md files, toggle auto memory and view saved memories.",
+      "category": "context",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/mobile",
+      "aliases": [
+        "/ios",
+        "/android"
+      ],
+      "summary": "Show a QR code that leads to the Claude app for your phone.",
+      "category": "integrations",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/model",
+      "args": "[model]",
+      "summary": "Switch model; in the terminal it also becomes your default for new sessions.",
+      "details": "Bare, it opens a picker, where s on a row changes only this session. In -p and SDK hosts such as the desktop app, pass the model as an argument and only the current session changes. Switching can mean rebuilding the prompt cache.",
+      "category": "model",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "sideEffects": "In an interactive session (also when sent over Remote Control) it saves your default model; in -p and SDK hosts it is session-only.",
+      "signalbox": {
+        "status": "planned",
+        "note": "Sessions shows each session's model. A per-session picker is planned, with a warning that it can change your global default."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/output-style",
+      "args": "[style]",
+      "summary": "Show the available output styles, or change the one this project uses.",
+      "details": "From Remote Control only the built-in styles can be listed and picked.",
+      "category": "config",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "sideEffects": "Saves the style in this project's .claude/settings.local.json, so later sessions in the project start with it too.",
+      "signalbox": {
+        "status": "planned",
+        "note": "The argument form, `/output-style <style>`, is a candidate for the opt-in session mod, labelled as changing this project's local settings."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/passes",
+      "summary": "Share a free week of Claude Code with friends (eligible accounts only).",
+      "category": "account",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/permissions",
+      "aliases": [
+        "/allowed-tools"
+      ],
+      "summary": "Manage allow, ask and deny rules for tools, plus auto-mode rules and denials.",
+      "category": "config",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "never",
+        "note": "Changes what Claude may do without asking."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/plan",
+      "args": "[open|description]",
+      "summary": "Enter plan mode; with a description, start planning that task right away.",
+      "details": "open shows the current plan. In plan mode Claude reads and plans without editing until you approve.",
+      "category": "session",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Permission mode is chosen in the session; the desktop app has its own mode selector."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/plugin",
+      "aliases": [
+        "/plugins",
+        "/marketplace"
+      ],
+      "args": "[subcommand]",
+      "summary": "Manage plugins and marketplaces: list, install, enable, disable.",
+      "details": "In the desktop app it points you to the app's own plugin manager instead. From a shell, `claude plugin ...` does the same jobs.",
+      "category": "config",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Signalbox lists commands and skills from your enabled plugins in this guide; managing them stays in the session or `claude plugin`."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/plugin-authoring",
+      "summary": "Skill: the reference Claude uses to write a mod (hooks, panes, status lines).",
+      "details": "Comes from a built-in plugin that you can turn off in /plugin.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Reference material for Claude; nothing for Signalbox to run."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/powerup",
+      "summary": "Short interactive lessons with animated demos of Claude Code features.",
+      "category": "info",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/privacy-settings",
+      "summary": "View and change your privacy settings (Pro and Max).",
+      "category": "account",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "never",
+        "note": "Account data-sharing choices; only you should change them."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/prototype",
+      "summary": "Skill: prototype an idea as a working artifact.",
+      "details": "Present in the 2.1.293 binary but not on the commands page; gated to accounts with artifacts and this feature.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": "unknown",
+        "headless": "unknown",
+        "remoteControl": "unknown"
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      }
+    },
+    {
+      "name": "/radio",
+      "summary": "Play Claude FM, a lo-fi music stream, in your web browser.",
+      "category": "other",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/rate-limit-options",
+      "summary": "When a claude.ai limit blocks you: wait and continue, add credits, or upgrade.",
+      "details": "Claude Code can also open it by itself when you hit a limit. Only for people signed in with a claude.ai plan.",
+      "category": "account",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Limits shows how close each window is and when it resets; this menu stays in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/recap",
+      "summary": "Write a one-line summary of the session now.",
+      "details": "It runs only when you type it yourself, in the session or over Remote Control; requests relayed from Slack, Teams, routines or other programs are turned away.",
+      "category": "session",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "sideEffects": "May use a small model call.",
+      "signalbox": {
+        "status": "no",
+        "note": "Claude Code runs /recap only when a person types it in the terminal, the desktop app, claude.ai/code or Remote Control. A command sent by a session mod counts as coming from a plugin and is refused, so Signalbox can't offer it."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/release-notes",
+      "summary": "Browse the changelog by version.",
+      "category": "info",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/reload-plugins",
+      "args": "[--force]",
+      "summary": "Pick up plugin changes in this session without a restart.",
+      "details": "Skips with a warning when the reload would change MCP tools and break the prompt cache, unless --force. In -p and the desktop app it doesn't apply plugin MCP server changes.",
+      "category": "config",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/reload-skills",
+      "summary": "Rescan skill and command folders so new or edited skills show up.",
+      "category": "config",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Signalbox rescans custom commands and skills by itself every few minutes."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/remote-control",
+      "aliases": [
+        "/rc"
+      ],
+      "args": "[name]",
+      "summary": "Make this session reachable from claude.ai/code or the Claude app.",
+      "details": "Only for people signed in with a claude.ai plan. Running it again shows the link, a QR code and a way to disconnect.",
+      "category": "integrations",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": false,
+        "remoteControl": false
+      },
+      "sideEffects": "Makes the session available to your claude.ai account on other devices.",
+      "signalbox": {
+        "status": "no",
+        "note": "First-party feature; Signalbox can't drive it."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/remote-env",
+      "summary": "Set which cloud environment new cloud sessions from the CLI use by default.",
+      "category": "integrations",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/rename",
+      "aliases": [
+        "/name"
+      ],
+      "args": "[name]",
+      "summary": "Rename the session; with no name, generate one from the conversation.",
+      "details": "The name shows on the prompt bar and in /resume. Control characters become spaces and names are capped at 200 characters.",
+      "category": "session",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "signalbox": {
+        "status": "planned",
+        "note": "Sessions shows the name. Inline rename sending `/rename <name>` is planned through the opt-in session mod."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/restart",
+      "aliases": [
+        "/update"
+      ],
+      "summary": "Restart Claude Code and keep the session, on the newer version if one is waiting.",
+      "details": "Present in the 2.1.293 binary but not on the commands page. Only on macOS and Linux, outside background sessions, when its rollout flag is on.",
+      "category": "other",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      }
+    },
+    {
+      "name": "/resume",
+      "aliases": [
+        "/continue"
+      ],
+      "args": "[session]",
+      "summary": "Resume a conversation by id or name, or pick one from a list.",
+      "details": "Background sessions are marked bg; picking a running one attaches this terminal to it. In the desktop app it lists the CLI sessions started on this computer.",
+      "category": "navigation",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Signalbox never resumes sessions. Select the session in History and use Copy under Resume, then paste the line (`cd` to its folder, then `claude --resume <id>`) into a terminal."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/rewind",
+      "aliases": [
+        "/checkpoint",
+        "/undo"
+      ],
+      "summary": "Roll code and/or conversation back to a checkpoint, or summarize from a message.",
+      "category": "session",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/run",
+      "summary": "Skill: launch and drive your project's app to see a change working.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/run-skill-generator",
+      "summary": "Skill: write a project skill that teaches /run and /verify to launch your app.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "sideEffects": "Writes a skill into the project.",
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/sandbox",
+      "args": "[exclude \"command pattern\"]",
+      "summary": "Turn sandbox mode on or off and configure it (supported platforms only).",
+      "category": "config",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "never",
+        "note": "Changes how commands are isolated."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/schedule",
+      "aliases": [
+        "/routines"
+      ],
+      "args": "[description]",
+      "summary": "Create, change, list or run routines: cloud agents on a cron schedule.",
+      "details": "Claude asks what you want and sets it up with you in the chat. Only with a claude.ai plan on the Anthropic API.",
+      "category": "integrations",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "sideEffects": "Creates cloud routines that run on a schedule and use your plan.",
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/scroll-speed",
+      "summary": "Adjust mouse wheel scroll speed (fullscreen renderer only).",
+      "category": "config",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/security-review",
+      "summary": "Check your branch's changes against the default branch for security problems.",
+      "details": "Needs an origin remote.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/session",
+      "aliases": [
+        "/remote"
+      ],
+      "summary": "Show this cloud session's link, with a QR code for your phone.",
+      "details": "Present in the 2.1.293 binary but not on the commands page; only enabled in remote (cloud) sessions.",
+      "category": "integrations",
+      "surfaces": {
+        "terminal": "unknown",
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      }
+    },
+    {
+      "name": "/setup-bedrock",
+      "summary": "Wizard for Amazon Bedrock sign-in, region and model pins.",
+      "details": "The menu leaves it out until you set CLAUDE_CODE_USE_BEDROCK=1, so type the whole name.",
+      "category": "account",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "never",
+        "note": "Handles cloud credentials."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/setup-claude",
+      "aliases": [
+        "/setup-cowork"
+      ],
+      "summary": "Skill: guided setup: pick a role, install a plugin, try a skill, connect tools.",
+      "details": "Present in the 2.1.293 binary but not on the commands page; only enabled on some hosted surfaces.",
+      "category": "other",
+      "surfaces": {
+        "terminal": "unknown",
+        "desktop": "unknown",
+        "headless": "unknown",
+        "remoteControl": "unknown"
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      }
+    },
+    {
+      "name": "/setup-vertex",
+      "summary": "Wizard for Google Cloud Agent Platform (Vertex) sign-in, project and models.",
+      "details": "The menu leaves it out until you set CLAUDE_CODE_USE_VERTEX=1, so type the whole name.",
+      "category": "account",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "never",
+        "note": "Handles cloud credentials."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/simplify",
+      "args": "[target]",
+      "summary": "Skill: clean up changed code without changing behavior, then apply the fixes.",
+      "details": "Four review agents look at reuse, simpler code, efficiency and abstraction level. It doesn't hunt for bugs; use /code-review for that.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "sideEffects": "Edits files.",
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/skill-doctor",
+      "summary": "Show what each skill costs in context and how often it's used.",
+      "details": "Needs feature-flag fetching.",
+      "category": "info",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/skills",
+      "summary": "List available skills; filter, sort by tokens, change visibility.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "This guide lists your custom commands and skills (names and descriptions); changing visibility stays in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/slides",
+      "args": "[brief]",
+      "summary": "Skill: make a Claude Slides deck artifact from a brief.",
+      "details": "Needs artifacts and the Slides template on your account; not available on Bedrock, Vertex or Foundry.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/status",
+      "summary": "Show version, model, account and connectivity (the Status tab of settings).",
+      "details": "You can open it even mid-reply. In a background session a row says whether a terminal is attached.",
+      "category": "info",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "view",
+        "view": "sessions",
+        "note": "Session rows show version, model, effort, entrypoint, folder and status from local data."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/statusline",
+      "args": "[description]",
+      "summary": "Set up the status line from a description or from your shell prompt.",
+      "category": "config",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": "unknown"
+      },
+      "sideEffects": "Edits ~/.claude/settings.json.",
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/stickers",
+      "summary": "Open the page where you can order Claude Code stickers.",
+      "category": "other",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/stop",
+      "summary": "End the background session you're attached to, keeping its transcript and worktree.",
+      "category": "navigation",
+      "surfaces": {
+        "terminal": true,
+        "desktop": "unknown",
+        "headless": true,
+        "remoteControl": true
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Not offered from Signalbox. From a shell, `claude stop <id>` stops a background session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/subtask",
+      "args": "<task>",
+      "summary": "Hand a task to a background subagent with your full context; its result comes back.",
+      "details": "Not available when agent view is turned off.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/tasks",
+      "aliases": [
+        "/bashes"
+      ],
+      "summary": "View and manage this session's background work, including finished subagents.",
+      "category": "info",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/team-onboarding",
+      "summary": "Write an onboarding guide for teammates from your last 30 days of use.",
+      "details": "Looks at your sessions, commands and MCP servers. On claude.ai plans it can also return a share link.",
+      "category": "info",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "sideEffects": "Uses a model call and can create a share link.",
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/teleport",
+      "aliases": [
+        "/tp"
+      ],
+      "summary": "Pull a cloud session into this terminal, with its branch and conversation.",
+      "details": "Only for people signed in with a claude.ai plan.",
+      "category": "navigation",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/terminal-setup",
+      "summary": "Set up Shift+Enter (or Option+Enter) for newlines in your terminal or editor.",
+      "category": "config",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "sideEffects": "Edits your terminal or editor keybinding settings.",
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/theme",
+      "summary": "Change the color theme, or create a custom one.",
+      "category": "config",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/tui",
+      "args": "[default|fullscreen]",
+      "summary": "Change how the terminal UI is drawn, then restart it with the chat intact.",
+      "details": "Run it bare to see which renderer is active.",
+      "category": "config",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/ultraplan",
+      "args": "<prompt>",
+      "summary": "Draft an editable plan in a cloud session (the docs list it as removed).",
+      "details": "The docs say plan mode replaced it, but 2.1.293 still ships it behind a server-side flag.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/ultrareview",
+      "args": "[PR or branch]",
+      "summary": "Deep multi-agent code review in a cloud sandbox; same as /code-review ultra.",
+      "details": "Pro and Max include a few free runs, then it needs usage credits. From a shell, `claude ultrareview` prints the findings.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": false
+      },
+      "sideEffects": "Uploads your branch to a cloud sandbox; may use usage credits.",
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/update-config",
+      "args": "[request]",
+      "summary": "Skill: describe a settings change and Claude edits the matching settings.json.",
+      "category": "config",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "sideEffects": "Edits Claude Code settings files.",
+      "signalbox": {
+        "status": "never",
+        "note": "Edits Claude Code settings, including permissions and hooks."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/upgrade",
+      "summary": "Open the upgrade page for a higher plan.",
+      "category": "account",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/usage",
+      "aliases": [
+        "/cost",
+        "/stats"
+      ],
+      "summary": "See this session's cost, how close you are to plan limits, and your activity history.",
+      "details": "Typed as /stats it jumps straight to the activity view. On paid plans it also breaks down what counts toward your limits.",
+      "category": "info",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "signalbox": {
+        "status": "view",
+        "view": "usage",
+        "note": "Usage computes API-equivalent spend from local transcripts and Limits shows plan windows. Signalbox never parses /usage output."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/usage-credits",
+      "summary": "Set up usage credits, or ask your admin for them, when you hit a limit.",
+      "details": "Opens billing in the browser, or prints the URL when it can't. Team and Enterprise members without billing access send their admin a request after confirming in the terminal. The old name /extra-usage still exists and just points here.",
+      "category": "account",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/verify",
+      "summary": "Skill: build and run your app to confirm a change works, not just its tests.",
+      "details": "Claude never starts it on its own; you have to type it. Rolled out gradually in this version.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/voice",
+      "args": "[hold|tap|off]",
+      "summary": "Toggle voice dictation or pick its mode (needs a Claude.ai account).",
+      "category": "config",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/web-setup",
+      "summary": "Link your GitHub account to cloud sessions, reusing the gh CLI login on this machine.",
+      "category": "integrations",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "never",
+        "note": "Links account credentials."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/whiteboard",
+      "summary": "Skill: pair on a whiteboard artifact; you draw and Claude answers on it.",
+      "details": "Present in the 2.1.293 binary but not on the commands page; gated to accounts with artifacts.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": "unknown",
+        "headless": "unknown",
+        "remoteControl": "unknown"
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      }
+    },
+    {
+      "name": "/workflow-authoring",
+      "summary": "Skill: reference for writing dynamic workflow scripts.",
+      "details": "Claude usually loads it by itself before writing a script. Only where dynamic workflows are on.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": true,
+        "headless": true,
+        "remoteControl": true
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Reference material for Claude; nothing for Signalbox to run."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/workflows",
+      "summary": "Watch, pause, resume or save running and finished workflows.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/commands"
+    },
+    {
+      "name": "/workshop",
+      "summary": "Skill: build a design together, one decision at a time.",
+      "details": "Present in the 2.1.293 binary but not on the commands page; gated to accounts with artifacts.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": "unknown",
+        "headless": "unknown",
+        "remoteControl": "unknown"
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Interactive; copy it and run it in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      }
+    }
+  ],
+  "cliCommands": [
+    {
+      "name": "claude agents --json",
+      "summary": "Print active sessions as JSON and exit; --all adds finished background ones.",
+      "category": "info",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "view",
+        "view": "sessions",
+        "note": "Signalbox's main source for live and background sessions."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude agents",
+      "summary": "Open agent view to watch, dispatch and reply to background sessions.",
+      "category": "navigation",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Run it in a terminal."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude --resume",
+      "aliases": [
+        "claude -r"
+      ],
+      "args": "[id or search term]",
+      "summary": "Resume a conversation by id, or open the picker with an optional search term.",
+      "details": "With -p and a prompt it picks the conversation back up and answers without opening the interactive UI.",
+      "category": "navigation",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Signalbox never resumes sessions. Select the session in History and use Copy under Resume, then paste the line into a terminal."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude --continue",
+      "aliases": [
+        "claude -c"
+      ],
+      "summary": "Pick up the latest conversation from the folder you're in.",
+      "details": "Add -p to continue without the interactive UI, for scripts.",
+      "category": "navigation",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Run it in a terminal in the project folder."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude --fork-session",
+      "summary": "With --resume or --continue, carry on under a new session id.",
+      "category": "navigation",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Run it in a terminal."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude --from-pr",
+      "args": "[pr number or url]",
+      "summary": "Resume a session linked to a PR, or pick one.",
+      "category": "navigation",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Run it in a terminal."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude --bg",
+      "aliases": [
+        "claude --background"
+      ],
+      "args": "<prompt>",
+      "summary": "Start a session in the background and print its id.",
+      "category": "navigation",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Run it in a terminal; the new session then appears in Sessions."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude attach",
+      "args": "<id|name>",
+      "summary": "Open a background session in this terminal; it keeps running when you leave.",
+      "category": "navigation",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Run it in a terminal with the id from Sessions."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude logs",
+      "args": "<id|name>",
+      "summary": "Show the latest terminal output of a session running in the background.",
+      "category": "debug",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "never",
+        "note": "The output includes message content, which Signalbox never shows."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude stop",
+      "aliases": [
+        "claude kill"
+      ],
+      "args": "<id>",
+      "summary": "Stop a background session; its conversation is kept.",
+      "category": "navigation",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Not offered from Signalbox; run it yourself."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude respawn",
+      "args": "<id>|--all",
+      "summary": "Restart background sessions so they run the current version.",
+      "category": "navigation",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Run it yourself after an update."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude rm",
+      "args": "<id>",
+      "summary": "Remove a background session, plus its worktree if nothing would be lost.",
+      "category": "navigation",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "sideEffects": "Removes the session and can remove its worktree.",
+      "signalbox": {
+        "status": "never",
+        "note": "Deletes a session."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude -p",
+      "aliases": [
+        "claude --print"
+      ],
+      "args": "<prompt>",
+      "summary": "Run one prompt non-interactively and print the result.",
+      "category": "session",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Signalbox doesn't start agent turns."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude --model",
+      "args": "<model>",
+      "summary": "Start a session on a given model (alias or full name).",
+      "category": "model",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Launch option; Sessions shows the model each session uses."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude --effort",
+      "args": "<low|medium|high|xhigh|max>",
+      "summary": "Start a session at a given effort level.",
+      "category": "model",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Launch option; Sessions shows each session's effort."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude --name",
+      "aliases": [
+        "claude -n"
+      ],
+      "args": "<name>",
+      "summary": "Start a session with a display name.",
+      "category": "session",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Launch option; Sessions shows the name."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude --worktree",
+      "aliases": [
+        "claude -w"
+      ],
+      "args": "[name]",
+      "summary": "Start the session in a new git worktree.",
+      "category": "session",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Launch option."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude --safe-mode",
+      "summary": "Start with all customizations off, to troubleshoot a broken setup.",
+      "category": "debug",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Launch option for troubleshooting."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude --teleport",
+      "args": "[session]",
+      "summary": "Move a cloud session onto this machine and keep working on it in the terminal.",
+      "category": "navigation",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Run it in a terminal."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude --desktop",
+      "summary": "Open the Claude desktop app on this folder, or a session with -c or --resume.",
+      "category": "navigation",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Run it in a terminal."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude --version",
+      "aliases": [
+        "claude -v"
+      ],
+      "summary": "Print the installed Claude Code version.",
+      "category": "info",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "view",
+        "view": "health",
+        "note": "Health lists the version of each agent CLI Signalbox finds."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude doctor",
+      "summary": "Check the installation's health without starting a session.",
+      "details": "It reads settings files in the current folder without a trust prompt. For a checkup that can also fix things, run /doctor in a session.",
+      "category": "debug",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Signalbox's Health covers its own data sources; run this for Claude Code's install."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude update",
+      "aliases": [
+        "claude upgrade"
+      ],
+      "summary": "Check for a newer version and install it.",
+      "category": "other",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "sideEffects": "Installs a new Claude Code version.",
+      "signalbox": {
+        "status": "no",
+        "note": "Run it yourself; running sessions keep their version until restarted."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude auth status",
+      "summary": "Show whether and how you're signed in.",
+      "category": "account",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Signalbox doesn't read account details."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude auth login",
+      "summary": "Log this machine in with your Anthropic account, from the shell.",
+      "category": "account",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "never",
+        "note": "Handles credentials."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude auth logout",
+      "summary": "End your Anthropic sign-in on this machine, from the shell.",
+      "category": "account",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "never",
+        "note": "Handles credentials."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude setup-token",
+      "summary": "Create a long-lived sign-in token (needs a Claude subscription).",
+      "category": "account",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "never",
+        "note": "Creates a credential."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude mcp list",
+      "summary": "List configured MCP servers and health-check them.",
+      "category": "integrations",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "sideEffects": "The health check starts local servers and contacts remote ones.",
+      "signalbox": {
+        "status": "no",
+        "note": "Run it yourself; Signalbox doesn't start MCP servers."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude mcp add",
+      "args": "<name> <commandOrUrl> [args...]",
+      "summary": "Add an MCP server (stdio, SSE, HTTP or WebSocket).",
+      "category": "integrations",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "sideEffects": "Writes MCP server config.",
+      "signalbox": {
+        "status": "no",
+        "note": "Changes agent config; run it yourself."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude plugin list",
+      "summary": "List installed plugins.",
+      "category": "config",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "This guide already lists commands and skills from enabled plugins."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude plugin install",
+      "aliases": [
+        "claude plugin i"
+      ],
+      "args": "<plugin[@marketplace]>",
+      "summary": "Install a plugin from a marketplace.",
+      "category": "config",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "sideEffects": "Installs and enables a plugin.",
+      "signalbox": {
+        "status": "no",
+        "note": "Changes agent config; run it yourself."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude ultrareview",
+      "args": "[target] [--json] [--post]",
+      "summary": "Run a cloud multi-agent review of this branch or a PR and print the findings.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "sideEffects": "Uploads your branch to a cloud sandbox; may use usage credits; --post comments on the PR.",
+      "signalbox": {
+        "status": "no",
+        "note": "Run it yourself."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude import",
+      "args": "[codex|gemini|cursor] [--dry-run] [--yes]",
+      "summary": "Import config from Codex, Gemini CLI or Cursor; --dry-run previews.",
+      "category": "config",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "sideEffects": "Writes Claude Code config files unless --dry-run.",
+      "signalbox": {
+        "status": "no",
+        "note": "Changes agent config; run it yourself."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude auto-mode config",
+      "summary": "Print the effective auto-mode configuration as JSON.",
+      "category": "config",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Run it yourself."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    },
+    {
+      "name": "claude remote-control",
+      "summary": "Serve sessions for Remote Control from this folder until you press Ctrl+C.",
+      "details": "Hidden from `claude --help` in 2.1.293 but present in the binary and documented.",
+      "category": "integrations",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "First-party feature; run it yourself."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/remote-control"
+    },
+    {
+      "name": "claude purge",
+      "args": "[path] [--all] [--dry-run]",
+      "summary": "Wipe a project's local Claude Code data, such as transcripts, tasks and file history.",
+      "category": "other",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "sideEffects": "Permanently deletes local session data.",
+      "signalbox": {
+        "status": "never",
+        "note": "Deletes transcripts and history."
+      },
+      "verified": {
+        "method": "help",
+        "version": "2.1.293"
+      },
+      "sourceUrl": "https://code.claude.com/docs/en/cli-reference"
+    }
+  ]
+}

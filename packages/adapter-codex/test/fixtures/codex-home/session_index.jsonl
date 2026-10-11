@@ -1,0 +1,6 @@
+{"id":"01a10000-0000-7000-8000-00000000000a","thread_name":"Synthetic session A (old name)","updated_at":"2026-10-09T10:01:00.000000Z"}
+{"id":"01a10000-0000-7000-8000-00000000000c","thread_name":"Synthetic session C","updated_at":"2026-10-09T11:55:00.000000Z"}
+{"id":"01a10000-0000-7000-8000-00000000000a","thread_name":"Synthetic session A","updated_at":"2026-10-09T10:32:00.000000Z"}
+{"id":"01a10000-0000-7000-8000-000000000010","thread_name":"Synthetic index-only session","updated_at":"2026-10-09T09:00:00.000000Z"}
+{"id":"01a10000-0000-7000-8000-000000000011","thread_name":"Synthetic stale session","updated_at":"2026-09-20T09:00:00.000000Z"}
+not json

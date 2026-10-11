@@ -1,0 +1,1 @@
+{"v":1,"seq":9,"agent":"claude-code","sessionId":"33333333-3333-4333-8333-333333333333","writtenAt":"2026-01-10T11:00:00.000Z","event":"session.measure","usage":{"rateLimits":[{"kind":"five_hour","percentUsed":30,"resetsAt":"2026-01-10T15:00:00.000Z"},{"kind":"seven_day_fable","percentUsed":5}]}}
