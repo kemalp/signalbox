@@ -18,6 +18,7 @@ beforeAll(() => {
     CODEX_HOME: join(root, "home", ".codex"),
     SIGNALBOX_CLAUDE_BIN: "/nonexistent",
     SIGNALBOX_BIN_DIRS: "",
+    SIGNALBOX_CLAUDE_MANAGED_SETTINGS_DIR: "",
     PATH: join(root, "bin"),
     TMPDIR: join(root, "tmp"),
   };

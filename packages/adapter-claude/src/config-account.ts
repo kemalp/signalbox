@@ -11,7 +11,7 @@
 // SIGNALBOX_CLAUDE_CONFIG_TRACE=1 logs every path the reader stats or opens to stderr, to audit a run.
 import { accountEvidence, type AccountEvidence } from "../../core/src/index.ts";
 import { CappedJsonReader, CONFIG_TRACE_ENV, defaultConfigFs, type CappedFs } from "./capped-json.ts";
-import { assertWholeObject, topLevelObjectText } from "./json-scan.ts";
+import { topLevelObjectText } from "./json-scan.ts";
 import { isObj } from "./util.ts";
 
 export { CONFIG_TRACE_ENV, topLevelObjectText };
@@ -20,15 +20,14 @@ export const CONFIG_LOGIN_MAX_BYTES = 32 * 1024 * 1024;
 /** What one read found. "ok" without `evidence`: the file exists but names no signed-in account. */
 export type LoginRead =
   | { path: string; state: "ok"; evidence?: AccountEvidence }
-  | { path: string; state: "missing" | "not-a-file" | "too-large" | "unparsable" }
+  | { path: string; state: "missing" | "not-a-file" | "too-large" | "unparsable" | "changed" }
   | { path: string; state: "unreadable"; code: string };
 
 /**
- * The two ids of `oauthAccount`, hashed; undefined when the file names no account. Throws on a file that doesn't look
- * whole (caught mid-write) or an `oauthAccount` that isn't valid JSON.
+ * The two ids of `oauthAccount`, hashed; undefined when the file names no account. Throws on a file that isn't valid
+ * JSON (one caught mid-write, say).
  */
 export function loginFromConfigText(text: string): AccountEvidence | undefined {
-  assertWholeObject(text);
   const raw = topLevelObjectText(text, "oauthAccount");
   if (raw === undefined) return undefined;
   let o: unknown;
@@ -46,8 +45,8 @@ export type LoginFs = CappedFs;
 export const defaultLoginFs = defaultConfigFs;
 
 /**
- * Reads logins, reusing a file's result while its mtime and size are unchanged. A read that fails in passing (caught
- * mid-write, unparsable, unreadable) answers with the file's last good login, if any, so accounts don't blink.
+ * Reads logins, reusing a file's result while its mtime and size are unchanged. A read that fails in passing (a file
+ * caught mid-write) answers with the file's last good login for a few seconds, so accounts don't blink.
  */
 export class ConfigLoginReader {
   private readonly inner: CappedJsonReader<AccountEvidence>;

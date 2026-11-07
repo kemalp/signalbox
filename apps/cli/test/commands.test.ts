@@ -196,6 +196,7 @@ describe("signalbox commands (spawned)", () => {
       CODEX_HOME: join(home, ".codex"),
       SIGNALBOX_CLAUDE_BIN: join(sandbox, "fake-claude"),
       SIGNALBOX_BIN_DIRS: "",
+      SIGNALBOX_CLAUDE_MANAGED_SETTINGS_DIR: "",
       PATH: join(sandbox, "bin"),
       TMPDIR: join(sandbox, "tmp"),
     };
