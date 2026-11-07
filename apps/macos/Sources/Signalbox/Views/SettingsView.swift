@@ -395,6 +395,19 @@ private struct AdvancedSettingsPane: View {
                 }
                 .disabled(controller.isFixture)
             }
+            Section("Transcript retention") {
+                VStack(alignment: .leading, spacing: 6) {
+                    Picker("Warn when transcripts are kept less than", selection: Binding(
+                        get: { settings.retentionWarnDays },
+                        set: { settings.retentionWarnDays = $0 }
+                    )) {
+                        ForEach(SettingsStore.retentionWarnChoices, id: \.self) { days in
+                            Text(days == 0 ? "Never warn" : "\(days) days").tag(days)
+                        }
+                    }
+                    SettingsNote("Claude Code deletes transcripts older than its cleanupPeriodDays setting (30 days when it isn't set), and History and the cost figures lose them too. The menu bar and Health say when a folder keeps them for less than this. Signalbox only reads that one setting; it never edits Claude Code's settings.")
+                }
+            }
             Section("Troubleshooting") {
                 HStack {
                     Button("Show Diagnostics") { controller.showDiagnostics() }

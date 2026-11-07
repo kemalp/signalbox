@@ -38,6 +38,11 @@
 // the user's labels from Signalbox's accounts.json and live session counts), and Claude Code sessions and history
 // entries name their `configDir` when it is known (one config dir holds the session's registry row or transcript).
 //
+// Retention (also additive): the fleet adds `retention` (core RetentionInfo[]: per Claude Code config dir, the
+// cleanupPeriodDays in force as far as the managed settings and the dir's settings.json say, where it comes from,
+// an `invalid` value as written, or a `problem` when a file couldn't be read). Raw values only: whether a period is
+// too short is for the reader to judge (core retentionStatus; the app uses its own threshold).
+//
 // Status pushes: adapters that can watch their sessions (Claude Code's registry dir, Codex's newest
 // rollouts) signal a possible change; signals within `statusDebounceMs` of the first are coalesced into
 // one quick fleet (status from those files, no `claude agents --json` run), sent like any fleet line.

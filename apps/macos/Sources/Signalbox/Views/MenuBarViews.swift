@@ -129,6 +129,19 @@ struct MenuBarContent: View {
                         .help(problem)
                         .privacySensitive()
                 }
+                if let retention = store.retentionWarning(warnBelowDays: settings.retentionWarnDays) {
+                    // Transcripts Claude Code will delete soon: History and the cost figures lose them too.
+                    Button { openMain(section: .health) } label: {
+                        Label(retention, systemImage: "clock.badge.exclamationmark")
+                            .font(.caption)
+                            .foregroundStyle(.orange)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.leading)
+                    }
+                    .buttonStyle(.plain)
+                    .help("History and the cost figures lose deleted transcripts too. Open Health for details and how to keep them longer.")
+                    .privacySensitive()
+                }
                 Divider()
                 limitRings(now: now)
                 Divider()

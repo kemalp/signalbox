@@ -4,6 +4,7 @@ import SwiftUI
 struct HealthView: View {
     @Environment(SignalboxStore.self) private var store
     @Environment(NavigationModel.self) private var nav
+    @Environment(SettingsStore.self) private var settings
 
     var body: some View {
         DataGate(value: store.health ?? store.fleet?.health, waitingFor: "adapter health") { health in
@@ -24,6 +25,21 @@ struct HealthView: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .padding(.top, 2)
+                    }
+
+                    if let rows = store.fleet?.retention, !rows.isEmpty {
+                        Section {
+                            ForEach(store.retention(warnBelowDays: settings.retentionWarnDays), id: \.info.id) { row in
+                                RetentionRow(info: row.info, status: row.status)
+                            }
+                        } header: {
+                            sectionHeader("Transcript retention", trailing: nil)
+                        } footer: {
+                            Text(retentionFooter)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .padding(.top, 2)
+                        }
                     }
 
                     Section {
@@ -61,6 +77,11 @@ struct HealthView: View {
                 .help("CLI output and connection details")
             }
         }
+    }
+
+    private var retentionFooter: String {
+        let threshold = settings.retentionWarnDays > 0 ? " Signalbox warns below \(settings.retentionWarnDays) days (Settings ▸ Advanced)." : ""
+        return "Claude Code deletes transcripts older than cleanupPeriodDays after a session starts, and History and the cost figures lose them too.\(threshold) Read from the managed settings and each folder's settings.json; a project's own .claude/settings.json, --settings and settings your organization serves from its console can also set it and aren't checked."
     }
 
     private var subtitle: String {
@@ -122,6 +143,66 @@ private struct HealthRow: View {
         }
         .padding(.vertical, 4)
         .accessibilityElement(children: .combine)
+    }
+}
+
+/// One Claude Code folder: how long it keeps transcripts, where that comes from, and what to do when it's too short.
+private struct RetentionRow: View {
+    let info: RetentionInfo
+    let status: RetentionStatus
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 12) {
+            Image(systemName: icon)
+                .foregroundStyle(color)
+                .font(.title3)
+                .accessibilityLabel(status.rawValue)
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 6) {
+                    Text(Fmt.shortPath(info.configDir))
+                        .font(.body.weight(.semibold))
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                        .help(info.configDir)
+                    AgentBadge(agent: info.agent)
+                }
+                Text("\(RetentionText.value(info)) · \(RetentionText.source(info))")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                if let advice = RetentionText.advice(info, status: status) {
+                    Text(advice)
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                if let shared = info.sharesTranscriptsWith, !shared.isEmpty {
+                    Text("Shares its transcripts folder with \(shared.map { Fmt.shortPath($0) }.joined(separator: ", ")): the shortest setting wins.")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .privacySensitive()
+            Spacer()
+        }
+        .padding(.vertical, 4)
+        .accessibilityElement(children: .combine)
+    }
+
+    private var icon: String {
+        switch status {
+        case .ok: "checkmark.circle.fill"
+        case .short, .invalid: "clock.badge.exclamationmark"
+        case .unknown: "questionmark.circle"
+        }
+    }
+
+    private var color: Color {
+        switch status {
+        case .ok: Theme.ok
+        case .short, .invalid: Theme.warning
+        case .unknown: .secondary
+        }
     }
 }
 

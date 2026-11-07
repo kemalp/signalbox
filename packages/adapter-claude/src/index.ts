@@ -20,3 +20,4 @@ export { defaultConfigDir, defaultSpoolDir } from "./paths.ts";
 export { parseSpool } from "./spool.ts";
 export { scanIssues, type UsageStats } from "./usage.ts";
 export { watchDir, type DirWatch, type DirWatchMode, type DirWatchOptions } from "./watch.ts";
+export { defaultManagedSettingsDir, MANAGED_SETTINGS_DIR_ENV, RetentionReader, retentionFromSettingsText } from "./retention.ts";

@@ -13,7 +13,7 @@ struct DecodingTests {
         #expect(s.fleet.sessions.count == 6)
         #expect(s.fleet.limits.count == 7)
         #expect(s.fleet.compactions.count == 4)
-        #expect(s.health.count == 10)
+        #expect(s.health.count == 11)
         // The Claude app's session list (read for History) has its own row, owned by "claude-app", not an agent.
         let app = try #require(s.health.first { $0.name == "claude-app:sessions" })
         #expect(app.stability == .internal)
