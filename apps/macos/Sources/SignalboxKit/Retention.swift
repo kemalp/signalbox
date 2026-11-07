@@ -4,6 +4,8 @@ import Foundation
 // session transcripts before Claude Code deletes them (`cleanupPeriodDays`, default 30 days, a whole number of days,
 // 1 or more). Once deleted, History and the cost figures lose them too. The CLI sends raw values; whether a period
 // is too short is judged here, against your threshold (Settings ▸ Advanced), so changing it needs no CLI restart.
+// From Claude Code 2.1.248 on, desktop app sessions are kept at any age unless managed settings set the period or
+// desktopSessionCleanupPeriodDays is set; while the period is invalid or can't be read, Claude Code pauses the cleanup.
 
 /// One config folder's retention, as far as the managed settings and the folder's settings.json say.
 public struct RetentionInfo: Codable, Hashable, Sendable, Identifiable {
@@ -44,7 +46,8 @@ public struct RetentionInfo: Codable, Hashable, Sendable, Identifiable {
         configDir = try c.decode(String.self, forKey: .configDir)
         // A days value that isn't a whole number of days, 1 or more, is never shown as one.
         days = (try? c.decodeIfPresent(Int.self, forKey: .days)).flatMap { $0 }.flatMap { $0 >= 1 ? $0 : nil }
-        source = (try? c.decodeIfPresent(String.self, forKey: .source)).flatMap { $0 } ?? "default"
+        // Without a source, a missing `days` can't be told apart from "not set": decode fails and the row is dropped.
+        source = try c.decode(String.self, forKey: .source)
         file = (try? c.decodeIfPresent(String.self, forKey: .file)).flatMap { $0 }
         invalid = (try? c.decodeIfPresent(String.self, forKey: .invalid)).flatMap { $0 }
         // Without the agent's default, a period can't be judged: decode fails and the row is dropped, not guessed.
@@ -53,8 +56,11 @@ public struct RetentionInfo: Codable, Hashable, Sendable, Identifiable {
         sharesTranscriptsWith = (try? c.decodeIfPresent([String].self, forKey: .sharesTranscriptsWith)).flatMap { $0 }
     }
 
+    /// No value can be told: a file couldn't be read, or a file set it but no valid number of days came through.
+    public var isUndetermined: Bool { problem != nil || (invalid == nil && days == nil && source != "default") }
+
     /// The days in force (the value set, else the default); nil when invalid or unknown.
-    public var effectiveDays: Int? { problem != nil || invalid != nil ? nil : (days ?? defaultDays) }
+    public var effectiveDays: Int? { isUndetermined || invalid != nil ? nil : (days ?? defaultDays) }
 }
 
 public enum RetentionStatus: String, Sendable, Comparable {
@@ -83,25 +89,29 @@ public enum RetentionStatus: String, Sendable, Comparable {
     public static func of(_ r: RetentionInfo, warnBelowDays: Int) -> Self {
         if r.problem != nil { return .unknown }
         if r.invalid != nil { return .invalid }
-        let days = r.days ?? r.defaultDays
+        guard let days = r.effectiveDays else { return .unknown }
         return warnBelowDays > 0 && days < warnBelowDays ? .short : .ok
     }
 }
 
 public enum RetentionText {
-    /// "365 days (settings.json)", "30 days (not set: the default)", "14 days (managed settings)".
+    /// The version from which Claude Code keeps desktop app sessions unless told otherwise (core CLAUDE_CODE_DESKTOP_KEPT_SINCE).
+    public static let desktopKeptSince = "2.1.248"
+
+    static func days(_ n: Int) -> String { "\(n) \(n == 1 ? "day" : "days")" }
+
+    /// "365 days", "1 day", "Invalid: 0", "Unknown".
     public static func value(_ r: RetentionInfo) -> String {
-        if r.problem != nil { return "Unknown" }
-        if let bad = r.invalid { return "Invalid: \(bad)" }
-        let days = r.days ?? r.defaultDays
-        return "\(days) \(days == 1 ? "day" : "days")"
+        if let bad = r.invalid, r.problem == nil { return "Invalid: \(bad)" }
+        guard let n = r.effectiveDays else { return "Unknown" }
+        return days(n)
     }
 
     public static func source(_ r: RetentionInfo) -> String {
         switch r.source {
         case "managed": "Set by your organization's managed settings"
-        case "user": "Set in settings.json"
-        case "default": "Not set: Claude Code's default"
+        case "user": "Set in \(r.file.map { URL(fileURLWithPath: $0).lastPathComponent } ?? "a settings file")"
+        case "default": "Not set: \(Fmt.agentName(r.agent))'s default"
         default: "From \(r.source)"
         }
     }
@@ -109,12 +119,16 @@ public enum RetentionText {
     /// The popover's line for the worst folder, or nil when none needs one.
     public static func warning(_ r: RetentionInfo, status: RetentionStatus, several: Bool) -> String? {
         let place = several ? " in \(Fmt.shortPath(r.configDir))" : ""
+        let name = Fmt.agentName(r.agent)
         switch status {
         case .short:
-            let days = r.days ?? r.defaultDays
-            return "Claude Code deletes transcripts older than \(days) days\(place)."
+            guard let n = r.effectiveDays else { return nil }
+            // Unless managed settings set it, Claude Code keeps desktop app sessions (from 2.1.248 on).
+            let what = r.agent == .claudeCode && r.source != "managed" ? "terminal transcripts" : "transcripts"
+            return "\(name) deletes \(what) older than \(days(n))\(place)."
         case .invalid:
-            return "Claude Code's cleanupPeriodDays\(place) is invalid (\(r.invalid ?? "?"))."
+            let setting = r.agent == .claudeCode ? "cleanupPeriodDays" : "retention setting"
+            return "\(name)'s \(setting)\(place) is invalid (\(r.invalid ?? "?"))."
         case .ok, .unknown:
             return nil
         }
@@ -126,12 +140,16 @@ public enum RetentionText {
         case .ok:
             return nil
         case .unknown:
-            return r.problem.map { Fmt.sentence("Can't tell: \($0)") }
+            return Fmt.sentence("Can't tell: \(r.problem ?? "no valid value came through for this folder")")
         case .invalid:
-            return "Claude Code takes a whole number of days, 1 or more. Interactive sessions report a settings error; runs that skip the broken value fall back to \(r.defaultDays) days."
+            guard r.agent == .claudeCode else { return nil }
+            return "Claude Code takes a whole number of days, 1 or more. Until it's fixed, interactive sessions report a settings error and Claude Code pauses its cleanup, so nothing is deleted."
         case .short:
-            if r.source == "managed" { return "Your organization's managed settings set this, so only they can change it." }
-            return "Add \"cleanupPeriodDays\": 365 to \(Fmt.shortPath(r.configDir))/settings.json to keep them for a year. Signalbox never edits it."
+            guard r.agent == .claudeCode else { return nil }
+            if r.source == "managed" {
+                return "Your organization's managed settings set this, so only they can change it. An MDM profile or console-served settings, if your organization uses them, replace the managed files; Signalbox can't see those."
+            }
+            return "Add \"cleanupPeriodDays\": 365 to \(Fmt.shortPath(r.configDir))/settings.json to keep them for a year. Signalbox never edits it. Desktop app sessions are kept from Claude Code \(desktopKeptSince) on, unless desktopSessionCleanupPeriodDays is set."
         }
     }
 }

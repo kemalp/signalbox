@@ -75,6 +75,7 @@ export function makeAppHome(): AppHome {
     SIGNALBOX_CLAUDE_APP_DIR: tree.base,
     SIGNALBOX_CLAUDE_BIN: "/nonexistent",
     SIGNALBOX_BIN_DIRS: "",
+    SIGNALBOX_CLAUDE_MANAGED_SETTINGS_DIR: "",
     PATH: join(root, "bin"),
     TMPDIR: join(root, "tmp"),
     TZ: "UTC",

@@ -1,86 +1,126 @@
 // Cutting one top-level member out of a JSON document without parsing the rest of it. Claude Code's global config
 // and settings files hold secrets (MCP server settings, `env` values, an API key helper) next to the one value
-// Signalbox reads, so the rest of the file is never turned into objects: only the member's own text is parsed.
+// Signalbox reads, so the rest of the file is never turned into objects: it is only checked to be valid JSON, and
+// only the member's own text (and the root object's key names) is parsed.
 
-/** Throws unless the text looks like one whole JSON object (a file caught mid-write usually doesn't). */
-export function assertWholeObject(text: string): void {
-  if (!/^\s*\{/.test(text) || !/\}\s*$/.test(text)) throw new SyntaxError("unparsable");
-}
+const NUMBER = /-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?/y;
+const ESCAPES = '"\\/bfnrt';
 
 /**
- * The raw text of the root object's `key` member, found by scanning (strings, escapes and nesting respected) instead
- * of parsing the whole document; undefined when there is none. Throws a SyntaxError when the text is cut off (a
- * string, the member or the root object never closes), so a file caught mid-write never reads as "not set".
+ * The raw text of the root object's `key` member; undefined when there is none. The whole text is checked against
+ * strict JSON (RFC 8259: JSON whitespace only, no comments, no trailing commas, nothing after the root object)
+ * without building any values, and a SyntaxError is thrown when it isn't one whole JSON object. Claude Code reads
+ * its settings files as strict JSON, so a file it would reject (or one caught mid-write) never reads as "not set".
+ * With duplicate keys the last one wins, as with JSON.parse.
  */
 export function topLevelValueText(text: string, key: string): string | undefined {
   const n = text.length;
-  const cut = () => new SyntaxError("unparsable");
-  /** Index just past the string that opens at `j`. */
-  const past = (j: number): number => {
-    for (j++; j < n; j++) {
-      if (text[j] === "\\") j++;
-      else if (text[j] === '"') return j + 1;
-    }
-    throw cut();
+  let i = 0;
+  const fail = (): never => {
+    throw new SyntaxError("unparsable");
   };
-  let depth = 0;
-  for (let i = 0; i < n; ) {
-    const c = text[i];
-    if (c === '"') {
-      const end = past(i);
-      if (depth === 1) {
-        let k = end;
-        while (k < n && /\s/.test(text[k]!)) k++;
-        if (text[k] === ":") {
-          let name: unknown;
-          try {
-            name = JSON.parse(text.slice(i, end));
-          } catch {
-            throw cut();
-          }
-          if (name === key) return valueAt(text, k + 1, past, cut);
-        }
+  const ws = () => {
+    for (; i < n; i++) {
+      const c = text.charCodeAt(i);
+      if (c !== 0x20 && c !== 0x0a && c !== 0x0d && c !== 0x09) return;
+    }
+  };
+  /** Moves past the string that opens at i. */
+  const string = () => {
+    if (text.charCodeAt(i) !== 0x22) fail();
+    for (i++; i < n; ) {
+      const c = text.charCodeAt(i);
+      if (c === 0x22) {
+        i++;
+        return;
       }
-      i = end;
-      continue;
+      if (c === 0x5c) {
+        const e = text[i + 1];
+        if (e === "u") {
+          if (!/^[0-9a-fA-F]{4}$/.test(text.slice(i + 2, i + 6))) fail();
+          i += 6;
+        } else if (e !== undefined && ESCAPES.includes(e)) i += 2;
+        else fail();
+        continue;
+      }
+      if (c < 0x20) fail();
+      i++;
     }
-    if (c === "{" || c === "[") depth++;
-    else if (c === "}" || c === "]") depth--;
+    fail();
+  };
+  // Containers open on the way in (0x7b object, 0x5b array); no recursion, so deep nesting can't overflow the stack.
+  const stack: number[] = [];
+  let found: string | undefined;
+  /** Where the value of a root member named `key` starts, while that value is being scanned. */
+  let pending = -1;
+  let targetNext = false;
+  /** A member's name and colon, at i. */
+  const member = () => {
+    ws();
+    const start = i;
+    string();
+    if (stack.length === 1) targetNext = JSON.parse(text.slice(start, i)) === key;
+    ws();
+    if (text.charCodeAt(i) !== 0x3a) fail();
     i++;
-  }
-  if (depth !== 0) throw cut();
-  return undefined;
-}
+  };
 
-/** The text of the value that starts at or after `from` (whitespace skipped): an object, array, string or literal. */
-function valueAt(text: string, from: number, past: (j: number) => number, cut: () => SyntaxError): string {
-  const n = text.length;
-  let v = from;
-  while (v < n && /\s/.test(text[v]!)) v++;
-  if (v >= n) throw cut();
-  const first = text[v];
-  if (first === '"') return text.slice(v, past(v));
-  if (first !== "{" && first !== "[") {
-    let e = v;
-    while (e < n && !/[\s,}\]]/.test(text[e]!)) e++;
-    if (e >= n) throw cut();
-    return text.slice(v, e);
-  }
-  let d = 0;
-  for (let j = v; j < n; ) {
-    const ch = text[j];
-    if (ch === '"') {
-      j = past(j);
-      continue;
+  ws();
+  if (text.charCodeAt(i) !== 0x7b) fail();
+  for (;;) {
+    // A value starts here.
+    ws();
+    if (targetNext) {
+      pending = i;
+      targetNext = false;
     }
-    if (ch === "{" || ch === "[") d++;
-    else if (ch === "}" || ch === "]") {
-      d--;
-      if (d === 0) return text.slice(v, j + 1);
+    const c = text.charCodeAt(i);
+    if (c === 0x7b || c === 0x5b) {
+      stack.push(c);
+      i++;
+      ws();
+      if (text.charCodeAt(i) !== (c === 0x7b ? 0x7d : 0x5d)) {
+        if (c === 0x7b) member();
+        continue;
+      }
+      i++;
+      stack.pop();
+    } else if (c === 0x22) {
+      string();
+    } else if (text.startsWith("true", i)) {
+      i += 4;
+    } else if (text.startsWith("false", i)) {
+      i += 5;
+    } else if (text.startsWith("null", i)) {
+      i += 4;
+    } else {
+      NUMBER.lastIndex = i;
+      if (!NUMBER.test(text)) fail();
+      i = NUMBER.lastIndex;
     }
-    j++;
+    // A value ended at i: close containers until a comma asks for the next value.
+    for (;;) {
+      if (pending >= 0 && stack.length === 1) {
+        found = text.slice(pending, i);
+        pending = -1;
+      }
+      ws();
+      if (stack.length === 0) {
+        if (i !== n) fail();
+        return found;
+      }
+      const top = stack[stack.length - 1];
+      const d = text.charCodeAt(i);
+      if (d === 0x2c) {
+        i++;
+        if (top === 0x7b) member();
+        break;
+      }
+      if (d !== (top === 0x7b ? 0x7d : 0x5d)) fail();
+      i++;
+      stack.pop();
+    }
   }
-  throw cut();
 }
 
 /** The root object's `key` member when it is an object (see topLevelValueText); undefined when absent or not one. */
@@ -89,14 +129,8 @@ export function topLevelObjectText(text: string, key: string): string | undefine
   return raw?.startsWith("{") ? raw : undefined;
 }
 
-/** The parsed value of the root object's `key` member: `{ set: false }` when absent. Throws on a cut-off file. */
+/** The parsed value of the root object's `key` member: `{ set: false }` when absent. Throws unless strict JSON. */
 export function topLevelValue(text: string, key: string): { set: false } | { set: true; value: unknown } {
-  assertWholeObject(text);
   const raw = topLevelValueText(text, key);
-  if (raw === undefined) return { set: false };
-  try {
-    return { set: true, value: JSON.parse(raw) };
-  } catch {
-    throw new SyntaxError("unparsable");
-  }
+  return raw === undefined ? { set: false } : { set: true, value: JSON.parse(raw) };
 }
