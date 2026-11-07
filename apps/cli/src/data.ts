@@ -8,6 +8,7 @@ import {
   priceRecord,
   processedTokens,
   type AccountInfo,
+  type RetentionInfo,
   type AdapterHealth,
   type CompactionEvent,
   type ContextSnapshot,
@@ -336,7 +337,7 @@ export class SignalboxData {
           maybe(this.scan(la, fleetSince, undefined, fresh)),
         ]);
         // After the sessions: they note the accounts their transcripts name.
-        const accounts = await list<AccountInfo>(a.readAccounts?.());
+        const [accounts, retention] = await Promise.all([list<AccountInfo>(a.readAccounts?.()), list<RetentionInfo>(a.readRetention?.())]);
         const ctx = new Map(contexts.map((c) => [c.sessionId, c]));
         const cost = scan ? this.costs(scan) : undefined;
         const out: FleetSession[] = sessions.map((s) => {
@@ -349,7 +350,7 @@ export class SignalboxData {
           if (sc && sc.unpricedTokens > 0) f.unpricedTokens = sc.unpricedTokens;
           return f;
         });
-        return { sessions: out, limits, compactions, accounts };
+        return { sessions: out, limits, compactions, accounts, retention };
       }),
     );
     const sessions = per.flatMap((p) => p.sessions);
@@ -362,6 +363,7 @@ export class SignalboxData {
       compactions: per.flatMap((p) => p.compactions).sort((a, b) => Date.parse(a.ts) - Date.parse(b.ts)),
       health: (opts.quick ? this.lastHealth : undefined) ?? (await this.health()),
       accounts: finishAccounts(per.flatMap((p) => p.accounts), { labels: await readAccountLabels(), live }),
+      retention: per.flatMap((p) => p.retention),
     };
   }
 }

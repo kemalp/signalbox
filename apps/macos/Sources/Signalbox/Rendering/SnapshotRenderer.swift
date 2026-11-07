@@ -127,6 +127,11 @@ enum SnapshotRenderer {
                     .environment(\.directoryExists, directoryExists)
                 let url = outDir.appendingPathComponent("\(section.rawValue)-\(suffix).png")
                 if render(view, size: windowSize, appearance: appearance, titled: true, to: url) { written.append(url) }
+                // Health in full: the data sources, then transcript retention and the price tables below them.
+                if section == .health {
+                    let tallURL = outDir.appendingPathComponent("health-tall-\(suffix).png")
+                    if render(view, size: CGSize(width: windowSize.width, height: 1500), appearance: appearance, titled: true, to: tallURL) { written.append(tallURL) }
+                }
             }
             // The real popover is as tall as its content, so render it at its natural height.
             let content = MenuBarContent()
