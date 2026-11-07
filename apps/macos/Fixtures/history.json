@@ -38,7 +38,14 @@
         "cwd": "/Users/you/code/api-refactor"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-api-refactor/7f3a91c2-0b4e-4d8a-9a51-2c6f1e8d4b10.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "claude-app-folder",
+        "quality": "recorded"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -75,7 +82,8 @@
         "cwd": "/Users/you/code/signalbox"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-signalbox/a0c7e2d9-41b6-4f85-b3a0-8e9d1c2f6a47.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -113,7 +121,14 @@
         "cwd": "/Users/you/code/signalbox"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-signalbox/2b9e0f14-6c3d-47a1-b8e9-5d4c2a1f7e03.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "claude-app-folder",
+        "quality": "recorded"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "codex",
@@ -188,7 +203,14 @@
         "cwd": "/Users/you/code/web-app"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-web-app/c41d2e77-5a90-4f3b-8e2d-91b0a7c3f562.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-946376a35368",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude-team"
     },
     {
       "agent": "claude-code",
@@ -229,7 +251,14 @@
       "archived": false,
       "appTitleSource": "auto",
       "effort": "high",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "claude-app-folder",
+        "quality": "recorded"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -267,7 +296,14 @@
         "cwd": "/Users/you/code/api-refactor"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-api-refactor/e8a5c3b1-9d72-4e60-a4f8-0c1b3d5e7f29.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -286,7 +322,13 @@
       "effort": "medium",
       "appSessionId": "local_4d5e5fde-5950-4d5e-85fd-168fb64b5950",
       "archived": false,
-      "hasTranscript": false
+      "hasTranscript": false,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "claude-app-folder",
+        "quality": "recorded"
+      }
     },
     {
       "agent": "claude-code",
@@ -325,7 +367,14 @@
         "cwd": "/Users/you/code/signalbox"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-signalbox/3c6ef362-0002-4c6e-8f36-67bf1af70002.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -358,11 +407,18 @@
       "subagentFiles": 0,
       "workflowRuns": 0,
       "resume": {
-        "command": "claude --resume daa66d13-0003-4aa6-86d1-817784860003",
+        "command": "CLAUDE_CONFIG_DIR='/Users/you/.claude-team' claude --resume daa66d13-0003-4aa6-86d1-817784860003",
         "cwd": "/Users/you/code/Client Work/o'reilly-site"
       },
-      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-Client-Work-o-reilly-site/daa66d13-0003-4aa6-86d1-817784860003.jsonl",
-      "hasTranscript": true
+      "transcriptPath": "/Users/you/.claude-team/projects/-Users-you-code-Client-Work-o-reilly-site/daa66d13-0003-4aa6-86d1-817784860003.jsonl",
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-946376a35368",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude-team"
     },
     {
       "agent": "claude-code",
@@ -380,7 +436,13 @@
       ],
       "appSessionId": "local_89cd5340-5952-49cd-8534-d21cbad55952",
       "archived": true,
-      "hasTranscript": false
+      "hasTranscript": false,
+      "account": {
+        "id": "acct-946376a35368",
+        "orgKnown": true,
+        "source": "claude-app-folder",
+        "quality": "recorded"
+      }
     },
     {
       "agent": "claude-code",
@@ -413,7 +475,14 @@
         "cwd": "/Users/you/code/web-app"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-web-app/15ae3f57-0903-45ae-83f5-4e7fd6c20903.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "claude-app-folder",
+        "quality": "recorded"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -446,7 +515,14 @@
         "cwd": "/Users/you/code/signalbox"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-signalbox/7776c5a6-0902-4776-8c5a-2ca72c330902.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-946376a35368",
+        "orgKnown": true,
+        "source": "claude-app-folder",
+        "quality": "recorded"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "codex",
@@ -499,7 +575,13 @@
       "models": [],
       "appSessionId": "local_eb95d98f-5951-4b95-8d98-b044301a5951",
       "archived": false,
-      "hasTranscript": false
+      "hasTranscript": false,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "claude-app-folder",
+        "quality": "recorded"
+      }
     },
     {
       "agent": "claude-code",
@@ -536,7 +618,14 @@
         "cwd": "/Users/you/code/signalbox"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-signalbox/17156075-0005-4715-8607-4cc489e00005.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -572,7 +661,14 @@
         "cwd": "/Users/you/code/web-app"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-web-app/3b07d244-0900-4b07-8d24-60d63bd10900.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -610,7 +706,14 @@
         "cwd": "/Users/you/code/personal/api"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-personal-api/b54cda26-0006-454c-8da2-ee9d33b30006.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -651,7 +754,14 @@
       "appSessionId": "local_7f051cdf-5007-4f05-81cd-24d4f54a5007",
       "archived": false,
       "appTitleSource": "user",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "claude-app-folder",
+        "quality": "recorded"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -693,7 +803,15 @@
       "appSessionId": "local_1d3c9690-5008-4d3c-8969-46ed7f055008",
       "archived": true,
       "appTitleSource": "auto",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "claude-app-folder",
+        "quality": "recorded"
+      },
+      "accountConflict": true,
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "codex",
@@ -763,11 +881,18 @@
       "subagentFiles": 4,
       "workflowRuns": 0,
       "resume": {
-        "command": "claude --resume 2e2ac0ea-0010-4e2a-8c0e-75fb297f0010",
+        "command": "CLAUDE_CONFIG_DIR='/Users/you/.claude-team' claude --resume 2e2ac0ea-0010-4e2a-8c0e-75fb297f0010",
         "cwd": "/Users/you/code/clients/acme/api"
       },
-      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-clients-acme-api/2e2ac0ea-0010-4e2a-8c0e-75fb297f0010.jsonl",
-      "hasTranscript": true
+      "transcriptPath": "/Users/you/.claude-team/projects/-Users-you-code-clients-acme-api/2e2ac0ea-0010-4e2a-8c0e-75fb297f0010.jsonl",
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-946376a35368",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude-team"
     },
     {
       "agent": "claude-code",
@@ -809,7 +934,14 @@
       "archived": false,
       "appTitleSource": "user",
       "effort": "high",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-946376a35368",
+        "orgKnown": true,
+        "source": "claude-app-folder",
+        "quality": "recorded"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -847,7 +979,14 @@
         "cwd": "/Users/you/code/api-refactor"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-api-refactor/6a99b44c-0012-4a99-8b44-31485dd90012.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -885,7 +1024,14 @@
         "cwd": "/Users/you/code/Client Work/o'reilly-site"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-Client-Work-o-reilly-site/08d12dfd-0013-48d1-82df-5300c4680013.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "codex",
@@ -955,11 +1101,18 @@
       "subagentFiles": 0,
       "workflowRuns": 0,
       "resume": {
-        "command": "claude --resume 4540215f-0015-4540-8215-1e91c8ca0015",
+        "command": "CLAUDE_CONFIG_DIR='/Users/you/.claude-team' claude --resume 4540215f-0015-4540-8215-1e91c8ca0015",
         "cwd": "/Users/you/code/personal/api"
       },
-      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-personal-api/4540215f-0015-4540-8215-1e91c8ca0015.jsonl",
-      "hasTranscript": true
+      "transcriptPath": "/Users/you/.claude-team/projects/-Users-you-code-personal-api/4540215f-0015-4540-8215-1e91c8ca0015.jsonl",
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-946376a35368",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude-team"
     },
     {
       "agent": "claude-code",
@@ -999,7 +1152,14 @@
       "appSessionId": "local_0ef86418-5016-4ef8-8641-55298d8d5016",
       "archived": false,
       "appTitleSource": "auto",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "claude-app-folder",
+        "quality": "recorded"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -1037,7 +1197,14 @@
         "cwd": "/Users/you/code/personal/api"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-personal-api/81af14c1-0017-41af-814c-da7efd540017.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -1074,7 +1241,14 @@
         "cwd": "/Users/you/code/web-app"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-web-app/1fe68e72-0018-4fe6-88e7-443767e70018.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "codex",
@@ -1154,7 +1328,14 @@
       "appSessionId": "local_87d64adc-5020-47d6-84ad-dc07a3495020",
       "archived": true,
       "appTitleSource": "user",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-aa787ac20528",
+        "orgKnown": false,
+        "source": "transcript",
+        "quality": "recorded"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -1187,11 +1368,18 @@
       "subagentFiles": 0,
       "workflowRuns": 0,
       "resume": {
-        "command": "claude --resume fa8cfb85-0021-4a8c-8fb8-a15d12100021",
+        "command": "CLAUDE_CONFIG_DIR='/Users/you/.claude-team' claude --resume fa8cfb85-0021-4a8c-8fb8-a15d12100021",
         "cwd": "/Users/you/code/clients/acme/api"
       },
-      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-clients-acme-api/fa8cfb85-0021-4a8c-8fb8-a15d12100021.jsonl",
-      "hasTranscript": true
+      "transcriptPath": "/Users/you/.claude-team/projects/-Users-you-code-clients-acme-api/fa8cfb85-0021-4a8c-8fb8-a15d12100021.jsonl",
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-946376a35368",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude-team"
     },
     {
       "agent": "claude-code",
@@ -1228,7 +1416,14 @@
         "cwd": "/Users/you/code/clients/acme/api"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-clients-acme-api/98c47536-0022-48c4-8753-c3159ca30022.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -1266,7 +1461,14 @@
         "cwd": "/Users/you/code/Client Work/o'reilly-site"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-Client-Work-o-reilly-site/36fbeee7-0023-46fb-8eee-6d2a07720023.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "codex",
@@ -1313,7 +1515,8 @@
       "lastActivityAt": "2026-09-27T11:30:00.000Z",
       "live": false,
       "models": [],
-      "hasTranscript": true
+      "hasTranscript": true,
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -1346,11 +1549,18 @@
       "subagentFiles": 0,
       "workflowRuns": 0,
       "resume": {
-        "command": "claude --resume 736ae249-0025-436a-8e24-28bb0bdc0025",
+        "command": "CLAUDE_CONFIG_DIR='/Users/you/.claude-team' claude --resume 736ae249-0025-436a-8e24-28bb0bdc0025",
         "cwd": "/Users/you/code/signalbox"
       },
-      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-signalbox/736ae249-0025-436a-8e24-28bb0bdc0025.jsonl",
-      "hasTranscript": true
+      "transcriptPath": "/Users/you/.claude-team/projects/-Users-you-code-signalbox/736ae249-0025-436a-8e24-28bb0bdc0025.jsonl",
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-946376a35368",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude-team"
     },
     {
       "agent": "claude-code",
@@ -1368,7 +1578,13 @@
       ],
       "appSessionId": "local_2804ccf1-5953-4804-8ccf-73d525645953",
       "archived": false,
-      "hasTranscript": false
+      "hasTranscript": false,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "claude-app-folder",
+        "quality": "recorded"
+      }
     },
     {
       "agent": "claude-code",
@@ -1406,7 +1622,14 @@
         "cwd": "/Users/you/code/clients/acme/api"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-clients-acme-api/11a25bfa-0026-41a2-85bf-4a73b26f0026.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -1443,7 +1666,14 @@
         "cwd": "/Users/you/code/infra"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-infra/afd9d5ab-0027-4fd9-8d5a-f4083c3e0027.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -1476,11 +1706,18 @@
       "subagentFiles": 0,
       "workflowRuns": 0,
       "resume": {
-        "command": "claude --resume 4e114f5c-0028-4e11-84f5-15c0a6c90028",
+        "command": "CLAUDE_CONFIG_DIR='/Users/you/.claude-team' claude --resume 4e114f5c-0028-4e11-84f5-15c0a6c90028",
         "cwd": "/Users/you/code/infra"
       },
-      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-infra/4e114f5c-0028-4e11-84f5-15c0a6c90028.jsonl",
-      "hasTranscript": true
+      "transcriptPath": "/Users/you/.claude-team/projects/-Users-you-code-infra/4e114f5c-0028-4e11-84f5-15c0a6c90028.jsonl",
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-946376a35368",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude-team"
     },
     {
       "agent": "codex",
@@ -1554,7 +1791,14 @@
         "cwd": "/Users/you/code/signalbox"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-signalbox/8a8042be-0030-4a80-842b-d151ab2b0030.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -1591,7 +1835,14 @@
         "cwd": "/Users/you/code/Client Work/o'reilly-site"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-Client-Work-o-reilly-site/28b7bc6f-0031-48b7-8bc6-736655fa0031.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -1624,11 +1875,18 @@
       "subagentFiles": 0,
       "workflowRuns": 0,
       "resume": {
-        "command": "claude --resume c6ef3620-0032-46ef-8362-9d3edfb50032",
+        "command": "CLAUDE_CONFIG_DIR='/Users/you/.claude-team' claude --resume c6ef3620-0032-46ef-8362-9d3edfb50032",
         "cwd": "/Users/you/code/web-app"
       },
-      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-web-app/c6ef3620-0032-46ef-8362-9d3edfb50032.jsonl",
-      "hasTranscript": true
+      "transcriptPath": "/Users/you/.claude-team/projects/-Users-you-code-web-app/c6ef3620-0032-46ef-8362-9d3edfb50032.jsonl",
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-946376a35368",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude-team"
     },
     {
       "agent": "claude-code",
@@ -1666,7 +1924,14 @@
         "cwd": "/Users/you/code/infra"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-infra/6526afd1-0033-4526-8afd-3ef746440033.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "codex",
@@ -1741,7 +2006,14 @@
         "cwd": "/Users/you/code/infra"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-infra/a195a333-0035-4195-8a33-fa444aa60035.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -1783,7 +2055,14 @@
       "archived": false,
       "appTitleSource": "auto",
       "effort": "high",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "claude-app-folder",
+        "quality": "recorded"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -1801,7 +2080,13 @@
       ],
       "appSessionId": "local_c63c46a2-5954-463c-846a-9dedaf375954",
       "archived": true,
-      "hasTranscript": false
+      "hasTranscript": false,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "claude-app-folder",
+        "quality": "recorded"
+      }
     },
     {
       "agent": "claude-code",
@@ -1842,7 +2127,14 @@
       "appSessionId": "local_09855f9d-5037-4985-85f9-5254b6085037",
       "archived": false,
       "appTitleSource": "user",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-946376a35368",
+        "orgKnown": true,
+        "source": "claude-app-folder",
+        "quality": "recorded"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -1884,7 +2176,14 @@
       "appSessionId": "local_a7bcd94e-5038-47bc-8d94-fc6d30db5038",
       "archived": true,
       "appTitleSource": "auto",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "claude-app-folder",
+        "quality": "recorded"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "codex",
@@ -1963,7 +2262,14 @@
       "archived": false,
       "appTitleSource": "user",
       "effort": "high",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "claude-app-folder",
+        "quality": "recorded"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -1997,11 +2303,18 @@
       "subagentFiles": 0,
       "workflowRuns": 0,
       "resume": {
-        "command": "claude --resume 56e27d59-0041-46e2-87d5-0d3394cc0041",
+        "command": "CLAUDE_CONFIG_DIR='/Users/you/.claude-team' claude --resume 56e27d59-0041-46e2-87d5-0d3394cc0041",
         "cwd": "/Users/you/code/Client Work/o'reilly-site"
       },
-      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-Client-Work-o-reilly-site/56e27d59-0041-46e2-87d5-0d3394cc0041.jsonl",
-      "hasTranscript": true
+      "transcriptPath": "/Users/you/.claude-team/projects/-Users-you-code-Client-Work-o-reilly-site/56e27d59-0041-46e2-87d5-0d3394cc0041.jsonl",
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-946376a35368",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude-team"
     },
     {
       "agent": "claude-code",
@@ -2038,7 +2351,14 @@
         "cwd": "/Users/you/code/web-app"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-web-app/f519f70a-0042-4519-8f70-aec81e9f0042.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -2075,7 +2395,14 @@
         "cwd": "/Users/you/code/api-refactor"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-api-refactor/935170bb-0043-4351-870b-c880992e0043.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "codex",
@@ -2145,11 +2472,18 @@
       "subagentFiles": 0,
       "workflowRuns": 0,
       "resume": {
-        "command": "claude --resume cfc0641d-0045-4fc0-8641-94118d880045",
+        "command": "CLAUDE_CONFIG_DIR='/Users/you/.claude-team' claude --resume cfc0641d-0045-4fc0-8641-94118d880045",
         "cwd": "/Users/you/code/Client Work/o'reilly-site"
       },
-      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-Client-Work-o-reilly-site/cfc0641d-0045-4fc0-8641-94118d880045.jsonl",
-      "hasTranscript": true
+      "transcriptPath": "/Users/you/.claude-team/projects/-Users-you-code-Client-Work-o-reilly-site/cfc0641d-0045-4fc0-8641-94118d880045.jsonl",
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-946376a35368",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude-team"
     },
     {
       "agent": "claude-code",
@@ -2190,7 +2524,14 @@
       "appSessionId": "local_9978a6d6-5046-4978-8a6d-c2a94f435046",
       "archived": false,
       "appTitleSource": "auto",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "claude-app-folder",
+        "quality": "recorded"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -2228,7 +2569,14 @@
         "cwd": "/Users/you/code/mobile-app"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-mobile-app/0c2f577f-0047-4c2f-8577-57febeea0047.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -2268,7 +2616,14 @@
       "appSessionId": "local_d5e79a38-5048-45e7-89a3-8e3673ad5048",
       "archived": true,
       "appTitleSource": "user",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-946376a35368",
+        "orgKnown": true,
+        "source": "claude-app-folder",
+        "quality": "recorded"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "codex",
@@ -2343,7 +2698,14 @@
         "cwd": "/Users/you/code/web-app"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-web-app/e6d5c492-0050-46d5-8c49-bd042d070050.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -2376,11 +2738,18 @@
       "subagentFiles": 0,
       "workflowRuns": 0,
       "resume": {
-        "command": "claude --resume 850d3e43-0051-450d-83e4-dedcd7d60051",
+        "command": "CLAUDE_CONFIG_DIR='/Users/you/.claude-team' claude --resume 850d3e43-0051-450d-83e4-dedcd7d60051",
         "cwd": "/Users/you/code/data-pipeline"
       },
-      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-data-pipeline/850d3e43-0051-450d-83e4-dedcd7d60051.jsonl",
-      "hasTranscript": true
+      "transcriptPath": "/Users/you/.claude-team/projects/-Users-you-code-data-pipeline/850d3e43-0051-450d-83e4-dedcd7d60051.jsonl",
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-946376a35368",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude-team"
     },
     {
       "agent": "claude-code",
@@ -2421,7 +2790,14 @@
       "archived": false,
       "appTitleSource": "auto",
       "effort": "high",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "claude-app-folder",
+        "quality": "recorded"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -2437,7 +2813,13 @@
       "models": [],
       "appSessionId": "local_6473c053-5955-4473-8c05-3fa229c65955",
       "archived": false,
-      "hasTranscript": false
+      "hasTranscript": false,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "claude-app-folder",
+        "quality": "recorded"
+      }
     },
     {
       "agent": "claude-code",
@@ -2475,7 +2857,14 @@
         "cwd": "/Users/you/code/clients/acme/api"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-clients-acme-api/c17c31a5-0053-417c-831a-9aadd8300053.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "codex",
@@ -2551,7 +2940,14 @@
         "cwd": "/Users/you/code/infra"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-infra/fdeb2507-0055-4deb-8250-a63acc920055.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -2593,7 +2989,14 @@
       "appSessionId": "local_c7a367c0-5056-47a3-867c-9c728e555056",
       "archived": false,
       "appTitleSource": "user",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "claude-app-folder",
+        "quality": "recorded"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -2627,11 +3030,18 @@
       "subagentFiles": 0,
       "workflowRuns": 0,
       "resume": {
-        "command": "claude --resume 3a5a1869-0057-4a5a-8186-618bf1fc0057",
+        "command": "CLAUDE_CONFIG_DIR='/Users/you/.claude-team' claude --resume 3a5a1869-0057-4a5a-8186-618bf1fc0057",
         "cwd": "/Users/you/code/personal/api"
       },
-      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-personal-api/3a5a1869-0057-4a5a-8186-618bf1fc0057.jsonl",
-      "hasTranscript": true
+      "transcriptPath": "/Users/you/.claude-team/projects/-Users-you-code-personal-api/3a5a1869-0057-4a5a-8186-618bf1fc0057.jsonl",
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-946376a35368",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude-team"
     },
     {
       "agent": "claude-code",
@@ -2669,7 +3079,14 @@
         "cwd": "/Users/you/code/api-refactor"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-api-refactor/d891921a-0058-4891-8921-83407b8f0058.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "codex",
@@ -2744,7 +3161,14 @@
         "cwd": "/Users/you/code/infra"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-infra/1500857c-0060-4500-8857-4ed16ce90060.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -2777,11 +3201,18 @@
       "subagentFiles": 0,
       "workflowRuns": 0,
       "resume": {
-        "command": "claude --resume b337ff2d-0061-4337-8ff2-e8e616b80061",
+        "command": "CLAUDE_CONFIG_DIR='/Users/you/.claude-team' claude --resume b337ff2d-0061-4337-8ff2-e8e616b80061",
         "cwd": "/Users/you/code/api-refactor"
       },
-      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-api-refactor/b337ff2d-0061-4337-8ff2-e8e616b80061.jsonl",
-      "hasTranscript": true
+      "transcriptPath": "/Users/you/.claude-team/projects/-Users-you-code-api-refactor/b337ff2d-0061-4337-8ff2-e8e616b80061.jsonl",
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-946376a35368",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude-team"
     },
     {
       "agent": "claude-code",
@@ -2820,7 +3251,14 @@
         "cwd": "/Users/you/code/Client Work/o'reilly-site"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-Client-Work-o-reilly-site/516f78de-0062-416f-878d-0abe914b0062.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -2857,7 +3295,14 @@
         "cwd": "/Users/you/code/signalbox"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-signalbox/efa6f28f-0063-4fa6-8f28-b4771b1a0063.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "codex",
@@ -2930,11 +3375,18 @@
       "subagentFiles": 0,
       "workflowRuns": 0,
       "resume": {
-        "command": "claude --resume 2c15e5f1-0065-4c15-8e5f-77c40c640065",
+        "command": "CLAUDE_CONFIG_DIR='/Users/you/.claude-team' claude --resume 2c15e5f1-0065-4c15-8e5f-77c40c640065",
         "cwd": "/Users/you/code/web-app"
       },
-      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-web-app/2c15e5f1-0065-4c15-8e5f-77c40c640065.jsonl",
-      "hasTranscript": true
+      "transcriptPath": "/Users/you/.claude-team/projects/-Users-you-code-web-app/2c15e5f1-0065-4c15-8e5f-77c40c640065.jsonl",
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-946376a35368",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude-team"
     },
     {
       "agent": "claude-code",
@@ -2975,7 +3427,14 @@
       "appSessionId": "local_f5ce28aa-5066-45ce-828a-ae1fc13f5066",
       "archived": true,
       "appTitleSource": "auto",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "claude-app-folder",
+        "quality": "recorded"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -3012,7 +3471,14 @@
         "cwd": "/Users/you/code/mobile-app"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-mobile-app/6884d953-0067-4884-8d95-335530c60067.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "claude-code",
@@ -3050,7 +3516,14 @@
         "cwd": "/Users/you/code/mobile-app"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-mobile-app/06bc5304-0068-46bc-8530-5d6dba910068.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     },
     {
       "agent": "codex",
@@ -3121,11 +3594,18 @@
       "subagentFiles": 3,
       "workflowRuns": 0,
       "resume": {
-        "command": "claude --resume 432b4666-0070-432b-8466-18faaff30070",
+        "command": "CLAUDE_CONFIG_DIR='/Users/you/.claude-team' claude --resume 432b4666-0070-432b-8466-18faaff30070",
         "cwd": "/Users/you/code/mobile-app"
       },
-      "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-mobile-app/432b4666-0070-432b-8466-18faaff30070.jsonl",
-      "hasTranscript": true
+      "transcriptPath": "/Users/you/.claude-team/projects/-Users-you-code-mobile-app/432b4666-0070-432b-8466-18faaff30070.jsonl",
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-946376a35368",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude-team"
     },
     {
       "agent": "claude-code",
@@ -3163,7 +3643,14 @@
         "cwd": "/Users/you/code/mobile-app"
       },
       "transcriptPath": "/Users/you/.claude/projects/-Users-you-code-mobile-app/e162c017-0071-4162-8c01-bab329820071.jsonl",
-      "hasTranscript": true
+      "hasTranscript": true,
+      "account": {
+        "id": "acct-fbc9ff170b0e",
+        "orgKnown": true,
+        "source": "config-login",
+        "quality": "inferred"
+      },
+      "configDir": "/Users/you/.claude"
     }
   ],
   "total": 87,

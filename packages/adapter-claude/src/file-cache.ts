@@ -35,6 +35,11 @@ export class FileCache<T> {
     return e.value;
   }
 
+  /** The value stored for `path` whatever its stamp (possibly stale), without marking it used. */
+  peek(path: string): T | undefined {
+    return this.entries.get(path)?.value;
+  }
+
   /**
    * Stores `value` under the stamp taken BEFORE the file was read: if the file grew while it was being
    * read, the next stat differs and the file is read again.

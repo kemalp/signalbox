@@ -8,13 +8,15 @@
 //   - a file must be a regular file (lstat, then fstat on a descriptor opened with O_NOFOLLOW) of at most 1 MiB;
 //   - the fields in KEPT are copied out right after JSON.parse and everything else is dropped: the app's
 //     conversation summaries (postTurnSummary), prompt suggestions and drafts, errors, plans, tool settings, …
+//   - the two folder names are the account and organization the app was signed in as (UUIDs, matched against
+//     transcript account lines, 2026-11). They are hashed into an account id (accountEvidence) and never kept raw.
 // Nothing is ever written there. SIGNALBOX_CLAUDE_APP_TRACE=1 logs every path the reader lists, stats or opens to
 // stderr, to audit a run against the allow-list.
 import { constants, type Dirent } from "node:fs";
 import { lstat, open, readdir } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
-import { sanitizeTitle, type AppSessionRecord, type ClaudeAppOffReason } from "../../core/src/index.ts";
+import { accountEvidence, sanitizeTitle, type AccountEvidence, type AppSessionRecord, type ClaudeAppOffReason } from "../../core/src/index.ts";
 import { FileCache } from "./file-cache.ts";
 import { isObj, label, toIso, type Obj } from "./util.ts";
 
@@ -84,7 +86,7 @@ export interface ClaudeAppFs {
 }
 
 /** Opens with O_NOFOLLOW | O_NONBLOCK, checks the open descriptor, and reads at most `maxBytes`. */
-async function readRegularFile(path: string, maxBytes: number): Promise<string | undefined> {
+export async function readRegularFile(path: string, maxBytes: number): Promise<string | undefined> {
   const fh = await open(path, constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK);
   try {
     const st = await fh.stat();
@@ -221,7 +223,7 @@ async function dirs(fs: ClaudeAppFs, dir: string): Promise<Dirent[] | undefined>
 }
 
 /** The error code of a failed call ("EACCES", …), or "error" when it has none. */
-function errorCode(err: unknown): string {
+export function errorCode(err: unknown): string {
   const code = (err as { code?: unknown } | null)?.code;
   return typeof code === "string" && /^[A-Z0-9_]{1,32}$/.test(code) ? code : "error";
 }
@@ -272,6 +274,17 @@ export class ClaudeAppReader {
     return { dirExists: true, paths };
   }
 
+  /** The (account, organization) folders that hold records, hashed; names only, nothing is opened. */
+  async folderAccounts(): Promise<AccountEvidence[]> {
+    const { paths } = await this.list();
+    const out = new Map<string, AccountEvidence>();
+    for (const rel of paths) {
+      const ev = folderEvidence(rel);
+      if (ev && !out.has(ev.ref.id)) out.set(ev.ref.id, ev);
+    }
+    return [...out.values()];
+  }
+
   async read(): Promise<ClaudeAppRead> {
     const { dirExists, dirError, paths } = await this.list();
     const out: ClaudeAppRead = { dir: this.dir, dirExists, records: [], candidates: paths.length, skipped: 0, errors: 0 };
@@ -308,9 +321,17 @@ export class ClaudeAppReader {
         rec = parseAppSession(text, now) ?? null;
         this.cache.set(path, stamp, rec);
       }
-      if (rec) out.records.push(rec);
-      else out.errors++;
+      if (rec) {
+        const ev = folderEvidence(rel, Date.parse(rec.lastActivityAt ?? rec.createdAt ?? ""));
+        out.records.push(ev ? { ...rec, accountEvidence: ev } : rec);
+      } else out.errors++;
     }
     return out;
   }
+}
+
+/** The account the app filed a record under: its two folder names (account, organization), hashed. */
+function folderEvidence(rel: string, atMs?: number): AccountEvidence | undefined {
+  const [a, b] = rel.split("/");
+  return accountEvidence(a, b, "claude-app-folder", "recorded", Number.isNaN(atMs) ? undefined : atMs);
 }

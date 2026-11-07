@@ -3,7 +3,7 @@
 // good copy of that file.
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
-import type { ContextSnapshot, LimitSnapshot, TapSpool } from "../../core/src/index.ts";
+import { pickLimits, type AccountRef, type ContextSnapshot, type LimitCandidate, type LimitSnapshot, type TapSpool } from "../../core/src/index.ts";
 import { isObj, num, str, toIso } from "./util.ts";
 
 const SPOOL_FILE = /^[A-Za-z0-9][A-Za-z0-9._-]*\.json$/;
@@ -24,6 +24,10 @@ export function parseSpool(text: string): TapSpool | undefined {
   if (!sessionId || !writtenAt || seq === undefined) return undefined;
   if (d.event !== "session.start" && d.event !== "session.measure" && d.event !== "session.end") return undefined;
   const spool: TapSpool = { v: 1, seq, agent: "claude-code", sessionId, writtenAt, event: d.event };
+  if (d.configDir === null) spool.configDir = null;
+  else if (typeof d.configDir === "string" && d.configDir.startsWith("/") && d.configDir.length <= 4096 && !/[\u0000-\u001f\u007f]/.test(d.configDir)) {
+    spool.configDir = d.configDir;
+  }
   if (isObj(d.usage)) spool.usage = d.usage as TapSpool["usage"];
   return spool;
 }
@@ -79,13 +83,17 @@ export async function readSpoolDir(dir: string, cache: Map<string, TapSpool>): P
 const LABELS: Record<string, string> = { five_hour: "5-hour", seven_day: "Weekly" };
 const WINDOW_MINUTES: Record<string, number> = { five_hour: 300, seven_day: 7 * 24 * 60 };
 
-/** Freshest reading per kind across all sessions (limits are account-wide). Kinds kept verbatim. */
-export function limitsFromSpools(spools: TapSpool[]): LimitSnapshot[] {
-  const best = new Map<string, { snap: LimitSnapshot; at: number; seq: number }>();
+/**
+ * One reading per (account, kind) across all sessions (limits are account-wide; core's pickLimits ranks them).
+ * `accountOf` names the account of the session that wrote a spool; a session it can't name groups as unknown.
+ * Kinds are kept verbatim.
+ */
+export function limitsFromSpools(spools: TapSpool[], accountOf: (sessionId: string) => AccountRef | undefined = () => undefined): LimitSnapshot[] {
+  const candidates: LimitCandidate[] = [];
   for (const sp of spools) {
     const list = sp.usage?.rateLimits;
     if (!Array.isArray(list)) continue;
-    const at = Date.parse(sp.writtenAt);
+    const account = accountOf(sp.sessionId);
     for (const rl of list as unknown[]) {
       if (!isObj(rl)) continue;
       const kind = str(rl.kind);
@@ -105,11 +113,11 @@ export function limitsFromSpools(spools: TapSpool[]): LimitSnapshot[] {
       if (win) snap.windowMinutes = win;
       const resets = toIso(rl.resetsAt);
       if (resets) snap.resetsAt = resets;
-      const prev = best.get(kind);
-      if (!prev || at > prev.at || (at === prev.at && sp.seq > prev.seq)) best.set(kind, { snap, at, seq: sp.seq });
+      if (account) snap.account = account;
+      candidates.push({ snap, seq: sp.seq });
     }
   }
-  return [...best.values()].map((b) => b.snap).sort((a, b) => (a.kind < b.kind ? -1 : a.kind > b.kind ? 1 : 0));
+  return pickLimits(candidates);
 }
 
 /** Official context reading from a spool, when it carries one. */

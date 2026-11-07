@@ -479,8 +479,8 @@ struct SessionSuggestionTests {
 @Suite("Navigation and redraw cadence")
 struct NavigationOrderTests {
     @Test func sidebarOrderAndShortcuts() {
-        #expect(SidebarSection.allCases == [.sessions, .history, .commands, .usage, .limits, .health])
-        #expect(SidebarSection.allCases.map(\.shortcutKey) == ["1", "2", "3", "4", "5", "6"])
+        #expect(SidebarSection.allCases == [.sessions, .history, .commands, .usage, .limits, .accounts, .health])
+        #expect(SidebarSection.allCases.map(\.shortcutKey) == ["1", "2", "3", "4", "5", "6", "7"])
         #expect(SidebarSection.commands.title == "Commands")
         #expect(SidebarSection.history.title == "History")
         #expect(SidebarSection.history.systemImage == "clock.arrow.circlepath")

@@ -214,6 +214,7 @@ private struct HistoryList: View {
 /// The note, the filters and the total of what's shown, pinned above the list.
 private struct HistoryHeader: View {
     @Environment(NavigationModel.self) private var nav
+    @Environment(SignalboxStore.self) private var store
     @Environment(\.money) private var money
     let history: HistorySnapshot
     let shown: [SessionHistoryEntry]
@@ -236,6 +237,7 @@ private struct HistoryHeader: View {
 
             FlowLayout(spacing: 12, lineSpacing: 8) {
                 HistoryAgentChips(history: history, filter: $nav.historyFilter)
+                accountMenu
                 projectMenu
                 rangePicker
                 emptyToggle
@@ -337,6 +339,47 @@ private struct HistoryHeader: View {
             .tint(.primary)
             .fixedSize()
             .help(selected.map { "Showing sessions in \($0.path)" } ?? "Show one project's sessions")
+        }
+    }
+
+    /// "Account: All", a menu of the accounts in the history (by your label or short id) and "Unknown". Shown when
+    /// the history names any account.
+    @ViewBuilder private var accountMenu: some View {
+        @Bindable var nav = nav
+        let found = HistoryBrowser.accounts(history.entries)
+        if !found.ids.isEmpty {
+            let current: String = switch nav.historyFilter.account {
+            case let .account(id)?: store.accountName(id)
+            case .unknown?: "Unknown"
+            case nil: "All"
+            }
+            HStack(spacing: 4) {
+                Text("Account")
+                    .foregroundStyle(.secondary)
+                Menu {
+                    Picker("Account", selection: $nav.historyFilter.account) {
+                        Text("All Accounts").tag(HistoryAccountFilter?.none)
+                        Divider()
+                        ForEach(found.ids, id: \.self) { id in
+                            Text(store.accountName(id))
+                                .privacySensitive()
+                                .tag(HistoryAccountFilter?.some(.account(id)))
+                        }
+                        if found.hasUnknown {
+                            Text("Unknown").tag(HistoryAccountFilter?.some(.unknown))
+                        }
+                    }
+                    .pickerStyle(.inline)
+                    .labelsHidden()
+                } label: {
+                    Text(HistoryBrowser.middleTruncated(current, max: 20))
+                        .privacySensitive(nav.historyFilter.account != nil)
+                }
+                .menuStyle(.borderlessButton)
+                .tint(.primary)
+                .fixedSize()
+                .help("Show one account's sessions, or those whose account is unknown")
+            }
         }
     }
 
@@ -472,6 +515,7 @@ struct HistoryRow: View {
                     }
                     if entry.isArchived { ArchivedTag() }
                     if showAgent { AgentBadge(agent: entry.agent) }
+                    AccountChip(account: entry.account)
                 }
                 meta
                     .font(.callout)

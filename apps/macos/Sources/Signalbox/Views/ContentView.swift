@@ -38,6 +38,7 @@ struct ContentView: View {
         case .commands: CommandsView()
         case .usage: UsageView()
         case .limits: LimitsView()
+        case .accounts: AccountsView()
         case .health: HealthView()
         }
     }

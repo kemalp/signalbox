@@ -17,7 +17,7 @@ struct DebugLogTests {
         let s = try TestPaths.loadSnapshot()
         let fleet = DebugLog.describe(.message(.fleet(at: nil, s.fleet)))
         #expect(fleet.hasPrefix("fleet sessions=6 "))
-        #expect(fleet.contains("limits=5"))
+        #expect(fleet.contains("limits=7"))
         #expect(fleet.hasSuffix(" contexts=4 windowed=4"))
         for session in s.fleet.sessions {
             if let name = session.name { #expect(!fleet.contains(name)) }

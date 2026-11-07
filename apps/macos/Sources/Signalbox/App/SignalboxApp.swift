@@ -180,8 +180,11 @@ final class AppController {
             notifier = UnavailableNotifier(reason: "Notifications need the Signalbox app bundle; this copy runs outside one (swift run). Build it with apps/macos/scripts/build-app.sh.")
         }
         let loginItems: any LoginItemService = bundled ? MainAppLoginItem() : StaticLoginItem()
-        return AppController(options: options, settings: SettingsStore(defaults: defaults), notifier: notifier,
-                             loginItems: loginItems, location: location)
+        let controller = AppController(options: options, settings: SettingsStore(defaults: defaults), notifier: notifier,
+                                       loginItems: loginItems, location: location)
+        // Account labels live in Signalbox's own accounts.json (the CLI reads it too); a fixture run keeps them in memory.
+        if options.fixture == nil { controller.store.useAccountLabels(FileAccountLabels(url: FileAccountLabels.defaultURL(environment: env))) }
+        return controller
     }
 
     /// For the snapshot renderer: in-memory settings, no system services.
@@ -297,6 +300,19 @@ final class AppController {
     func setIncludeClaudeAppSessions(_ on: Bool) {
         guard on != settings.includeClaudeAppSessions else { return }
         settings.includeClaudeAppSessions = on
+        guard !isFixture else { return }
+        store.clearHistory()
+        historyClearPending = true
+        Task { await restartCLI() }
+    }
+
+    /// Sets the extra Claude Code config folders the CLI reads (one per account, say): the CLI restarts with a
+    /// --claude-config-dir per folder, and History reads again.
+    func setClaudeConfigDirs(_ dirs: [String]) {
+        var clean: [String] = []
+        for d in dirs where d.hasPrefix("/") && !clean.contains(d) { clean.append(d) }
+        guard clean != settings.claudeConfigDirs else { return }
+        settings.claudeConfigDirs = clean
         guard !isFixture else { return }
         store.clearHistory()
         historyClearPending = true

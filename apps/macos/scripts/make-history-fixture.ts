@@ -9,6 +9,7 @@
 // `--now <ISO>` pins the clock (default: the snapshot fixture's). The output doesn't depend on TZ.
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { accountId } from "../../../packages/core/src/accounts.ts";
 
 type Tokens = { input: number; output: number; cacheRead: number; cacheWrite5m: number; cacheWrite1h: number; reasoning?: number };
 type Entry = {
@@ -41,6 +42,9 @@ type Entry = {
   appSessionId?: string;
   archived?: boolean;
   hasTranscript: boolean;
+  account?: { id: string; orgKnown: boolean; source: string; quality: string };
+  accountConflict?: boolean;
+  configDir?: string;
 };
 
 const DEFAULT_NOW = "2026-10-09T14:30:00.000Z";
@@ -124,8 +128,11 @@ const uuid = (n: number) => {
 const entries: Entry[] = [];
 
 // The fixture's live sessions (busy, waiting, idle) and its ended one, with the titles the app would show.
+type Account = NonNullable<Entry["account"]>;
 const snapshot = JSON.parse(readFileSync(join(import.meta.dir, "..", "Fixtures", "snapshot.json"), "utf8")) as {
-  fleet: { sessions: { agent: string; sessionId: string; name?: string; status: string; cwd?: string; model?: string; startedAt?: string; lastActivity?: string; costUsd?: number; entrypoint?: string; version?: string }[] };
+  fleet: {
+    sessions: { agent: string; sessionId: string; name?: string; status: string; cwd?: string; model?: string; startedAt?: string; lastActivity?: string; costUsd?: number; entrypoint?: string; version?: string; account?: Account; configDir?: string }[];
+  };
 };
 const liveTitles: Record<string, [string | undefined, string]> = {
   "api-refactor": ["api-refactor", "custom"],
@@ -166,6 +173,8 @@ for (const s of snapshot.fleet.sessions) {
     workflowRuns: 0,
     ...(s.agent === "codex" ? codexIds(s.sessionId, started) : claudeIds(project ?? HOME, s.sessionId)),
     hasTranscript: true,
+    account: s.account,
+    configDir: s.configDir,
   });
 }
 
@@ -392,6 +401,36 @@ for (const a of APP_ONLY) {
     archived: a.archived,
     hasTranscript: false,
   });
+}
+
+// Accounts, assigned after the fact so the generator's sequence (and every other value) stays as it was. The same
+// two made-up subscriptions as apps/web/src/mock.ts: desktop and app-only sessions carry the app folder's account
+// (recorded), terminal and SDK sessions the current login of the config dir they ran from (inferred), and a session
+// whose files name nothing has no account. One desktop session names two accounts, one only an account half.
+const MAX = accountId("00000000-0000-4000-8000-0000000000a1", "00000000-0000-4000-8000-0000000000b1");
+const TEAM = accountId("00000000-0000-4000-8000-0000000000a2", "00000000-0000-4000-8000-0000000000b2");
+const PARTIAL = accountId("00000000-0000-4000-8000-0000000000a4");
+let nDesk = 0;
+let nTerm = 0;
+for (const e of entries) {
+  if (e.agent !== "claude-code" || e.live || e.account) continue;
+  const desktop = e.entrypoint === "claude-desktop" || e.hasTranscript === false;
+  if (desktop) {
+    const n = nDesk++;
+    e.account = { id: n % 4 === 3 ? TEAM : MAX, orgKnown: true, source: "claude-app-folder", quality: "recorded" };
+    if (n === 2) e.accountConflict = true;
+    if (n === 5) e.account = { id: PARTIAL, orgKnown: false, source: "transcript", quality: "recorded" };
+  } else if (e.entrypoint === "cli" || e.entrypoint === "sdk") {
+    const team = nTerm++ % 3 === 1;
+    e.account = { id: team ? TEAM : MAX, orgKnown: true, source: "config-login", quality: "inferred" };
+    if (team) {
+      e.configDir = `${HOME}/.claude-team`;
+      if (e.transcriptPath) e.transcriptPath = e.transcriptPath.replace(`${HOME}/.claude/`, `${HOME}/.claude-team/`);
+      if (e.resume) e.resume.command = `CLAUDE_CONFIG_DIR='${HOME}/.claude-team' ${e.resume.command}`;
+      continue;
+    }
+  }
+  if (e.hasTranscript) e.configDir = `${HOME}/.claude`;
 }
 
 entries.sort((a, b) => b.lastActivityAt.localeCompare(a.lastActivityAt) || a.sessionId.localeCompare(b.sessionId));

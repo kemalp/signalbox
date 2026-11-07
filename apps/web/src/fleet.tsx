@@ -1,4 +1,5 @@
-import type { FleetSession, SessionStatus } from "@signalbox/core";
+import type { AccountInfo, FleetSession, SessionStatus } from "@signalbox/core";
+import { AccountChip } from "./accounts.tsx";
 import type { FleetSessionExtras } from "./server.ts";
 import {
   ageMs,
@@ -100,7 +101,7 @@ function ContextGauge({ s }: { s: FleetSession }) {
   );
 }
 
-function SessionCard({ s, now }: { s: FleetSession; now: number }) {
+function SessionCard({ s, now, accounts }: { s: FleetSession; now: number; accounts?: AccountInfo[] | undefined }) {
   const title = sessionTitle(s);
   const since = ageMs(s.statusSince, now);
   const where = [s.name ? basename(s.cwd) : undefined, s.entrypoint, s.version ? `v${s.version}` : undefined]
@@ -111,7 +112,10 @@ function SessionCard({ s, now }: { s: FleetSession; now: number }) {
   return (
     <article class={`card session ${s.status}`} aria-label={`${title}, ${s.status}`}>
       <div class="session-top">
-        <AgentBadge agent={s.agent} />
+        <span class="session-badges">
+          <AgentBadge agent={s.agent} />
+          <AccountChip account={s.account} accounts={accounts} />
+        </span>
         <StatusPill status={s.status} since={since !== undefined ? fmtDuration(since) : undefined} />
       </div>
       <div>
@@ -144,7 +148,7 @@ function SessionCard({ s, now }: { s: FleetSession; now: number }) {
   );
 }
 
-export function NeedsYou({ sessions, now }: { sessions: FleetSession[]; now: number }) {
+export function NeedsYou({ sessions, now, accounts }: { sessions: FleetSession[]; now: number; accounts?: AccountInfo[] | undefined }) {
   const waiting = sessions.filter((s) => s.status === "waiting").sort(sortSessions);
   if (!waiting.length) return null;
   return (
@@ -160,19 +164,19 @@ export function NeedsYou({ sessions, now }: { sessions: FleetSession[]; now: num
       </div>
       <div class="grid-fleet">
         {waiting.map((s) => (
-          <SessionCard key={`${s.agent}:${s.sessionId}`} s={s} now={now} />
+          <SessionCard key={`${s.agent}:${s.sessionId}`} s={s} now={now} accounts={accounts} />
         ))}
       </div>
     </div>
   );
 }
 
-export function Fleet({ sessions, now }: { sessions: FleetSession[] | undefined; now: number }) {
+export function Fleet({ sessions, now, accounts }: { sessions: FleetSession[] | undefined; now: number; accounts?: AccountInfo[] | undefined }) {
   const list = (sessions ?? []).filter((s) => s.status !== "waiting").sort(sortSessions);
   const total = sessions?.length;
   return (
     <Section id="fleet" title="Fleet" count={total} note={`Session $ is a ${LIST_PRICE_NOTE.toLowerCase()}`}>
-      {sessions ? <NeedsYou sessions={sessions} now={now} /> : null}
+      {sessions ? <NeedsYou sessions={sessions} now={now} accounts={accounts} /> : null}
       {sessions === undefined ? (
         <p class="empty">Loading sessions…</p>
       ) : sessions.length === 0 ? (
@@ -180,7 +184,7 @@ export function Fleet({ sessions, now }: { sessions: FleetSession[] | undefined;
       ) : list.length ? (
         <div class="grid-fleet">
           {list.map((s) => (
-            <SessionCard key={`${s.agent}:${s.sessionId}`} s={s} now={now} />
+            <SessionCard key={`${s.agent}:${s.sessionId}`} s={s} now={now} accounts={accounts} />
           ))}
         </div>
       ) : null}

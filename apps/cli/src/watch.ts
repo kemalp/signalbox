@@ -30,6 +30,13 @@
 // changed), so the first one, after the first scan, is the only full read of older transcripts. "Live" means busy,
 // waiting or idle in the last fleet. Titles only: never prompts, message bodies, summaries or tool output.
 //
+// Accounts (added without a version change, like "commands" and "history"): fleet sessions, limits and history
+// entries carry an optional `account` (core AccountRef: a hashed id, whether the organization is known, the source,
+// and "recorded" or "inferred"); its absence means unknown, never a default account. Limits are one per (agent,
+// account, kind). The fleet adds `accounts` (AccountInfo[]: every account seen, with the user's labels from
+// Signalbox's accounts.json and live session counts), and Claude Code sessions and history entries name their
+// `configDir` when Signalbox reads more than one (--claude-config-dir) or it is otherwise known.
+//
 // Status pushes: adapters that can watch their sessions (Claude Code's registry dir, Codex's newest
 // rollouts) signal a possible change; signals within `statusDebounceMs` of the first are coalesced into
 // one quick fleet (status from those files, no `claude agents --json` run), sent like any fleet line.

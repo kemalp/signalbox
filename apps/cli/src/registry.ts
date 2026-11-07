@@ -25,6 +25,15 @@ export interface LoadOptions {
    * which still leaves it out when CLAUDE_CONFIG_DIR points away from ~/.claude (see claudeAppSetting).
    */
   claudeApp?: boolean;
+  /** More Claude Code config dirs to read (--claude-config-dir, $SIGNALBOX_CLAUDE_CONFIG_DIRS). */
+  claudeConfigDirs?: string[];
+}
+
+/** Process-wide defaults (set once per run by main from the command line), under each call's own options. */
+let loadDefaults: LoadOptions = {};
+
+export function configureLoad(defaults: LoadOptions): void {
+  loadDefaults = { ...defaults };
 }
 
 /** What the history took from an app's own session list (HistorySnapshot.sources.claudeApp). */
@@ -69,6 +78,7 @@ export const ADAPTERS: readonly AdapterEntry[] = [
       const app = claudeAppSetting(opts?.claudeApp !== false);
       return createClaudeAdapter({
         claudeBin: findBinary("claude", { envVar: "SIGNALBOX_CLAUDE_BIN" })?.path,
+        extraConfigDirs: opts?.claudeConfigDirs ?? [],
         ...("dir" in app ? { claudeAppDir: app.dir } : { claudeAppDir: false, claudeAppOff: { reason: app.off, detail: app.detail } }),
       });
     },
@@ -79,6 +89,11 @@ export const ADAPTERS: readonly AdapterEntry[] = [
         { label: "config", path: a.configDir },
         { label: "transcripts", path: join(a.configDir, "projects") },
         { label: "registry", path: join(a.configDir, "sessions") },
+        ...a.configDirs.slice(1).flatMap((dir) => [
+          { label: "extra config", path: dir },
+          { label: "transcripts", path: join(dir, "projects") },
+          { label: "registry", path: join(dir, "sessions") },
+        ]),
         ...(app?.enabled && app.dir ? [{ label: "app sessions", path: app.dir }] : []),
       ];
     },
@@ -130,5 +145,6 @@ export interface LoadedAdapter {
 
 /** Instantiates every registered adapter, or only `only` when given. */
 export function loadAdapters(only?: string, opts: LoadOptions = {}): LoadedAdapter[] {
-  return ADAPTERS.filter((e) => !only || e.id === only).map((e) => ({ entry: e, adapter: e.create(opts) }));
+  const merged = { ...loadDefaults, ...opts };
+  return ADAPTERS.filter((e) => !only || e.id === only).map((e) => ({ entry: e, adapter: e.create(merged) }));
 }

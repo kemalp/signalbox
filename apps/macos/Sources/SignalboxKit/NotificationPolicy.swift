@@ -237,11 +237,13 @@ public struct NotificationPolicy: Sendable {
         let seen = Set(current.sessions.map(\.id))
         sessions = sessions.filter { seen.contains($0.key) || now.timeIntervalSince($0.value.lastSeen) < Self.forgetSessionAfter }
 
-        out += evaluateLimits(current.limits, startup: startup, context: context)
+        out += evaluateLimits(current.limits, accounts: current.accounts ?? [], startup: startup, context: context)
         return out
     }
 
-    private mutating func evaluateLimits(_ readings: [LimitSnapshot], startup: Bool, context: NotificationContext) -> [NotificationRequest] {
+    private mutating func evaluateLimits(_ readings: [LimitSnapshot], accounts: [AccountInfo], startup: Bool, context: NotificationContext) -> [NotificationRequest] {
+        // With readings from more than one account per agent, a title names the account.
+        let several = Set(Dictionary(grouping: readings, by: \.agent).filter { Set($0.value.map { $0.account?.id ?? "" }).count > 1 }.keys)
         let now = context.now
         let thresholds = Self.sanitize(context.settings.limitThresholds)
         var out: [NotificationRequest] = []
@@ -267,7 +269,8 @@ public struct NotificationPolicy: Sendable {
             let passed = thresholds.filter { l.usedPercent >= $0 }
             let fresh = passed.filter { !m.fired.contains($0) }
             if let highest = fresh.max(), !startup, context.settings.limits {
-                out.append(Self.limitRequest(l, threshold: highest, now: now))
+                let name = several.contains(l.agent) ? (l.account.map { AccountNaming.name($0.id, accounts: accounts) } ?? "account unknown") : nil
+                out.append(Self.limitRequest(l, threshold: highest, now: now, accountName: name))
             }
             m.fired.formUnion(passed)
             limits[l.id] = m
@@ -337,12 +340,13 @@ public struct NotificationPolicy: Sendable {
         )
     }
 
-    static func limitRequest(_ l: LimitSnapshot, threshold: Double, now: Date) -> NotificationRequest {
+    static func limitRequest(_ l: LimitSnapshot, threshold: Double, now: Date, accountName: String? = nil) -> NotificationRequest {
         let period = l.resetsAt.map { String(Int($0.timeIntervalSince1970)) } ?? "none"
+        let who = accountName.map { "\(Fmt.agentName(l.agent)) (\($0))" } ?? Fmt.agentName(l.agent)
         return NotificationRequest(
             id: "limit/\(l.id)/\(Int(threshold))/\(period)",
             kind: .limit,
-            title: "\(Fmt.agentName(l.agent)): \(Fmt.limitLabel(l)) at \(Fmt.percent(l.usedPercent))",
+            title: "\(who): \(Fmt.limitLabel(l)) at \(Fmt.percent(l.usedPercent))",
             body: "Past your \(Fmt.percent(threshold)) alert · \(Fmt.countdown(l.resetsAt, now: now)).",
             target: .limits
         )

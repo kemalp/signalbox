@@ -111,6 +111,41 @@ function parseIntArg(raw: string, flag: string, min: number, max: number): numbe
   return n;
 }
 
+export const CLAUDE_CONFIG_DIRS_ENV = "SIGNALBOX_CLAUDE_CONFIG_DIRS";
+const CLAUDE_CONFIG_DIR_FLAG = "--claude-config-dir";
+
+/**
+ * Pulls every `--claude-config-dir DIR` (or `=DIR`) out of argv, whatever the command, then adds the dirs in
+ * $SIGNALBOX_CLAUDE_CONFIG_DIRS (colon-separated). These Claude Code config dirs (one per account, say) are read
+ * alongside $CLAUDE_CONFIG_DIR or ~/.claude. A leading `~` expands to `home`; each dir must then be absolute.
+ * Duplicates are dropped, the first kept.
+ */
+export function takeClaudeConfigDirs(argv: string[], env: Record<string, string | undefined>, home: string): { dirs: string[]; argv: string[] } {
+  const rest: string[] = [];
+  const raw: string[] = [];
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i]!;
+    if (arg === CLAUDE_CONFIG_DIR_FLAG) {
+      const v = argv[++i];
+      if (v === undefined || v === "" || v.startsWith("--")) throw new UsageError(`${CLAUDE_CONFIG_DIR_FLAG} needs a value`);
+      raw.push(v);
+    } else if (arg.startsWith(`${CLAUDE_CONFIG_DIR_FLAG}=`)) {
+      const v = arg.slice(CLAUDE_CONFIG_DIR_FLAG.length + 1);
+      if (v === "") throw new UsageError(`${CLAUDE_CONFIG_DIR_FLAG} needs a value`);
+      raw.push(v);
+    } else rest.push(arg);
+  }
+  for (const v of (env[CLAUDE_CONFIG_DIRS_ENV] ?? "").split(":")) if (v.trim() !== "") raw.push(v.trim());
+  const dirs: string[] = [];
+  for (const v of raw) {
+    const dir = v === "~" ? home : v.startsWith("~/") ? `${home.replace(/\/+$/, "")}/${v.slice(2)}` : v;
+    if (!dir.startsWith("/")) throw new UsageError(`${CLAUDE_CONFIG_DIR_FLAG}: expected an absolute path, got "${v}"`);
+    const clean = dir.length > 1 ? dir.replace(/\/+$/, "") : dir;
+    if (!dirs.includes(clean)) dirs.push(clean);
+  }
+  return { dirs, argv: rest };
+}
+
 /** Splits `--flag=value` and reads `--flag value`, rejecting unknown flags. */
 function readFlags(argv: string[], valued: ReadonlySet<string>, boolean: ReadonlySet<string>): Map<string, string> {
   const out = new Map<string, string>();
@@ -277,6 +312,7 @@ Usage:
   signalbox fleet --json
   signalbox commands [--agent ID] [--verbose | --json]
   signalbox history [--days N | --all] [--agent ID] [--limit N] [--no-claude-app] [--json]
+  Any command: --claude-config-dir DIR (repeatable) reads another Claude Code config dir too
 
 report   Usage and list-price-equivalent dollars from local transcripts.
          --days N      N calendar days: today since local midnight and the N-1 days
@@ -322,7 +358,11 @@ Environment: CLAUDE_CONFIG_DIR, CODEX_HOME, GEMINI_CLI_HOME (agent homes); SIGNA
 nvm, volta, asdf); SIGNALBOX_PRICING_DIR (price tables to use instead of the built-in ones);
 SIGNALBOX_CLAUDE_APP_DIR (the Claude app's session list, read-only; default
 ~/Library/Application Support/Claude/claude-code-sessions); SIGNALBOX_CLAUDE_APP_TRACE=1 (one
-stderr line per path the Claude app reader lists, stats or opens, to audit a run).
+stderr line per path the Claude app reader lists, stats or opens, to audit a run);
+SIGNALBOX_CLAUDE_CONFIG_DIRS (more Claude Code config dirs, colon-separated, like --claude-config-dir);
+SIGNALBOX_CLAUDE_CONFIG_TRACE=1 (one stderr line per global config file the login reader stats or
+opens; it keeps the two oauthAccount ids, hashed); SIGNALBOX_ACCOUNTS_FILE (account labels, default
+~/Library/Application Support/signalbox/accounts.json).
 
 Dollar figures are list-price equivalents, not a bill.`;
 }

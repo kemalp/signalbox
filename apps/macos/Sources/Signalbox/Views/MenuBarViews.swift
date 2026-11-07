@@ -50,9 +50,18 @@ struct MenuBarLabel: View {
         case .iconOnly:
             return nil
         case .fiveHour:
-            return store.highestFiveHourPercent(now: now).map { Figure(text: Fmt.percent($0), percent: $0, spoken: "5-hour limit \(Fmt.percent($0)) used") }
+            // The highest fresh reading across accounts; with more than one account, prefixed with its name.
+            return store.highestFiveHour(now: now).map { h in
+                let who = store.menuBarAccountPrefix(h.limit)
+                return Figure(text: who.map { "\($0) \(Fmt.percent(h.percent))" } ?? Fmt.percent(h.percent), percent: h.percent,
+                              spoken: "\(who.map { "\($0): " } ?? "")5-hour limit \(Fmt.percent(h.percent)) used")
+            }
         case .weekly:
-            return store.highestWeeklyPercent(now: now).map { Figure(text: Fmt.percent($0), percent: $0, spoken: "weekly limit \(Fmt.percent($0)) used") }
+            return store.highestWeekly(now: now).map { h in
+                let who = store.menuBarAccountPrefix(h.limit)
+                return Figure(text: who.map { "\($0) \(Fmt.percent(h.percent))" } ?? Fmt.percent(h.percent), percent: h.percent,
+                              spoken: "\(who.map { "\($0): " } ?? "")weekly limit \(Fmt.percent(h.percent)) used")
+            }
         case .todaySpend:
             return store.todaySpendUSD(now: now).map { Figure(text: money.headline($0), percent: nil, spoken: "\(money.amount($0)) recorded today") }
         }
@@ -158,17 +167,32 @@ struct MenuBarContent: View {
 
     @ViewBuilder
     private func limitRings(now: Date) -> some View {
-        let agents = store.limitAgents
+        // One row per (agent, account); an agent with no reading gets one row that says so.
+        let rows: [RingRow] = store.limitAgents.flatMap { agent -> [RingRow] in
+            let groups = store.limitGroups(for: agent)
+            return groups.isEmpty ? [RingRow(agent: agent, group: nil)] : groups.map { RingRow(agent: agent, group: $0) }
+        }
         VStack(alignment: .leading, spacing: 10) {
-            ForEach(agents, id: \.self) { agent in
-                let picked = store.menuBarLimits(for: agent, now: now)
+            ForEach(rows) { row in
+                let agent = row.agent
+                let picked = row.group.map { store.menuBarLimits(for: $0, now: now) } ?? (shown: [], hidden: 0)
+                let several = store.hasSeveralAccounts(agent)
                 // Rings line up by their centres, so a ring with a "stale" line under it doesn't shift the row.
                 HStack(alignment: .ringCenter, spacing: 12) {
-                    Text(Fmt.agentName(agent))
-                        .font(.callout.weight(.medium))
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                        .frame(width: 92, alignment: .leading)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(Fmt.agentName(agent))
+                            .font(.callout.weight(.medium))
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                        if let account = row.group?.account {
+                            AccountChip(account: account)
+                        } else if several, row.group != nil {
+                            Text("Account unknown")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .frame(width: 92, alignment: .leading)
                     if picked.shown.isEmpty {
                         Text(unknownLimitsText(agent))
                             .font(.caption)
@@ -190,6 +214,13 @@ struct MenuBarContent: View {
                 }
             }
         }
+    }
+
+    /// One row of rings: an (agent, account) group, or an agent with no reading at all.
+    struct RingRow: Identifiable {
+        let agent: AgentID
+        let group: LimitGroup?
+        var id: String { group?.id ?? "\(agent.rawValue)/none" }
     }
 
     /// The widest a ring caption may be: up to 76 pt ("gpt-reserve" needs about 60), less when the row
@@ -389,7 +420,7 @@ struct MenuBarContent: View {
 
 /// One limit as a small capacity ring with its window underneath. Only a fresh reading fills the ring; a stale or
 /// reset-passed one is an empty grey ring with "—" and says which underneath.
-private struct LimitRing: View {
+struct LimitRing: View {
     let limit: LimitSnapshot
     let state: LimitState
     let now: Date

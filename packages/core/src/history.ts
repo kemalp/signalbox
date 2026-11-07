@@ -1,6 +1,7 @@
 // Session history: adapters hand over each session's titles, metadata and usage records (HistorySession),
 // optionally folded together with an app's own session list (mergeAppSessions); this prices them with the same
 // rules as the report and lists them newest first.
+import { resolveAccount } from "./accounts.ts";
 import { newestLedgerByModel, priceLedgerRow } from "./ledger.ts";
 import { addTokens, canonicalModel, priceRecord, processedTokens, zeroTokens } from "./pricing.ts";
 import { countsAsResponse } from "./report.ts";
@@ -74,6 +75,25 @@ const SAFE_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
 export function resumeCommand(prefix: string, sessionId: string, cwd?: string): { command: string; cwd?: string } | undefined {
   if (!SAFE_ID.test(sessionId)) return undefined;
   return cwd ? { command: `${prefix} ${sessionId}`, cwd } : { command: `${prefix} ${sessionId}` };
+}
+
+/** `s` single-quoted for a POSIX shell (an embedded quote becomes '\''). */
+export function shellQuote(s: string): string {
+  return `'${s.replaceAll("'", "'\\''")}'`;
+}
+
+/**
+ * The resume command prefix for a Claude Code session whose transcript is in `configDir`: plain `claude --resume`
+ * for the dir a plain `claude` uses (`defaultDir`) or no known dir, else with CLAUDE_CONFIG_DIR set, since `claude`
+ * only finds a session in the config dir it runs with.
+ */
+export function claudeResumePrefix(configDir: string | undefined, defaultDir: string): string {
+  if (!configDir || stripSlash(configDir) === stripSlash(defaultDir)) return "claude --resume";
+  return `CLAUDE_CONFIG_DIR=${shellQuote(configDir)} claude --resume`;
+}
+
+function stripSlash(p: string): string {
+  return p.length > 1 ? p.replace(/\/+$/, "") : p;
 }
 
 export function sessionKey(agent: AgentId, sessionId: string): string {
@@ -172,6 +192,10 @@ export function historyEntry(s: HistorySession, tables: readonly PriceTable[], l
   }
   if (hasTranscript && s.resume) entry.resume = { ...s.resume };
   if (hasTranscript && s.transcriptPath) entry.transcriptPath = s.transcriptPath;
+  const { account, conflict } = resolveAccount(s.accountEvidence);
+  if (account) entry.account = account;
+  if (conflict) entry.accountConflict = true;
+  if (s.configDir) entry.configDir = s.configDir;
   return entry;
 }
 
@@ -240,6 +264,7 @@ function joinApp(s: HistorySession, r: AppSessionRecord): void {
   if (r.effort) s.effort = r.effort;
   if (r.model && !s.model) s.model = r.model;
   if (!s.project && (r.cwd || r.originCwd)) s.project = r.cwd ?? r.originCwd;
+  if (r.accountEvidence) s.accountEvidence = [...(s.accountEvidence ?? []), r.accountEvidence];
 }
 
 function appOnlySession(r: AppSessionRecord): HistorySession | undefined {
@@ -264,6 +289,7 @@ function appOnlySession(r: AppSessionRecord): HistorySession | undefined {
   if (r.archived !== undefined) s.archived = r.archived;
   if (r.model) s.model = r.model;
   if (r.effort) s.effort = r.effort;
+  if (r.accountEvidence) s.accountEvidence = [r.accountEvidence];
   return s;
 }
 

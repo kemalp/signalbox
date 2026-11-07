@@ -9,13 +9,21 @@ struct LimitsView: View {
             LiveNow(anchors: store.limits.flatMap { [$0.observedAt, $0.resetsAt] }) { now in
                 ScrollView {
                     VStack(alignment: .leading, spacing: 14) {
-                        Text("Account-wide. The freshest reading per window wins. A reading older than 15 minutes, or from before its window reset, shows no fill: limits also move with use elsewhere.")
+                        Text("One card per account: limits belong to a subscription, not a session. The latest window's newest reading wins. A reading older than 15 minutes, or from before its window reset, shows no fill: limits also move with use elsewhere.")
                             .fixedSize(horizontal: false, vertical: true)
                             .font(.callout)
                             .foregroundStyle(.secondary)
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 340, maximum: 560), spacing: 16, alignment: .top)], alignment: .leading, spacing: 16) {
                             ForEach(store.limitAgents, id: \.self) { agent in
-                                LimitCard(agent: agent, now: now)
+                                let groups = store.limitGroups(for: agent)
+                                if groups.isEmpty {
+                                    LimitCard(agent: agent, group: nil, several: false, now: now)
+                                } else {
+                                    let several = store.hasSeveralAccounts(agent)
+                                    ForEach(groups) { g in
+                                        LimitCard(agent: agent, group: g, several: several, now: now)
+                                    }
+                                }
                             }
                         }
                     }
@@ -34,10 +42,14 @@ struct LimitsView: View {
 private struct LimitCard: View {
     @Environment(SignalboxStore.self) private var store
     let agent: AgentID
+    /// nil: no reading from this agent at all.
+    let group: LimitGroup?
+    /// The agent reports more than one account, so a group without one says "Account unknown".
+    let several: Bool
     let now: Date
 
     var body: some View {
-        let limits = store.limits(for: agent)
+        let limits = group?.limits ?? []
         GroupBox {
             VStack(alignment: .leading, spacing: 14) {
                 if limits.isEmpty {
@@ -52,9 +64,15 @@ private struct LimitCard: View {
             .padding(8)
             .frame(maxWidth: .infinity, alignment: .leading)
         } label: {
-            HStack {
+            HStack(spacing: 8) {
                 Text(Fmt.agentName(agent))
                     .font(.headline)
+                if let account = group?.account {
+                    AccountChip(account: account)
+                } else if several {
+                    Tag(text: "Account unknown", color: .secondary)
+                        .help("The sessions that reported these readings have no known account")
+                }
                 Spacer()
                 if let plan = limits.first(where: { $0.plan != nil })?.plan {
                     Tag(text: plan, color: .secondary)

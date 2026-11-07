@@ -6,8 +6,8 @@
 // `--now <ISO>` pins the clock (default below); with TZ=UTC the output is identical across machines.
 // `--stress` adds what real machines produce and the base mock doesn't: dozens of sessions, very long
 // names and paths, unknown agents and statuses, unknown and over-100% limits, and unpriced models.
-import type { FleetSession, GroupTotals, LimitSnapshot } from "@signalbox/core";
-import { mockFleet, mockHealth, mockReport } from "../../web/src/mock.ts";
+import { accountId, type AccountRef, type FleetSession, type GroupTotals, type LimitSnapshot } from "@signalbox/core";
+import { MOCK_ACCOUNTS, mockFleet, mockHealth, mockReport } from "../../web/src/mock.ts";
 
 const DEFAULT_NOW = "2026-10-09T14:30:00.000Z";
 const nowArg = process.argv.indexOf("--now");
@@ -35,6 +35,8 @@ const ended: FleetSession = {
   startedAt: iso(-6 * HOUR),
   lastActivity: iso(-3 * HOUR),
   source: "registry",
+  account: { id: MOCK_ACCOUNTS.max, orgKnown: true, source: "config-login", quality: "inferred" },
+  configDir: "/Users/you/.claude",
   costUsd: 24.11,
 };
 fleet.sessions.push(ended);
@@ -58,6 +60,17 @@ function addStress(): void {
   const agents = ["claude-code", "claude-code", "codex", "gemini-cli", "aider"] as const;
   const statuses = ["waiting", "busy", "idle", "unknown", "ended", "waiting", "idle"] as const;
   const models = ["claude-opus-5-5", "claude-experimental-research-preview-2026-10-01", "gpt-6-sol", "gemini-3.5-pro", undefined];
+  // A third account with a label too long for a chip, and one known only without its organization.
+  const third: AccountRef = {
+    id: accountId("00000000-0000-4000-8000-0000000000a3", "00000000-0000-4000-8000-0000000000b3"),
+    orgKnown: true,
+    source: "claude-app-folder",
+    quality: "recorded",
+  };
+  const partial: AccountRef = { id: accountId("00000000-0000-4000-8000-0000000000a4"), orgKnown: false, source: "transcript", quality: "recorded" };
+  const team: AccountRef = { id: MOCK_ACCOUNTS.team, orgKnown: true, source: "config-login", quality: "inferred" };
+  const accountFor = (i: number, agent: string): AccountRef | undefined =>
+    agent !== "claude-code" ? undefined : [third, partial, team, undefined][i % 4];
   for (let i = 0; i < 28; i++) {
     const agent = agents[i % agents.length]!;
     const sessionId = `5a5a${String(i).padStart(4, "0")}-0000-4000-8000-${String(i).padStart(12, "0")}`;
@@ -79,6 +92,7 @@ function addStress(): void {
       startedAt: iso(-(i + 2) * HOUR),
       lastActivity: i % 7 === 6 ? undefined : iso(-(i + 1) * 3 * MIN),
       source: agent === "aider" ? "experimental" : "registry",
+      account: accountFor(i, agent),
       costUsd: i % 5 === 2 ? undefined : i === 1 ? 12_345.67 : 0.37 * (i + 1) ** 2,
       ...(i % 5 === 1 ? { unpricedTokens: 1_234_567 } : {}),
       context: hasContext
@@ -105,6 +119,10 @@ function addStress(): void {
     // A kind the app has no label for, with no window, no reset time and over 100%.
     limit({ agent: "claude-code", kind: "monthly_overage_credits_pool", usedPercent: 104 }),
     limit({ agent: "claude-code", kind: "seven_day_opus", usedPercent: 97, windowMinutes: 10_080, resetsAt: iso(30 * HOUR) }),
+    // Two more accounts' gauges: one the user named at length, one whose session's account is unknown.
+    limit({ agent: "claude-code", kind: "five_hour", usedPercent: 93, windowMinutes: 300, resetsAt: iso(90 * MIN), account: third }),
+    limit({ agent: "claude-code", kind: "seven_day", usedPercent: 12, windowMinutes: 10_080, resetsAt: iso(50 * HOUR), account: third }),
+    limit({ agent: "claude-code", kind: "five_hour", usedPercent: 51, windowMinutes: 300, resetsAt: iso(3 * HOUR) }),
     // An unknown agent with more windows than the menu bar shows.
     limit({ agent: "aider", kind: "a.hourly", label: "Hourly requests", usedPercent: 12, windowMinutes: 60, resetsAt: iso(40 * MIN) }),
     limit({ agent: "aider", kind: "a.daily", label: "Daily requests", usedPercent: 55, windowMinutes: 1_440, resetsAt: iso(9 * HOUR) }),
@@ -112,6 +130,11 @@ function addStress(): void {
     limit({ agent: "aider", kind: "a.monthly", label: "Monthly", usedPercent: 3, windowMinutes: 43_200, observedAt: iso(-3 * HOUR) }),
   );
   // gemini-cli has sessions but no limit reading at all.
+  fleet.accounts = [
+    ...(fleet.accounts ?? []),
+    { id: third.id, orgKnown: true, label: "Client work (shared seat for the acme-corporation contract)", sources: ["claude-app-folder"], claudeAppFolder: true, liveSessions: 3 },
+    { id: partial.id, orgKnown: false, sources: ["transcript"], liveSessions: 2 },
+  ];
 
   const longModel = "claude-experimental-research-preview-2026-10-01";
   const unpricedRow = (key: string, from: GroupTotals): GroupTotals => ({

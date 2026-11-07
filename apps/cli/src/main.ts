@@ -2,6 +2,7 @@
 // The `signalbox` CLI: report, doctor, serve, watch, snapshot, fleet, commands, history. Read-only: it never
 // writes agent config or the Claude app's files, never runs a slash command, and prints aggregates and session
 // titles only (no message content).
+import { homedir } from "node:os";
 import { loadPriceTables, type PriceTable } from "@signalbox/core";
 import pkg from "../package.json" with { type: "json" };
 import {
@@ -9,6 +10,7 @@ import {
   helpText,
   parseArgs,
   reportWindow,
+  takeClaudeConfigDirs,
   reportWindowLabel,
   UsageError,
   type CommandsArgs,
@@ -23,7 +25,8 @@ import { message, SignalboxData } from "./data.ts";
 import { formatDoctor, runDoctor } from "./doctor.ts";
 import { formatHistory, formatReport } from "./format.ts";
 import { ensurePrivateDir } from "./private-dir.ts";
-import { adapterIds, findEntry, loadAdapters, type LoadedAdapter } from "./registry.ts";
+import { readAccountLabels } from "./account-labels.ts";
+import { adapterIds, configureLoad, findEntry, loadAdapters, type LoadedAdapter } from "./registry.ts";
 import { debugEnabled, LineSplitter, PROTOCOL_VERSION, WATCH_CACHE, Watcher, type Snapshot, type WatchSource } from "./watch.ts";
 
 const VERSION: string = pkg.version;
@@ -164,6 +167,7 @@ async function history(args: HistoryArgs): Promise<number> {
         agentLabel: args.agent ? (findEntry(args.agent)?.displayName ?? args.agent) : "all agents",
         windowLabel: args.days ? (args.days === 1 ? "today" : `last ${args.days} calendar days`) : "every session",
         noData,
+        accountLabels: await readAccountLabels(),
       }),
     );
   }
@@ -258,7 +262,9 @@ async function watch(args: WatchArgs): Promise<never> {
 export async function main(argv: string[]): Promise<number> {
   let args;
   try {
-    args = parseArgs(argv, adapterIds(), CATALOG_AGENTS);
+    const extra = takeClaudeConfigDirs(argv, process.env, homedir());
+    configureLoad({ claudeConfigDirs: extra.dirs });
+    args = parseArgs(extra.argv, adapterIds(), CATALOG_AGENTS);
     switch (args.command) {
       case "help":
         console.log(helpText(adapterIds(), CATALOG_AGENTS));

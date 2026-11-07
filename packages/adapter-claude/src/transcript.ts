@@ -3,8 +3,10 @@
 // timestamps, gitBranch/entrypoint/version, the first working directory). A line is JSON-parsed only when a
 // cheap substring prefilter says it is one of those, and only those fields are kept. Prompts (`user`,
 // `last-prompt` lines), message bodies, summaries, attachments and queue operations are never read for text.
-import type { CompactionEvent, LedgerEntry, UsageRecord } from "../../core/src/index.ts";
-import { sanitizeTitle } from "../../core/src/index.ts";
+// Account ids come from two small line types (2.1.293, desktop sessions only): `bridge-session` (ownerAccountUuid,
+// ownerOrganizationUuid) and `artifact-autoreact-ledger` (accountUuid). They are hashed at once (accountEvidence).
+import type { AccountEvidence, CompactionEvent, LedgerEntry, UsageRecord } from "../../core/src/index.ts";
+import { accountEvidence, sanitizeTitle } from "../../core/src/index.ts";
 import type { FileStamp } from "./file-cache.ts";
 import { compactionFromLine, costStateStart, ledgerFromCostState } from "./ledger.ts";
 import type { TranscriptFile } from "./paths.ts";
@@ -31,6 +33,13 @@ export interface TranscriptMeta {
   gitBranch?: string;
   entrypoint?: string;
   version?: string;
+  /**
+   * The last `bridge-session` line's account and organization, hashed (main transcripts only). These lines carry no
+   * timestamp: `atMs` is the latest line time seen before it.
+   */
+  accountFull?: AccountEvidence;
+  /** The last account named without an organization (`artifact-autoreact-ledger`, or a bridge line without one). */
+  accountPartial?: AccountEvidence;
 }
 
 /** Everything one read of a transcript produces. Cached per file while its mtime and size stay the same. */
@@ -50,6 +59,9 @@ export interface TranscriptParse {
  */
 const MAX_TITLE_LINE = 16 * 1024;
 const TITLE_TYPES = ['"custom-title"', '"ai-title"', '"agent-name"'] as const;
+/** Account lines are small (under 1 KiB seen); a longer line is never parsed for one. */
+const MAX_ACCOUNT_LINE = 16 * 1024;
+const ACCOUNT_TYPES = ['"bridge-session"', '"artifact-autoreact-ledger"'] as const;
 /** A line's timestamp may not be later than the file's mtime by more than this (clock skew). */
 const FUTURE_SLACK_MS = 10 * 60_000;
 const TS_KEY = '"timestamp":"';
@@ -99,10 +111,11 @@ export class TranscriptReader {
     const cost = line.includes('"cost-state"');
     const compact = this.main && line.includes('"compact_boundary"');
     const title = this.main && line.length <= MAX_TITLE_LINE && TITLE_TYPES.some((t) => line.includes(t));
+    const account = this.main && line.length <= MAX_ACCOUNT_LINE && line.includes('ccountUuid"') && ACCOUNT_TYPES.some((t) => line.includes(t));
     // One line per main transcript, usually the first: a nested object can hold a `cwd` key too, so the line is
     // parsed for its top-level one instead of trusting the first match.
     const needCwd = this.main && this.meta.cwd === undefined && line.includes(CWD_KEY);
-    if (!assistant && !cost && !compact && !title && !needCwd) {
+    if (!assistant && !cost && !compact && !title && !needCwd && !account) {
       this.noteTs(rawTimestamp(line));
       return;
     }
@@ -111,7 +124,7 @@ export class TranscriptReader {
       d = JSON.parse(line);
     } catch {
       if (assistant) this.stats.parseErrors++; // usually the partial last line of a live file
-      else if (!cost && !compact && !title) this.noteTs(rawTimestamp(line));
+      else if (!cost && !compact && !title && !account) this.noteTs(rawTimestamp(line));
       return;
     }
     if (!isObj(d)) return;
@@ -145,6 +158,21 @@ export class TranscriptReader {
       else if (d.type === "ai-title") this.meta.aiTitle = sanitizeTitle(d.aiTitle);
       else if (d.type === "agent-name") this.meta.agentName = sanitizeTitle(d.agentName);
     }
+    if (account) this.noteAccount(d);
+  }
+
+  /** Only the id fields of a top-level account line, hashed; every other key is ignored. */
+  private noteAccount(d: Record<string, unknown>): void {
+    const at = this.meta.lastTsMs;
+    const ev =
+      d.type === "bridge-session"
+        ? accountEvidence(d.ownerAccountUuid, d.ownerOrganizationUuid, "transcript", "recorded", at)
+        : d.type === "artifact-autoreact-ledger"
+          ? accountEvidence(d.accountUuid, undefined, "transcript", "recorded", at)
+          : undefined;
+    if (!ev) return;
+    if (ev.ref.orgKnown) this.meta.accountFull = ev;
+    else this.meta.accountPartial = ev;
   }
 
   finish(): TranscriptParse {

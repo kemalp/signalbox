@@ -923,7 +923,7 @@ describe("snapshot --json and fleet --json (spawned)", () => {
     const { out, code } = await run(["fleet", "--json"]);
     expect(code).toBe(0);
     const f = JSON.parse(out) as FleetSnapshot;
-    expect(Object.keys(f).sort()).toEqual(["compactions", "generatedAt", "health", "limits", "sessions"]);
+    expect(Object.keys(f).sort()).toEqual(["accounts", "compactions", "generatedAt", "health", "limits", "sessions"]);
     expect(f.sessions.find((s) => s.sessionId === SID)?.status).toBe("busy");
   }, 20_000);
 

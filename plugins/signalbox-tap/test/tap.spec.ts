@@ -23,6 +23,8 @@ const USAGE = {
 
 interface World {
   home?: string;
+  /** CLAUDE_CONFIG_DIR as the engine reports it. */
+  configDir?: string;
   sessionId: string;
   usage?: unknown;
   usageThrows?: boolean;
@@ -42,7 +44,7 @@ function world(over: Partial<World> = {}): World {
 /** A `$` that answers the allowed calls from `w` and records every member touched, allowed or not. */
 function engine(w: World): unknown {
   const nouns: Record<string, Record<string, (...args: never[]) => unknown>> = {
-    env: { get: async (name: string) => (name === "HOME" ? w.home : undefined) },
+    env: { get: async (name: string) => (name === "HOME" ? w.home : name === "CLAUDE_CONFIG_DIR" ? w.configDir : undefined) },
     session: {
       id: async () => w.sessionId,
       usage: async () => {
@@ -123,9 +125,19 @@ describe("signalbox-tap", () => {
       sessionId: w.sessionId,
       writtenAt: "2026-10-09T12:00:00.000Z",
       event: "session.start",
+      configDir: null,
       usage: { context: USAGE.context, rateLimits: USAGE.rateLimits, cost: USAGE.cost },
     } satisfies TapSpool;
     expect(spoolAt(w, w.sessionId)).toEqual(expected);
+  });
+
+  test("records CLAUDE_CONFIG_DIR when it is absolute, null when unset, nothing when relative", async () => {
+    const set = world({ configDir: "/Users/synthetic/.claude-team" });
+    await fire(set, "session.start", START);
+    expect((spoolAt(set, set.sessionId) as TapSpool).configDir).toBe("/Users/synthetic/.claude-team");
+    const rel = world({ configDir: "relative/dir" });
+    await fire(rel, "session.start", START);
+    expect("configDir" in (spoolAt(rel, rel.sessionId) as object)).toBe(false);
   });
 
   test("session.measure writes the pushed figures and increments seq", async () => {

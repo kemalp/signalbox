@@ -36,10 +36,11 @@ Signalbox watches the coding agents on your Mac and puts them in one place. It s
 - **Sessions.** Every live session, plus the ones that ended recently. Each shows its status (busy, waiting or idle) and how long it has been that way, plus its model, a context bar marking where auto-compaction starts, and its cost. The inspector shows where the session runs, its compactions, and copyable suggestions, such as `/compact` once context passes 75%.
 - **History.** Past and live sessions grouped by day, like the Claude app's list. Each row has the title, project, start time, model, duration and cost. Search them, or filter by agent, project and date range. Each session has a resume command (`claude --resume <id>` or `codex resume <id>`) that you can copy. Signalbox never resumes a session itself.
 - **Usage.** Spend per day, stacked by model, by kind (main, subagent, workflow) or by token type. It shows totals by model and project, recorded and estimated dollars, and fresh and total tokens. Today, 7 days and 30 days are calendar days.
-- **Limits.** Plan windows (5-hour, weekly) with their reset times. A bar fills only while its reading is current. A reading older than 15 minutes, or from before its window reset, shows as "stale" or "reset passed" with the last value.
+- **Limits.** Plan windows (5-hour, weekly) with their reset times, one card per account. A bar fills only while its reading is current. A reading older than 15 minutes, or from before its window reset, shows as "stale" or "reset passed" with the last value.
+- **Accounts.** If you use more than one subscription (say a Max and a Team account), each session and limit reading carries its account. The account comes from the Claude app's session list (desktop sessions), from the session's transcript, or, marked as inferred, from the current login of the Claude Code config folder the session runs from. You give each account a name; until then it shows a short id. Signalbox tells accounts apart by a hash of the vendor's ids and never reads or shows an email. A session whose account it can't determine says "Account unknown" and is never assigned a default. Settings ▸ Advanced ▸ Claude Code folders adds a second config folder (a `CLAUDE_CONFIG_DIR` you use for another account), and the resume command for that folder's sessions sets `CLAUDE_CONFIG_DIR` for you.
 - **Commands.** A guide to every built-in slash command and useful shell command in Claude Code, Codex and Gemini CLI. Each entry says what the command does, where it works, its side effects, and whether Signalbox already shows that information. The guide also lists your own commands, skills and plugin commands, by name and description. Signalbox runs no commands: Copy puts one on the clipboard for you to run in the session.
 - **Health.** Each data source, how stable its format is, and whether it's working, as `signalbox doctor` reports them.
-- **Menu bar.** Limit rings, the sessions waiting for you, and recorded spend for the report window (7 days by default) with a per-day sparkline. The menu bar label can show the 5-hour %, the weekly % or today's spend. The app can run from the menu bar alone, with no Dock icon.
+- **Menu bar.** Limit rings (one row per account), the sessions waiting for you, and recorded spend for the report window (7 days by default) with a per-day sparkline. The menu bar label can show the 5-hour %, the weekly % or today's spend. The app can run from the menu bar alone, with no Dock icon.
 - **Notifications (opt-in).** Signalbox can tell you when a session needs you and what it's waiting for (for example, "permission prompt"). It can also tell you when a long task finishes or a plan limit passes 80% or 95%. "Needs you" and "finished" arrive about half a second after the status changes; limit alerts come with the regular 15-second refresh. An alert that is off by default says when Signalbox can't read data. You can mute a single session.
 - **Settings.** Launch at login, the menu bar label, notification kinds and thresholds, and currency. GBP and EUR use a rate you enter; Signalbox fetches no exchange rates. If you enter your monthly plan price, Usage shows the last 30 days at list price as a multiple of it.
 
@@ -123,6 +124,8 @@ The app is a front end for the `signalbox` CLI, which also works on its own. `bu
 | `signalbox fleet --json` | Live sessions, limits, context and compactions |
 | `signalbox watch --ndjson` | The JSON-lines stream the macOS app reads (protocol v1, documented in [`apps/cli/src/watch.ts`](apps/cli/src/watch.ts)) |
 
+Every command takes `--claude-config-dir DIR`, repeatable, to read another Claude Code config folder alongside `CLAUDE_CONFIG_DIR` (or `~/.claude`): a second account's, say.
+
 ```sh
 signalbox doctor                                 # what Signalbox can see, and how far to trust each source
 signalbox report --days 7 --verbose              # today and the 6 days before, with how the estimate was made
@@ -138,6 +141,9 @@ signalbox history --days 30 --agent codex --json # the last 30 days of Codex ses
 | `SIGNALBOX_PRICING_DIR` | A folder of price tables to use instead of the built-in ones |
 | `SIGNALBOX_CLAUDE_APP_DIR` | Where to read the Claude app's session list (read-only) |
 | `SIGNALBOX_CLAUDE_APP_TRACE=1` | Prints one stderr line per file the Claude app reader lists, checks or opens |
+| `SIGNALBOX_CLAUDE_CONFIG_DIRS` | More Claude Code config folders to read, colon-separated (like `--claude-config-dir DIR`, which any command takes) |
+| `SIGNALBOX_CLAUDE_CONFIG_TRACE=1` | Prints one stderr line per Claude Code global config file the login reader checks or opens |
+| `SIGNALBOX_ACCOUNTS_FILE` | Your account labels (default `~/Library/Application Support/signalbox/accounts.json`, written by the app when you rename an account) |
 | `SIGNALBOX_DEBUG=1` | Logs timings and stream events to stderr, in `signalbox watch` and the app |
 
 ## How it works
@@ -171,9 +177,11 @@ Each source declares how much to trust its format: **documented** (published by 
 | Claude Code | Transcripts, `~/.claude/projects/**/*.jsonl` | Token counts, model, timestamps, working folder, git branch, title lines | internal |
 | Claude Code | `cost-state` rows in those transcripts | Claude Code's own per-model cost figures, used to reconcile the estimate | internal |
 | Claude Code | Session registry, `~/.claude/sessions/<pid>.json` | Live status and entry point (never the `.key` files beside them) | internal |
-| Claude Code | `claude agents --json --all` | The list of running sessions and their state | preview |
+| Claude Code | `claude agents --json --all` (once per config folder) | The list of running sessions and their state | preview |
+| Claude Code | Account lines in transcripts (`bridge-session`, `artifact-autoreact-ledger`) | The account and organization ids, hashed at once (desktop sessions only; no email is in them) | internal |
+| Claude Code | Global config, `~/.claude.json` (or `<config dir>/.claude.json`) | Only `oauthAccount.accountUuid` and `organizationUuid`, hashed at once: which account each config folder's terminal login uses | internal |
 | Claude Code | signalbox-tap spool, `~/Library/Application Support/signalbox/spool/` | Official context fill, plan limits and session cost, when the mod is loaded | preview |
-| Claude app | `~/Library/Application Support/Claude/claude-code-sessions` | Session ids, titles, folders, dates, model, effort and the archived flag | internal |
+| Claude app | `~/Library/Application Support/Claude/claude-code-sessions` | Session ids, titles, folders, dates, model, effort and the archived flag; the two folder names (account and organization ids), hashed at once | internal |
 | Codex | Rollouts, `~/.codex/sessions` and `~/.codex/archived_sessions` | Token usage per response, session status, plan-limit readings | internal |
 | Codex | `~/.codex/session_index.jsonl` | Session names | internal |
 | Claude Code, Codex, Gemini CLI | Command, skill and plugin folders in each agent's home and in the project folders of listed sessions, and `~/.claude/plugins/installed_plugins.json` | Names and descriptions, for the command guide | internal |
@@ -191,9 +199,11 @@ Without the tap, Claude Code plan limits read "unknown", and context is estimate
 - Message content: prompts, replies, summaries and tool output. Signalbox takes the usage fields out of each line and drops everything else as it parses. It never stores or displays message text.
 - Agent settings. It never writes agent config either.
 
-**The Claude app's session list** sits next to the app's login and cookie files, so the reader works from an allow-list. It opens only the per-session `local_<id>.json` records: regular files, no symlinks, at most 1 MiB each. It keeps the ids, title, folders, dates, model, effort and archived flag, and drops the rest of each record as soon as it is parsed. You can turn the reader off with `--no-claude-app` or in Settings ▸ Advanced. `SIGNALBOX_CLAUDE_APP_TRACE=1` prints every filesystem call it makes, so you can audit it.
+**The Claude app's session list** sits next to the app's login and cookie files, so the reader works from an allow-list. It opens only the per-session `local_<id>.json` records: regular files, no symlinks, at most 1 MiB each. It keeps the ids, title, folders, dates, model, effort and archived flag, and drops the rest of each record as soon as it is parsed. The two folders above each record are named after the account and organization the app was signed in as; Signalbox turns them into a hash right away. You can turn the reader off with `--no-claude-app` or in Settings ▸ Advanced. `SIGNALBOX_CLAUDE_APP_TRACE=1` prints every filesystem call it makes, so you can audit it.
 
-**No vendor calls.** Signalbox calls no vendor API, documented or not. It sends no telemetry and fetches nothing. Besides the CLI itself and one run of your login shell (so the app learns your `PATH`), the only processes Signalbox starts are `claude agents --json --all`, each agent's `--version`, and `open` to show the web page. It never runs a slash command, and it never resumes, messages or compacts a session. A resume command is only shown for you to copy.
+**Accounts.** Claude Code's global config file (`~/.claude.json`, or `.claude.json` inside a config folder set with `CLAUDE_CONFIG_DIR`) records the signed-in account, and it also holds your email address, your name and MCP server settings that can contain API keys. Signalbox reads it through an allow-list: a regular file only, at most 32 MiB, and of everything in it only `oauthAccount.accountUuid` and `oauthAccount.organizationUuid`, which it hashes straight after parsing. The email, the names and everything else are dropped at once and never stored or shown. `SIGNALBOX_CLAUDE_CONFIG_TRACE=1` lists every path it touches. Account labels you set are kept in Signalbox's own `accounts.json`, keyed by the hash. Working folders are shown as they are, and the Claude app keeps desktop scratch sessions in folders named after the account, so those paths contain the vendor's account id.
+
+**No vendor calls.** Signalbox calls no vendor API, documented or not. It sends no telemetry and fetches nothing. Besides the CLI itself and one run of your login shell (so the app learns your `PATH`), the only processes Signalbox starts are `claude agents --json --all` (once per Claude Code config folder, with `CLAUDE_CONFIG_DIR` set for the extra ones), each agent's `--version`, and `open` to show the web page. It never runs a slash command, and it never resumes, messages or compacts a session. A resume command is only shown for you to copy.
 
 **The local web page** (`signalbox serve`) binds to 127.0.0.1 on a random port. The link carries a new token on every start. The page sends that token in an `Authorization: Bearer` header on every API request. The server accepts only GET and HEAD requests, checks the `Host` and `Origin` headers exactly, and sets no CORS headers and no cookies.
 

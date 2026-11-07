@@ -1,5 +1,7 @@
 // signalbox-tap: on session start, measure and end, writes this session's usage figures
-// (context fill, rate-limit windows, cost) as a TapSpool v1 file. It does nothing else:
+// (context fill, rate-limit windows, cost) as a TapSpool v1 file, with the session's
+// CLAUDE_CONFIG_DIR (null when unset), so Signalbox can tell which account's limits they are
+// when several config dirs share one transcript folder. It does nothing else:
 // no network, no commands, no prompts, no settings, no UI. A failure is logged to the
 // debug log only, and no hook ever throws.
 import type { EngineInterface, Register, SessionUsage } from 'claude-code'
@@ -13,6 +15,12 @@ const SAFE_ID = /^[A-Za-z0-9_-][A-Za-z0-9._-]*$/
 const seqs = new Map<string, number>()
 
 const num = (v: unknown): number | undefined => (typeof v === 'number' && Number.isFinite(v) ? v : undefined)
+
+// null: the default config (~/.claude). A relative value can't be placed, so it is left out.
+function configDirField(v: unknown): string | null | undefined {
+  if (v === undefined || v === null || v === '') return null
+  return typeof v === 'string' && v.startsWith('/') ? v : undefined
+}
 
 function figures(u: Figures | undefined) {
   const tokens = num(u?.context?.tokens)
@@ -39,7 +47,8 @@ async function tap($: EngineInterface, event: TapEvent, sessionId: () => string 
     seqs.set(sid, ++seq)
     const usage = figures(pushed ?? (await $.session.usage().catch(() => undefined)))
     const writtenAt = new Date(await $.clock.now()).toISOString()
-    const spool = { v: 1, seq, agent: 'claude-code', sessionId: sid, writtenAt, event, usage }
+    const configDir = configDirField(await $.env.get('CLAUDE_CONFIG_DIR'))
+    const spool = { v: 1, seq, agent: 'claude-code', sessionId: sid, writtenAt, event, configDir, usage }
     await $.fs.write(path, JSON.stringify(spool) + '\n')
   } catch (err) {
     try {
