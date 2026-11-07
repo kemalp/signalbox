@@ -4,8 +4,10 @@ import {
   buildHistory,
   buildReport,
   DEFAULT_HISTORY_LIMIT,
+  finishAccounts,
   priceRecord,
   processedTokens,
+  type AccountInfo,
   type AdapterHealth,
   type CompactionEvent,
   type ContextSnapshot,
@@ -21,6 +23,7 @@ import {
   type UsageRecord,
 } from "@signalbox/core";
 import type { FleetSessionExtras } from "@signalbox/web";
+import { readAccountLabels } from "./account-labels.ts";
 import { calendarSince } from "./args.ts";
 import { tildify } from "./format.ts";
 import type { AppListSource, LoadedAdapter } from "./registry.ts";
@@ -332,6 +335,8 @@ export class SignalboxData {
           list(this.compactions(la, fresh)),
           maybe(this.scan(la, fleetSince, undefined, fresh)),
         ]);
+        // After the sessions: they note the accounts their transcripts name.
+        const accounts = await list<AccountInfo>(a.readAccounts?.());
         const ctx = new Map(contexts.map((c) => [c.sessionId, c]));
         const cost = scan ? this.costs(scan) : undefined;
         const out: FleetSession[] = sessions.map((s) => {
@@ -344,17 +349,19 @@ export class SignalboxData {
           if (sc && sc.unpricedTokens > 0) f.unpricedTokens = sc.unpricedTokens;
           return f;
         });
-        return { sessions: out, limits, compactions };
+        return { sessions: out, limits, compactions, accounts };
       }),
     );
     const sessions = per.flatMap((p) => p.sessions);
     this.lastFleetSessions = sessions;
+    const live = sessions.filter((s) => s.status === "busy" || s.status === "waiting" || s.status === "idle");
     return {
       generatedAt: now.toISOString(),
       sessions,
       limits: per.flatMap((p) => p.limits),
       compactions: per.flatMap((p) => p.compactions).sort((a, b) => Date.parse(a.ts) - Date.parse(b.ts)),
       health: (opts.quick ? this.lastHealth : undefined) ?? (await this.health()),
+      accounts: finishAccounts(per.flatMap((p) => p.accounts), { labels: await readAccountLabels(), live }),
     };
   }
 }

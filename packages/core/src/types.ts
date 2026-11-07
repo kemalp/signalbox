@@ -180,9 +180,16 @@ export interface SessionInfo {
   lastActivity?: string;
   /** Which adapter source produced this row, e.g. "agents --json", "registry". */
   source: string;
+  /** The subscription the session runs under, when anything names it; undefined is unknown (never a default). */
+  account?: AccountRef;
+  /** Claude Code: the config dir whose session registry lists it. */
+  configDir?: string;
 }
 
-/** A plan/rate-limit reading. Limits are account-wide; the freshest reading per (agent, kind) wins. */
+/**
+ * A plan/rate-limit reading. Limits are account-wide: per (agent, account, kind), a reading whose window hasn't reset
+ * yet beats one whose window has, then the newest reading wins, so two subscriptions never share a gauge.
+ */
 export interface LimitSnapshot {
   agent: AgentId;
   /** e.g. "five_hour", "seven_day", "seven_day_fable", "codex.primary". Unknown kinds are kept verbatim. */
@@ -197,6 +204,8 @@ export interface LimitSnapshot {
   plan?: string;
   sessionId?: string;
   source: string;
+  /** The account of the session that reported it; undefined when that session's account is unknown. */
+  account?: AccountRef;
 }
 
 export interface ContextSnapshot {
@@ -288,6 +297,8 @@ export interface Adapter {
    * `scanUsage`. Core prices them (`buildHistory`). Titles only: never prompts, message bodies or tool output.
    */
   listHistory?(opts?: HistoryOptions): Promise<HistorySession[]>;
+  /** Every account this adapter has seen evidence of so far (hashed ids only), for FleetSnapshot.accounts. */
+  readAccounts?(): Promise<AccountInfo[]>;
 }
 
 // ---------- Report shapes (served at /api/report and printed by `signalbox report --json`) ----------
@@ -367,10 +378,51 @@ export interface FleetSession extends SessionInfo {
 export interface FleetSnapshot {
   generatedAt: string;
   sessions: FleetSession[];
-  /** Freshest reading per (agent, kind). */
+  /** One reading per (agent, account, kind): a window not yet reset first, then the newest reading. */
   limits: LimitSnapshot[];
   compactions: CompactionEvent[];
   health: AdapterHealth[];
+  /** Every account seen (with the user's labels); absent from CLIs before accounts. */
+  accounts?: AccountInfo[];
+}
+
+// ---------- Accounts (packages/core/src/accounts.ts) ----------
+// Which subscription a session ran under. Never an email, a name or a raw vendor id: an adapter hashes the vendor's
+// account and organization UUIDs right after it reads them (accountEvidence), and only the hash travels. Plan limits
+// belong to the (account, organization) pair: one person can be in a personal organization (e.g. Max) and a Team one.
+
+/** Where an account id came from. Adapters list the stability of each in their health rows. */
+export type AccountSource = "claude-app-folder" | "transcript" | "config-login" | "tap-config-dir" | "account-match" | (string & {});
+
+export interface AccountRef {
+  /**
+   * Opaque and stable: "acct-" + 12 hex of sha256(accountUuid + "\n" + organizationUuid). With only the account half
+   * known (`orgKnown` false) the organization part is "?", so such an id never equals a full one.
+   */
+  id: string;
+  orgKnown: boolean;
+  source: AccountSource;
+  /**
+   * "recorded": the session's own files name the account (the Claude app's folder for it, a transcript line).
+   * "inferred": the current terminal login of the config dir the session ran from (a later /login there would make
+   * it wrong), or an account-only id completed by the one full id with the same account ("account-match"); UIs mark it.
+   */
+  quality: "recorded" | "inferred";
+}
+
+export interface AccountInfo {
+  id: string;
+  orgKnown: boolean;
+  /** The user's name for it (Signalbox's accounts.json), sanitized; UIs fall back to the short id. */
+  label?: string;
+  /** Every source that named it, sorted. */
+  sources: AccountSource[];
+  /** Config dirs whose terminal login (oauthAccount in Claude Code's global config) is this account now. */
+  loginConfigDirs?: string[];
+  /** The Claude app's session list has a folder for this account (sessions run in the desktop app). */
+  claudeAppFolder?: boolean;
+  /** Fleet sessions that are busy, waiting or idle under this account. */
+  liveSessions?: number;
 }
 
 // ---------- Session history (`signalbox history --json`, the watch stream's "history" line) ----------
@@ -426,6 +478,17 @@ export interface AppSessionRecord {
    * transcript that is on this Mac (the file is the better evidence); without one the record is app-only anyway.
    */
   transcriptUnavailable?: boolean;
+  /** The account the app filed the record under (its folder), hashed. */
+  accountEvidence?: AccountEvidence;
+}
+
+/** One piece of evidence for a session's account, before resolveAccount picks one. Never serialized. */
+export interface AccountEvidence {
+  ref: AccountRef;
+  /** Hash of the account half alone, so a partial ref can be checked against a full one. */
+  accountKey: string;
+  /** Epoch ms the evidence dates from, when known; the newest recorded evidence wins. */
+  atMs?: number;
 }
 
 /** One session as an adapter reads it, before pricing. Core turns it into a SessionHistoryEntry. */
@@ -474,6 +537,10 @@ export interface HistorySession {
   model?: string;
   /** The effort level the app last set. */
   effort?: string;
+  /** Everything that names the session's account; historyEntry resolves it. */
+  accountEvidence?: AccountEvidence[];
+  /** Claude Code: the config dir whose projects/ holds the transcript. */
+  configDir?: string;
 }
 
 export interface SessionHistoryEntry {
@@ -528,6 +595,12 @@ export interface SessionHistoryEntry {
   workflowRuns?: number;
   resume?: HistoryResume;
   transcriptPath?: string;
+  /** The session's account; undefined is unknown (never a default). */
+  account?: AccountRef;
+  /** Recorded sources named different accounts (e.g. resumed under another one); `account` is the newest. */
+  accountConflict?: boolean;
+  /** Claude Code: the config dir whose projects/ holds the transcript. */
+  configDir?: string;
 }
 
 /** Why the Claude app's session list was not read (HistorySources.claudeApp.off). */
@@ -586,6 +659,8 @@ export interface TapSpool {
   /** ISO timestamp of when the mod wrote this. */
   writtenAt: string;
   event: "session.start" | "session.measure" | "session.end";
+  /** $CLAUDE_CONFIG_DIR of the session; null when unset (the default config). Absent from taps before it. */
+  configDir?: string | null;
   usage?: {
     /** `tokens`/`percent` are absent until a response of the live window reports a fill. */
     context?: { tokens?: number; window?: number; percent?: number };

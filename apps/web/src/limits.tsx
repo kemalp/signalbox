@@ -1,4 +1,5 @@
-import type { AdapterHealth, AgentId, FleetSession, LimitSnapshot } from "@signalbox/core";
+import type { AccountInfo, AdapterHealth, AgentId, FleetSession, LimitSnapshot } from "@signalbox/core";
+import { AccountChip, limitGroups } from "./accounts.tsx";
 import { ageMs, agentOrder, fmtAgo, fmtCountdown, fmtPercent, limitLabel, severity, windowLabel } from "./format.ts";
 import { sessionTitle } from "./fleet.tsx";
 import { AgentBadge, Icon, Meter, Section } from "./ui.tsx";
@@ -115,6 +116,8 @@ export function Limits(props: {
   sessions: FleetSession[] | undefined;
   /** Data-source health; the tap spool's entry decides what an unknown Claude Code limit says. */
   health?: AdapterHealth[] | undefined;
+  /** The fleet's accounts, for labels. */
+  accounts?: AccountInfo[] | undefined;
   now: number;
 }) {
   const spool = props.health?.find((h) => h.name === "claude-code:spool");
@@ -126,29 +129,50 @@ export function Limits(props: {
   const ordered = [...agents].sort(agentOrder);
 
   return (
-    <Section id="limits" title="Plan limits" note="Account-wide; the freshest reading per window wins">
+    <Section id="limits" title="Plan limits" note="One gauge per account and window; the newest reading of a window not yet reset wins">
       {props.limits === undefined ? (
         <p class="empty">Loading limits…</p>
       ) : (
         <div class="limits">
-          {ordered.map((agent) => {
-            const mine = limits
-              .filter((l) => l.agent === agent)
-              .sort((a, b) => (a.windowMinutes ?? 1e9) - (b.windowMinutes ?? 1e9) || a.kind.localeCompare(b.kind));
-            const plan = mine.find((l) => l.plan)?.plan;
-            return (
-              <div class="card" key={agent}>
-                <div class="limit-group-head">
-                  <AgentBadge agent={agent} />
-                  {plan ? <span class="small muted">{plan}</span> : null}
-                </div>
-                {mine.length ? (
-                  mine.map((l) => <LimitGauge key={l.kind} l={l} sessions={sessions} now={props.now} />)
-                ) : (
-                  <UnknownLimits agent={agent} spool={spool} />
-                )}
-              </div>
+          {ordered.flatMap((agent) => {
+            const groups = limitGroups(
+              limits.filter((l) => l.agent === agent),
+              props.accounts,
             );
+            if (groups.length === 0) {
+              return [
+                <div class="card" key={agent}>
+                  <div class="limit-group-head">
+                    <AgentBadge agent={agent} />
+                  </div>
+                  <UnknownLimits agent={agent} spool={spool} />
+                </div>,
+              ];
+            }
+            // An agent with accounts names each group's; readings whose account is unknown get their own card.
+            const anyAccount = groups.some((g) => g.account);
+            return groups.map((g) => {
+              const mine = [...g.limits].sort((a, b) => (a.windowMinutes ?? 1e9) - (b.windowMinutes ?? 1e9) || a.kind.localeCompare(b.kind));
+              const plan = mine.find((l) => l.plan)?.plan;
+              return (
+                <div class="card" key={`${agent}:${g.account?.id ?? "unknown"}`}>
+                  <div class="limit-group-head">
+                    <AgentBadge agent={agent} />
+                    {g.account ? (
+                      <AccountChip account={g.account} accounts={props.accounts} />
+                    ) : anyAccount ? (
+                      <span class="badge" title="The sessions that reported these readings have no known account">
+                        Account unknown
+                      </span>
+                    ) : null}
+                    {plan ? <span class="small muted">{plan}</span> : null}
+                  </div>
+                  {mine.map((l) => (
+                    <LimitGauge key={l.kind} l={l} sessions={sessions} now={props.now} />
+                  ))}
+                </div>
+              );
+            });
           })}
         </div>
       )}

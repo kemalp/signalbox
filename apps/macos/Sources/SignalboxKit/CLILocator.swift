@@ -54,16 +54,20 @@ public struct CLILaunch: Sendable, Equatable {
 public struct CLIWatchOptions: Sendable, Equatable {
     /// Read the Claude app's session list for History (the CLI's default). Off adds `--no-claude-app`.
     public var includeClaudeApp: Bool
+    /// More Claude Code config dirs to read (one per account, say): `--claude-config-dir DIR` each.
+    public var claudeConfigDirs: [String]
 
-    public init(includeClaudeApp: Bool = true) {
+    public init(includeClaudeApp: Bool = true, claudeConfigDirs: [String] = []) {
         self.includeClaudeApp = includeClaudeApp
+        self.claudeConfigDirs = claudeConfigDirs
     }
 
     public static let noClaudeAppFlag = "--no-claude-app"
+    public static let claudeConfigDirFlag = "--claude-config-dir"
 
     /// The flags, in the order they follow `watch --ndjson --days N`.
     public var arguments: [String] {
-        includeClaudeApp ? [] : [Self.noClaudeAppFlag]
+        (includeClaudeApp ? [] : [Self.noClaudeAppFlag]) + claudeConfigDirs.flatMap { [Self.claudeConfigDirFlag, $0] }
     }
 }
 

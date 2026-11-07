@@ -199,10 +199,13 @@ describe("health", () => {
       ["claude-code:titles", "internal", true],
       ["claude-code:agents-json", "preview", true],
       ["claude-code:registry", "internal", true],
+      ["claude-code:logins", "internal", true],
+      ["claude-code:accounts", "internal", true],
       ["claude-code:spool", "preview", true],
     ]);
     const none = await createClaudeAdapter({ configDir: join(sb.root, "x"), spoolDir: join(sb.root, "y"), claudeBin: join(BIN, "fake-claude-fail") }).health();
-    expect(none.filter((x) => x.ok).map((x) => x.name)).toEqual(["claude-code:agents-json"]);
+    // No global config is not a fault (no session has run there), and the accounts row is informational.
+    expect(none.filter((x) => x.ok).map((x) => x.name)).toEqual(["claude-code:agents-json", "claude-code:logins", "claude-code:accounts"]);
     // No global config file: agents --json is not run at all (it would create the file).
     expect(none.find((x) => x.name === "claude-code:agents-json")!.detail).toContain("not run");
   });

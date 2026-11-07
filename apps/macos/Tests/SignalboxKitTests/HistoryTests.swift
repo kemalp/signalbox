@@ -91,7 +91,8 @@ struct HistoryDecodingTests {
             return
         }
         #expect(at != nil)
-        let claude = try #require(h.entries.first { $0.agent == .claudeCode && $0.hasTranscript })
+        // The main config dir's session (the fixture's second dir has a terminal session with no app record).
+        let claude = try #require(h.entries.first { $0.agent == .claudeCode && $0.hasTranscript && $0.appSessionId != nil })
         #expect(claude.title == "Synthetic app title")
         #expect(claude.titleSource == .app)
         #expect(claude.appTitleSource == "user")

@@ -1,7 +1,7 @@
 // Plain-text rendering for the terminal. Pure functions over core's Report: no I/O.
 import { homedir } from "node:os";
 import { basename } from "node:path";
-import type { GroupTotals, HistorySnapshot, Report } from "@signalbox/core";
+import { accountShortId, type GroupTotals, type HistorySnapshot, type Report } from "@signalbox/core";
 
 export function fmtUsd(n: number): string {
   const sign = n < 0 ? "-" : "";
@@ -239,6 +239,8 @@ export interface HistoryTextOptions {
   windowLabel?: string;
   /** No adapter found any data: say so instead of printing an empty table. */
   noData?: boolean;
+  /** The user's account labels (accounts.json), by account id. */
+  accountLabels?: Record<string, string>;
 }
 
 /** `signalbox history`: one row per session, newest first: date, agent, title, project folder, duration, $. */
@@ -256,6 +258,11 @@ export function formatHistory(h: HistorySnapshot, opts: HistoryTextOptions = {})
     return out.join("\n");
   }
   const agentW = Math.max(5, ...h.entries.map((e) => String(e.agent).length));
+  // An account column only when some session has one: the label, else the short id; "~" marks an inferred one.
+  const accountOf = (e: (typeof h.entries)[number]) =>
+    e.account ? `${e.account.quality === "inferred" ? "~" : ""}${clipEnd(opts.accountLabels?.[e.account.id] ?? accountShortId(e.account.id), 12)}` : "-";
+  const showAccount = h.entries.some((e) => e.account);
+  const acctW = showAccount ? Math.max(7, ...h.entries.map((e) => Array.from(accountOf(e)).length)) : 0;
   // Narrow terminals get the date without the time and a shorter project column; the title takes the rest.
   const wide = width >= 100;
   const dateW = wide ? 16 : 10;
@@ -263,10 +270,11 @@ export function formatHistory(h: HistorySnapshot, opts: HistoryTextOptions = {})
   const timeW = 7;
   const costW = 10;
   const marksW = 8; // "  * live"
-  const titleW = Math.max(12, width - (dateW + 2 + agentW + 2 + 2 + projW + 2 + timeW + 2 + costW + marksW));
+  const titleW = Math.max(12, width - (dateW + 2 + agentW + 2 + 2 + projW + 2 + timeW + 2 + costW + marksW + (showAccount ? acctW + 2 : 0)));
+  const acctCol = (text: string) => (showAccount ? `  ${padEndChars(text, acctW)}` : "");
   out.push("");
   out.push(
-    `${(wide ? "Last active" : "Date").padEnd(dateW)}  ${"Agent".padEnd(agentW)}  ${"Title".padEnd(titleW)}  ${"Project".padEnd(projW)}  ${"Time".padStart(timeW)}  ${"Cost".padStart(costW)}`,
+    `${(wide ? "Last active" : "Date").padEnd(dateW)}  ${"Agent".padEnd(agentW)}${acctCol("Account")}  ${"Title".padEnd(titleW)}  ${"Project".padEnd(projW)}  ${"Time".padStart(timeW)}  ${"Cost".padStart(costW)}`,
   );
   let unpriced = false;
   let appOnly = false;
@@ -285,13 +293,18 @@ export function formatHistory(h: HistorySnapshot, opts: HistoryTextOptions = {})
     if (hasUnpriced) unpriced = true;
     if (e.hasTranscript === false) appOnly = true;
     out.push(
-      `${date.padEnd(dateW)}  ${String(e.agent).padEnd(agentW)}  ${title}  ${project}  ${time.padStart(timeW)}  ${cost.padStart(costW)}${marks ? `  ${marks}` : ""}`.trimEnd(),
+      `${date.padEnd(dateW)}  ${String(e.agent).padEnd(agentW)}${acctCol(accountOf(e))}  ${title}  ${project}  ${time.padStart(timeW)}  ${cost.padStart(costW)}${marks ? `  ${marks}` : ""}`.trimEnd(),
     );
   }
   out.push("");
   if (h.truncated) out.push(wrap("", `Showing the newest ${fmtInt(h.entries.length)} of ${fmtInt(h.total)} sessions; --limit N shows more.`, width));
   if (unpriced) out.push(wrap("", "* includes tokens of a model with no list price, counted as $0.", width));
   if (appOnly) out.push(wrap("", "app: listed by the Claude app, with no transcript on this Mac, so its time and figures are unknown.", width));
+  if (showAccount) {
+    out.push(
+      wrap("", "Account: your label (accounts.json) or a short id; ~ means inferred from the current login of the config dir the session ran from; - means unknown.", width),
+    );
+  }
   out.push(wrap("", "Titles are the agents' (and the Claude app's) own session names, never prompts. Dollar figures are list-price equivalents, not a bill.", width));
   return out.join("\n");
 }

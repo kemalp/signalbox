@@ -83,10 +83,11 @@ public final class SettingsStore {
         static let planCurrency = "display.planCurrency"
         static let cliPath = "advanced.cliPathOverride"
         static let includeClaudeApp = "advanced.includeClaudeAppSessions"
+        static let claudeConfigDirs = "advanced.claudeConfigDirs"
 
         static let all = [schema, showDockIcon, menuBarLabel, notifyWaiting, notifyLongTask, longTaskMinutes, notifyLimits,
                           limitThresholds, notifyCLIFailure, quietWhenViewing, bannerDismissed, mutes, currency, rates,
-                          ratesAsOf, planPrice, planCurrency, cliPath, includeClaudeApp]
+                          ratesAsOf, planPrice, planCurrency, cliPath, includeClaudeApp, claudeConfigDirs]
     }
 
     public static let defaultThresholds = [80, 95]
@@ -149,7 +150,9 @@ public final class SettingsStore {
     public var includeClaudeAppSessions = true { didSet { write(Key.includeClaudeApp, includeClaudeAppSessions) } }
 
     /// The `watch` flags these settings ask for.
-    public var watchOptions: CLIWatchOptions { CLIWatchOptions(includeClaudeApp: includeClaudeAppSessions) }
+    /// More Claude Code config dirs for the CLI to read (Settings ▸ Advanced ▸ Claude Code folders), absolute paths.
+    public var claudeConfigDirs: [String] = [] { didSet { write(Key.claudeConfigDirs, claudeConfigDirs) } }
+    public var watchOptions: CLIWatchOptions { CLIWatchOptions(includeClaudeApp: includeClaudeAppSessions, claudeConfigDirs: claudeConfigDirs) }
 
     @ObservationIgnored private let defaults: any SettingsBackend
     /// The schema version found in the defaults (nil when they hold no settings yet).
@@ -194,6 +197,7 @@ public final class SettingsStore {
         planCurrency = (d.object(forKey: Key.planCurrency) as? String).flatMap(DisplayCurrency.init(rawValue:)) ?? .usd
         cliPathOverride = d.object(forKey: Key.cliPath) as? String ?? ""
         includeClaudeAppSessions = d.object(forKey: Key.includeClaudeApp) as? Bool ?? true
+        claudeConfigDirs = (d.object(forKey: Key.claudeConfigDirs) as? [String] ?? []).filter { $0.hasPrefix("/") }
     }
 
     private func write(_ key: String, _ value: Any?) {

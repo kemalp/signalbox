@@ -10,6 +10,7 @@ export {
   defaultClaudeAppFs,
   nodeClaudeAppFs,
   parseAppSession,
+  redactIdFolders,
   tracedClaudeAppFs,
   type ClaudeAppFs,
   type ClaudeAppRead,

@@ -52,6 +52,12 @@ struct HistoryInspector: View {
                     if e.hasTranscript || e.gitBranch != nil { row("Git branch", e.gitBranch, mono: true, sensitive: true) }
                     if e.hasTranscript || e.entrypoint != nil { row("Entrypoint", e.entrypoint) }
                     if e.hasTranscript || e.version != nil { row("Version", e.version.map { "v\($0)" }) }
+                    if e.agent == .claudeCode {
+                        AccountDetail(account: e.account, conflict: e.accountConflict == true, entrypoint: e.entrypoint)
+                        if let dir = e.configDir {
+                            row("Config folder", Fmt.shortPath(dir), sensitive: true)
+                        }
+                    }
                 }
                 if e.isAppOnly {
                     Section("Usage") {

@@ -171,6 +171,11 @@ public struct NotificationPolicy: Sendable {
         var resetsAt: Date?
         var fired: Set<Double> = []
         var observedAt: Date
+        /// What the reading is, apart from its account: so when the same session's window comes back under another
+        /// account id (found later, or completed), what already fired carries over instead of alerting again.
+        var agent: AgentID? = nil
+        var kind: String? = nil
+        var sessionId: String? = nil
     }
 
     private(set) var sessions: [String: SessionMemory] = [:]
@@ -237,11 +242,13 @@ public struct NotificationPolicy: Sendable {
         let seen = Set(current.sessions.map(\.id))
         sessions = sessions.filter { seen.contains($0.key) || now.timeIntervalSince($0.value.lastSeen) < Self.forgetSessionAfter }
 
-        out += evaluateLimits(current.limits, startup: startup, context: context)
+        out += evaluateLimits(current.limits, accounts: current.accounts ?? [], startup: startup, context: context)
         return out
     }
 
-    private mutating func evaluateLimits(_ readings: [LimitSnapshot], startup: Bool, context: NotificationContext) -> [NotificationRequest] {
+    private mutating func evaluateLimits(_ readings: [LimitSnapshot], accounts: [AccountInfo], startup: Bool, context: NotificationContext) -> [NotificationRequest] {
+        // With readings from more than one account per agent, a title names the account.
+        let several = Set(Dictionary(grouping: readings, by: \.agent).filter { Set($0.value.map { $0.account?.id ?? "" }).count > 1 }.keys)
         let now = context.now
         let thresholds = Self.sanitize(context.settings.limitThresholds)
         var out: [NotificationRequest] = []
@@ -251,8 +258,12 @@ public struct NotificationPolicy: Sendable {
             if state == .resetPassed { continue }
             // A stale reading never notifies; at app start it still records what was already passed.
             if state == .stale, !startup { continue }
-            var m = limits[l.id] ?? LimitMemory(resetsAt: l.resetsAt, observedAt: l.observedAt)
-            if limits[l.id] != nil {
+            let existing = sameReading(l) ?? limits[l.id]
+            var m = existing ?? LimitMemory(resetsAt: l.resetsAt, observedAt: l.observedAt)
+            m.agent = l.agent
+            m.kind = l.kind
+            m.sessionId = l.sessionId
+            if existing != nil {
                 // An older reading arriving late changes nothing.
                 if l.observedAt < m.observedAt { continue }
                 if Self.isNewWindow(old: m.resetsAt, new: l.resetsAt) {
@@ -267,12 +278,22 @@ public struct NotificationPolicy: Sendable {
             let passed = thresholds.filter { l.usedPercent >= $0 }
             let fresh = passed.filter { !m.fired.contains($0) }
             if let highest = fresh.max(), !startup, context.settings.limits {
-                out.append(Self.limitRequest(l, threshold: highest, now: now))
+                let name = several.contains(l.agent) ? (l.account.map { AccountNaming.name($0.id, accounts: accounts) } ?? "account unknown") : nil
+                out.append(Self.limitRequest(l, threshold: highest, now: now, accountName: name))
             }
             m.fired.formUnion(passed)
             limits[l.id] = m
         }
         return out
+    }
+
+    /// The newest memory of this same reading (agent, kind, session, window) under any account id, so a reading whose
+    /// account moved (or moved back) keeps what already fired.
+    private func sameReading(_ l: LimitSnapshot) -> LimitMemory? {
+        guard let sid = l.sessionId else { return nil }
+        return limits.values
+            .filter { $0.agent == l.agent && $0.kind == l.kind && $0.sessionId == sid && !Self.isNewWindow(old: $0.resetsAt, new: l.resetsAt) }
+            .max { $0.observedAt < $1.observedAt }
     }
 
     static func isNewWindow(old: Date?, new: Date?) -> Bool {
@@ -337,12 +358,13 @@ public struct NotificationPolicy: Sendable {
         )
     }
 
-    static func limitRequest(_ l: LimitSnapshot, threshold: Double, now: Date) -> NotificationRequest {
+    static func limitRequest(_ l: LimitSnapshot, threshold: Double, now: Date, accountName: String? = nil) -> NotificationRequest {
         let period = l.resetsAt.map { String(Int($0.timeIntervalSince1970)) } ?? "none"
+        let who = accountName.map { "\(Fmt.agentName(l.agent)) (\($0))" } ?? Fmt.agentName(l.agent)
         return NotificationRequest(
             id: "limit/\(l.id)/\(Int(threshold))/\(period)",
             kind: .limit,
-            title: "\(Fmt.agentName(l.agent)): \(Fmt.limitLabel(l)) at \(Fmt.percent(l.usedPercent))",
+            title: "\(who): \(Fmt.limitLabel(l)) at \(Fmt.percent(l.usedPercent))",
             body: "Past your \(Fmt.percent(threshold)) alert · \(Fmt.countdown(l.resetsAt, now: now)).",
             target: .limits
         )

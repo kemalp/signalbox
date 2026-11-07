@@ -4,7 +4,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { cpSync, mkdirSync } from "node:fs";
 import { join, relative } from "node:path";
-import { CLAUDE_APP_PATH, CLAUDE_APP_TRACE_ENV } from "@signalbox/adapter-claude";
+import { CLAUDE_APP_PATH, CLAUDE_APP_TRACE_ENV, redactIdFolders } from "@signalbox/adapter-claude";
 import type { AdapterHealth, HistorySnapshot, SessionHistoryEntry } from "@signalbox/core";
 import { APP_ARCHIVED, APP_GONE, APP_IDS, APP_LINKED, APP_TITLES, CANARY, MAIN, makeAppHome, runCli, TRANSCRIPT_ONLY, type AppHome } from "./claude-app-home.ts";
 
@@ -138,11 +138,14 @@ describe("the audit trace (SIGNALBOX_CLAUDE_APP_TRACE=1)", () => {
     const trace = traceOf(err);
     for (const { path } of trace) expect(path === base || path.startsWith(`${base}/`)).toBe(true);
     const opened = trace.filter((t) => t.op === "open").map((t) => t.path);
-    expect(opened.sort()).toEqual([...home.tree.allowed].sort());
+    // The account and organization folders are printed as <id>.
+    const shown = (p: string) => redactIdFolders(p, base);
+    expect(opened.sort()).toEqual(home.tree.allowed.map(shown).sort());
+    expect(err).not.toContain("acct-0001");
     for (const p of [...opened, ...trace.filter((t) => t.op === "lstat").map((t) => t.path)]) {
       expect(CLAUDE_APP_PATH.test(relative(base, p))).toBe(true);
     }
-    for (const d of home.tree.decoys) expect(opened).not.toContain(d);
+    for (const d of home.tree.decoys) expect(opened).not.toContain(shown(d));
     // `doctor` (the health row) lists names and opens nothing.
     const doctor = traceOf((await runCli(["doctor"], env)).err);
     expect(doctor.length).toBeGreaterThan(0);

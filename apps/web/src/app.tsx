@@ -5,6 +5,7 @@ import { AuthError, forgetToken, takeToken, useNow, usePoll } from "./api.ts";
 import { agentOrder, fmtAgo, fmtTime } from "./format.ts";
 import { Fleet } from "./fleet.tsx";
 import { Ledger, Reconciliation, type RangeDays } from "./ledger.tsx";
+import { Accounts } from "./accounts.tsx";
 import { Limits } from "./limits.tsx";
 import { Compactions, Health } from "./panels.tsx";
 import { BrandMark, Icon, LIST_PRICE_NOTE } from "./ui.tsx";
@@ -178,8 +179,9 @@ function Dashboard({ token, onAuthFail }: { token: string; onAuthFail(): void })
             </span>
           </div>
         ) : null}
-        <Fleet sessions={sessions} now={now} />
-        <Limits limits={fleet.data?.limits} sessions={sessions} health={health.data ?? fleet.data?.health} now={now} />
+        <Fleet sessions={sessions} now={now} accounts={fleet.data?.accounts} />
+        <Limits limits={fleet.data?.limits} sessions={sessions} health={health.data ?? fleet.data?.health} accounts={fleet.data?.accounts} now={now} />
+        <Accounts accounts={fleet.data?.accounts} sessions={sessions} />
         <Ledger
           report={report.data}
           refreshing={report.loading && report.data !== undefined}
