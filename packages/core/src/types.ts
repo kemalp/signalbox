@@ -299,6 +299,8 @@ export interface Adapter {
   listHistory?(opts?: HistoryOptions): Promise<HistorySession[]>;
   /** Every account this adapter has seen evidence of so far (hashed ids only), for FleetSnapshot.accounts. */
   readAccounts?(): Promise<AccountInfo[]>;
+  /** How long each config dir keeps transcripts (one settings value per dir, nothing else), for FleetSnapshot.retention. */
+  readRetention?(): Promise<RetentionInfo[]>;
 }
 
 // ---------- Report shapes (served at /api/report and printed by `signalbox report --json`) ----------
@@ -384,6 +386,35 @@ export interface FleetSnapshot {
   health: AdapterHealth[];
   /** Every account seen (with the user's labels); absent from CLIs before accounts. */
   accounts?: AccountInfo[];
+  /** How long each Claude Code config dir keeps transcripts; absent from CLIs before retention. */
+  retention?: RetentionInfo[];
+}
+
+// ---------- Transcript retention (packages/core/src/retention.ts) ----------
+
+/**
+ * How long an agent keeps its session transcripts before deleting them (Claude Code's `cleanupPeriodDays`), for one
+ * config dir, as far as Signalbox can see: the managed settings file(s) and the dir's own settings.json. Project
+ * settings files, `--settings`, MDM profiles and settings an organization serves from its console can also set it
+ * and aren't seen.
+ */
+export interface RetentionInfo {
+  agent: AgentId;
+  configDir: string;
+  /** The value in force, in days: a whole number, 1 or more. Unset when no file sets it, or when it is invalid. */
+  days?: number;
+  /** Where the value comes from: the managed settings (they win), the dir's settings.json, or neither (the default). */
+  source: "managed" | "user" | "default";
+  /** The file that sets it, when one does. */
+  file?: string;
+  /** The value as written when it isn't a whole number of days, 1 or more (JSON text, at most 40 characters). */
+  invalid?: string;
+  /** The agent's default, used when nothing sets it. */
+  defaultDays: number;
+  /** A file that could have set it couldn't be read, so the value in force can't be told. */
+  problem?: string;
+  /** Other config dirs whose agent prunes the same transcripts folder (a shared projects/): the shortest wins. */
+  sharesTranscriptsWith?: string[];
 }
 
 // ---------- Accounts (packages/core/src/accounts.ts) ----------

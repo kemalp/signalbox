@@ -1105,6 +1105,12 @@
         "detail": "last history: 58 of 61 sessions have an account (21 from the Claude app's folder names, 2 from transcript account lines, 35 inferred from a config dir's current login); 3 accounts recorded so far"
       },
       {
+        "name": "claude-code:retention",
+        "stability": "documented",
+        "ok": true,
+        "detail": "/Users/you/.claude: 365 days (settings.json); /Users/you/.claude-team: 30 days (not set: the default) (cleanupPeriodDays only, from settings.json and the managed settings; project settings files aren't read)"
+      },
+      {
         "name": "claude-app:sessions",
         "stability": "internal",
         "ok": true,
@@ -1169,6 +1175,54 @@
           "transcript"
         ],
         "liveSessions": 2
+      }
+    ],
+    "retention": [
+      {
+        "agent": "claude-code",
+        "configDir": "/Users/you/.claude",
+        "source": "user",
+        "file": "/Users/you/.claude/settings.json",
+        "days": 365,
+        "defaultDays": 30
+      },
+      {
+        "agent": "claude-code",
+        "configDir": "/Users/you/.claude-team",
+        "source": "default",
+        "defaultDays": 30
+      },
+      {
+        "agent": "claude-code",
+        "configDir": "/Users/you/code/clients/acme-corporation/platform-monorepo/packages/an-unreasonably-long-package-directory-name/.claude-client",
+        "source": "managed",
+        "file": "/Library/Application Support/ClaudeCode/managed-settings.json",
+        "days": 14,
+        "defaultDays": 30
+      },
+      {
+        "agent": "claude-code",
+        "configDir": "/Users/you/.claude-zero",
+        "source": "user",
+        "file": "/Users/you/.claude-zero/settings.json",
+        "invalid": "0",
+        "defaultDays": 30
+      },
+      {
+        "agent": "claude-code",
+        "configDir": "/Users/you/.claude-broken",
+        "source": "default",
+        "defaultDays": 30,
+        "problem": "/Users/you/.claude-broken/settings.json isn't valid JSON"
+      },
+      {
+        "agent": "aider",
+        "configDir": "/Users/you/.aider",
+        "source": "default",
+        "defaultDays": 7,
+        "sharesTranscriptsWith": [
+          "/Users/you/.aider-2"
+        ]
       }
     ]
   },
@@ -3559,6 +3613,12 @@
       "stability": "internal",
       "ok": true,
       "detail": "last history: 58 of 61 sessions have an account (21 from the Claude app's folder names, 2 from transcript account lines, 35 inferred from a config dir's current login); 3 accounts recorded so far"
+    },
+    {
+      "name": "claude-code:retention",
+      "stability": "documented",
+      "ok": true,
+      "detail": "/Users/you/.claude: 365 days (settings.json); /Users/you/.claude-team: 30 days (not set: the default) (cleanupPeriodDays only, from settings.json and the managed settings; project settings files aren't read)"
     },
     {
       "name": "claude-app:sessions",

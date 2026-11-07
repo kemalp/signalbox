@@ -12,6 +12,7 @@ import {
   embeddedModelTables,
   findPrice,
   plural,
+  retentionWarning,
   type AdapterHealth,
   type ModelTable,
   type PriceTable,
@@ -260,10 +261,19 @@ export async function runDoctor(opts: {
       warnings.push(`${la.entry.displayName} data exists, but its CLI (${la.entry.bin.name}) ${binMissing ? "was " : ""}${v.error}.`);
     }
     for (const h of health[i]!) {
-      if (h.ok || h.name.endsWith(":spool")) continue;
+      // Retention has its own warnings below (also for a period that is merely short, which health doesn't flag).
+      if (h.ok || h.name.endsWith(":spool") || h.name.endsWith(":retention")) continue;
       // One cause, one warning: a missing binary already explains why agents --json failed.
       if (binMissing && h.name.endsWith(":agents-json")) continue;
       warnings.push(`${h.name} is not working: ${h.detail}`);
+    }
+    try {
+      for (const r of (await la.adapter.readRetention?.()) ?? []) {
+        const w = retentionWarning(r);
+        if (w) warnings.push(w);
+      }
+    } catch {
+      // The retention health row already says what failed.
     }
   }
 

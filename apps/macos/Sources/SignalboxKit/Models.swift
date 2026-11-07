@@ -317,17 +317,20 @@ public struct FleetSnapshot: Codable, Hashable, Sendable {
     public var health: [AdapterHealth]
     /// Every account the CLI has seen, with your labels; nil from CLIs before accounts.
     public var accounts: [AccountInfo]?
+    /// How long each Claude Code config folder keeps transcripts; nil from CLIs before retention.
+    public var retention: [RetentionInfo]?
 
-    public init(generatedAt: Date, sessions: [FleetSession] = [], limits: [LimitSnapshot] = [], compactions: [CompactionEvent] = [], health: [AdapterHealth] = [], accounts: [AccountInfo]? = nil) {
+    public init(generatedAt: Date, sessions: [FleetSession] = [], limits: [LimitSnapshot] = [], compactions: [CompactionEvent] = [], health: [AdapterHealth] = [], accounts: [AccountInfo]? = nil, retention: [RetentionInfo]? = nil) {
         self.generatedAt = generatedAt
         self.sessions = sessions
         self.limits = limits
         self.compactions = compactions
         self.health = health
         self.accounts = accounts
+        self.retention = retention
     }
 
-    enum CodingKeys: String, CodingKey { case generatedAt, sessions, limits, compactions, health, accounts }
+    enum CodingKeys: String, CodingKey { case generatedAt, sessions, limits, compactions, health, accounts, retention }
 
     public init(from decoder: any Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -337,6 +340,7 @@ public struct FleetSnapshot: Codable, Hashable, Sendable {
         compactions = c.lossyArray(CompactionEvent.self, forKey: .compactions)
         health = c.lossyArray(AdapterHealth.self, forKey: .health)
         accounts = c.contains(.accounts) ? c.lossyArray(AccountInfo.self, forKey: .accounts) : nil
+        retention = c.contains(.retention) ? c.lossyArray(RetentionInfo.self, forKey: .retention) : nil
     }
 }
 

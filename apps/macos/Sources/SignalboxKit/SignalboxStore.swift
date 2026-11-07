@@ -494,6 +494,24 @@ public final class SignalboxStore {
         return (live, past)
     }
 
+    // MARK: Retention
+
+    /// Each Claude Code config folder's retention and its status against `warnBelowDays` (0: no "short" check).
+    public func retention(warnBelowDays: Int) -> [(info: RetentionInfo, status: RetentionStatus)] {
+        (fleet?.retention ?? []).map { ($0, RetentionStatus.of($0, warnBelowDays: warnBelowDays)) }
+    }
+
+    /// The popover's line: the worst folder that is invalid or kept too briefly (the shortest first), or nil when none
+    /// is, or when the check is off.
+    public func retentionWarning(warnBelowDays: Int) -> String? {
+        guard warnBelowDays > 0 else { return nil }
+        let rows = retention(warnBelowDays: warnBelowDays)
+        let worst = rows.filter { $0.status == .short || $0.status == .invalid }.max { a, b in
+            a.status != b.status ? a.status < b.status : (a.info.effectiveDays ?? 0) > (b.info.effectiveDays ?? 0)
+        }
+        return worst.flatMap { RetentionText.warning($0.info, status: $0.status, several: rows.count > 1) }
+    }
+
     /// One group of plan windows per (agent, account), for `agent`; the unknown-account group last.
     public func limitGroups(for agent: AgentID) -> [LimitGroup] {
         LimitGroup.groups(limits.filter { $0.agent == agent }, name: accountName)

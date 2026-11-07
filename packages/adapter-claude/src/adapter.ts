@@ -29,6 +29,8 @@ import {
   type LedgerEntry,
   type LimitSnapshot,
   type ModelTable,
+  type RetentionInfo,
+  retentionText,
   type ScanOptions,
   type SessionInfo,
   type SessionListOptions,
@@ -37,6 +39,7 @@ import {
 } from "../../core/src/index.ts";
 import { ClaudeAppReader, type ClaudeAppFs, type ClaudeAppRead } from "./claude-app.ts";
 import { ConfigLoginReader, defaultLoginFs, type LoginFs, type LoginRead } from "./config-account.ts";
+import { RetentionReader } from "./retention.ts";
 import { lastMainResponse } from "./context.ts";
 import { FileCache, type FileStamp } from "./file-cache.ts";
 import { forEachLine } from "./lines.ts";
@@ -91,6 +94,10 @@ export interface ClaudeAdapterOptions {
   loginFs?: LoginFs;
   /** The home folder for Claude Code's defaults (~/.claude, ~/.claude.json). Default os.homedir(); tests set it. */
   homeDir?: string;
+  /** The managed settings folder read for cleanupPeriodDays; false skips it. Default: the platform's (see retention.ts). */
+  managedSettingsDir?: string | false;
+  /** Filesystem calls of the settings reader (tests). */
+  settingsFs?: ClaudeAppFs;
 }
 
 /** What the last listHistory took from the Claude app's list. */
@@ -133,6 +140,8 @@ export interface ClaudeCodeAdapter extends Adapter {
   claudeAppStatus(): ClaudeAppStatus | undefined;
   /** Accounts seen so far: each config dir's login, the Claude app's folders, transcript account lines. */
   readAccounts(): Promise<AccountInfo[]>;
+  /** How long each config dir keeps transcripts (cleanupPeriodDays only). */
+  readRetention(maxAgeMs?: number): Promise<RetentionInfo[]>;
 }
 
 /** Reuse one `claude agents --json` result across calls made in the same refresh. */
@@ -292,6 +301,8 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
   /** Claude Code's own default config dir, ~/.claude. */
   private readonly claudeDefaultDir: string;
   private loginCache?: { at: number; reads: Map<string, LoginRead> };
+  private readonly retention: RetentionReader;
+  private retentionCache?: { at: number; infos: RetentionInfo[] };
   private lastApp?: { at: number; read: ClaudeAppRead };
   private appInFlight?: Promise<ClaudeAppRead>;
   /** Recorded account evidence seen in transcripts and the Claude app's records (by id), for readAccounts. */
@@ -318,6 +329,7 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
     this.agentsTimeoutMs = opts.agentsTimeoutMs ?? 5000;
     this.modelTables = opts.modelTables ?? embeddedModelTables();
     this.logins = new ConfigLoginReader(opts.loginFs ?? defaultLoginFs());
+    this.retention = new RetentionReader({ managedDir: opts.managedSettingsDir, fs: opts.settingsFs });
     // Only point the child at a config dir we were explicitly given; setting CLAUDE_CONFIG_DIR
     // to the default path is not a no-op for Claude Code (its global config moves into the dir).
     const explicit = opts.configDir ?? (process.env.CLAUDE_CONFIG_DIR || undefined);
@@ -779,6 +791,19 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
     return resolveAccount(evidence).account;
   }
 
+  /** Each config dir's cleanupPeriodDays (and the managed settings'), re-read at most every LOGINS_TTL_MS. */
+  async readRetention(maxAgeMs = LOGINS_TTL_MS): Promise<RetentionInfo[]> {
+    const c = this.retentionCache;
+    if (c && Date.now() - c.at < maxAgeMs) return c.infos;
+    const shares = new Map<string, string[]>();
+    for (const t of await this.trees()) {
+      for (const r of t.roots) shares.set(r.configDir, t.roots.filter((o) => o !== r).map((o) => o.configDir));
+    }
+    const infos = await this.retention.read(this.roots.map((r) => r.configDir), shares);
+    this.retentionCache = { at: Date.now(), infos };
+    return infos;
+  }
+
   async readAccounts(): Promise<AccountInfo[]> {
     const [logins, folders] = await Promise.all([this.readLogins(), this.readAppFolders()]);
     const found: Array<{ ev: AccountEvidence; sighting: AccountSighting }> = [];
@@ -1016,7 +1041,7 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
   }
 
   async health(): Promise<AdapterHealth[]> {
-    const [trees, files, regs, runs, spool, app, logins] = await Promise.all([
+    const [trees, files, regs, runs, spool, app, logins, retention] = await Promise.all([
       this.trees(),
       this.listAllTranscripts(),
       Promise.all(this.roots.map((r) => readRegistry(r.sessionsDir))),
@@ -1024,6 +1049,7 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
       readSpoolDir(this.spoolDir, this.spoolCache),
       this.claudeAppHealth(),
       this.readLogins(0),
+      this.readRetention(0),
     ]);
     const many = this.roots.length > 1;
     const where = trees
@@ -1110,6 +1136,15 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
             (st.conflicts ? `, ${st.conflicts} with recorded sources that disagree` : "") +
             `; ${this.seenEvidence.size} account ids recorded so far`
           : "read with the history: the Claude app's folder names, transcript account lines, and each config dir's login for terminal sessions",
+      },
+      {
+        name: "claude-code:retention",
+        stability: "documented",
+        // Whether the setting could be read, and is valid; how short is too short is the app's (and doctor's) call.
+        ok: retention.every((r) => r.problem === undefined && r.invalid === undefined),
+        detail:
+          `${perRoot((i) => retentionText(retention[i]!))} ` +
+          "(cleanupPeriodDays only, from settings.json and the managed settings; project settings files aren't read)",
       },
       {
         name: "claude-code:spool",

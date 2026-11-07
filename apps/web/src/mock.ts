@@ -19,6 +19,7 @@ import {
   type ReconciliationRow,
   type RecordKind,
   type Report,
+  type RetentionInfo,
   type TokenCounts,
 } from "@signalbox/core";
 import type { ReportQuery } from "./server.ts";
@@ -591,7 +592,13 @@ export function mockFleet(now: Date = new Date()): FleetSnapshot {
     },
   ];
 
-  return { generatedAt: now.toISOString(), sessions, limits, compactions, health: mockHealth(), accounts };
+  // The main folder keeps a year; the Team folder sets nothing, so Claude Code's 30-day default applies.
+  const retention: RetentionInfo[] = [
+    { agent: "claude-code", configDir: "/Users/you/.claude", source: "user", file: "/Users/you/.claude/settings.json", days: 365, defaultDays: 30 },
+    { agent: "claude-code", configDir: "/Users/you/.claude-team", source: "default", defaultDays: 30 },
+  ];
+
+  return { generatedAt: now.toISOString(), sessions, limits, compactions, health: mockHealth(), accounts, retention };
 }
 
 export function mockHealth(): AdapterHealth[] {
@@ -613,6 +620,13 @@ export function mockHealth(): AdapterHealth[] {
       ok: true,
       detail:
         "last history: 58 of 61 sessions have an account (21 from the Claude app's folder names, 2 from transcript account lines, 35 inferred from a config dir's current login); 3 accounts recorded so far",
+    },
+    {
+      name: "claude-code:retention",
+      stability: "documented",
+      ok: true,
+      detail:
+        "/Users/you/.claude: 365 days (settings.json); /Users/you/.claude-team: 30 days (not set: the default) (cleanupPeriodDays only, from settings.json and the managed settings; project settings files aren't read)",
     },
     {
       name: "claude-app:sessions",

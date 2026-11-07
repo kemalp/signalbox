@@ -84,10 +84,11 @@ public final class SettingsStore {
         static let cliPath = "advanced.cliPathOverride"
         static let includeClaudeApp = "advanced.includeClaudeAppSessions"
         static let claudeConfigDirs = "advanced.claudeConfigDirs"
+        static let retentionWarnDays = "advanced.retentionWarnDays"
 
         static let all = [schema, showDockIcon, menuBarLabel, notifyWaiting, notifyLongTask, longTaskMinutes, notifyLimits,
                           limitThresholds, notifyCLIFailure, quietWhenViewing, bannerDismissed, mutes, currency, rates,
-                          ratesAsOf, planPrice, planCurrency, cliPath, includeClaudeApp, claudeConfigDirs]
+                          ratesAsOf, planPrice, planCurrency, cliPath, includeClaudeApp, claudeConfigDirs, retentionWarnDays]
     }
 
     public static let defaultThresholds = [80, 95]
@@ -154,6 +155,12 @@ public final class SettingsStore {
     public var claudeConfigDirs: [String] = [] { didSet { write(Key.claudeConfigDirs, claudeConfigDirs) } }
     public var watchOptions: CLIWatchOptions { CLIWatchOptions(includeClaudeApp: includeClaudeAppSessions, claudeConfigDirs: claudeConfigDirs) }
 
+    /// Warn when a Claude Code folder keeps transcripts for fewer days than this (0: never). Judged in the app from the
+    /// raw values the CLI sends, so changing it needs no restart.
+    public var retentionWarnDays = SettingsStore.defaultRetentionWarnDays { didSet { write(Key.retentionWarnDays, retentionWarnDays) } }
+    public static let defaultRetentionWarnDays = 90
+    public static let retentionWarnChoices = [0, 60, 90, 180, 365]
+
     @ObservationIgnored private let defaults: any SettingsBackend
     /// The schema version found in the defaults (nil when they hold no settings yet).
     public let loadedSchemaVersion: Int?
@@ -198,6 +205,8 @@ public final class SettingsStore {
         cliPathOverride = d.object(forKey: Key.cliPath) as? String ?? ""
         includeClaudeAppSessions = d.object(forKey: Key.includeClaudeApp) as? Bool ?? true
         claudeConfigDirs = (d.object(forKey: Key.claudeConfigDirs) as? [String] ?? []).filter { $0.hasPrefix("/") }
+        retentionWarnDays = (d.object(forKey: Key.retentionWarnDays) as? Int).flatMap { Self.retentionWarnChoices.contains($0) ? $0 : nil }
+            ?? Self.defaultRetentionWarnDays
     }
 
     private func write(_ key: String, _ value: Any?) {

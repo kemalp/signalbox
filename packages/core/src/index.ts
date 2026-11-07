@@ -6,3 +6,4 @@ export * from "./commands.ts";
 export * from "./ledger.ts";
 export * from "./history.ts";
 export * from "./accounts.ts";
+export * from "./retention.ts";
