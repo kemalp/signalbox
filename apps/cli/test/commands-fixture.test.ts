@@ -95,6 +95,7 @@ beforeAll(async () => {
       GEMINI_CLI_HOME: home,
       SIGNALBOX_CLAUDE_BIN: join(bin, "claude"),
       SIGNALBOX_BIN_DIRS: "",
+      SIGNALBOX_CLAUDE_MANAGED_SETTINGS_DIR: "",
       PATH: bin,
       TMPDIR: join(root, "tmp"),
     },

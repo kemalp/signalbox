@@ -32,13 +32,15 @@ struct HealthView: View {
                             ForEach(store.retention(warnBelowDays: settings.retentionWarnDays), id: \.info.id) { row in
                                 RetentionRow(info: row.info, status: row.status)
                             }
-                        } header: {
-                            sectionHeader("Transcript retention", trailing: nil)
-                        } footer: {
+                            // A row, not the section's footer: an inset list's footer gets one line, and this needs several.
                             Text(retentionFooter)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .listRowSeparator(.hidden)
                                 .padding(.top, 2)
+                        } header: {
+                            sectionHeader("Transcript retention", trailing: nil)
                         }
                     }
 
@@ -81,7 +83,7 @@ struct HealthView: View {
 
     private var retentionFooter: String {
         let threshold = settings.retentionWarnDays > 0 ? " Signalbox warns below \(settings.retentionWarnDays) days (Settings ▸ Advanced)." : ""
-        return "Claude Code deletes transcripts older than cleanupPeriodDays after a session starts, and History and the cost figures lose them too.\(threshold) Read from the managed settings and each folder's settings.json; a project's own .claude/settings.json, --settings and settings your organization serves from its console can also set it and aren't checked."
+        return "Claude Code deletes transcripts older than cleanupPeriodDays after a session starts, and History and the cost figures lose them too. From Claude Code \(RetentionText.desktopKeptSince) on, desktop app sessions are kept unless managed settings set the period or desktopSessionCleanupPeriodDays is set.\(threshold) Read from the managed settings files and each folder's settings.json. A project's own .claude/settings.json, --settings, MDM profiles and settings your organization serves from its console can also set it, and aren't checked."
     }
 
     private var subtitle: String {

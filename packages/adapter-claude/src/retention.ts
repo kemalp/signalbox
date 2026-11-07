@@ -10,7 +10,10 @@
 //   - nothing is ever written.
 // Precedence follows https://code.claude.com/docs/en/settings#settings-precedence: managed settings win (the .d files
 // merged after managed-settings.json, alphabetically, per https://code.claude.com/docs/en/managed-settings), then
-// the user's settings.json. Project files, --settings, MDM profiles and console-served settings aren't read.
+// the user's settings.json. Project files, --settings, MDM profiles and console-served settings aren't read (an MDM
+// profile or console-served settings that carry any policy replace the managed files: "first-wins"). Claude Code also
+// follows a managed file deployed as a symlink; Signalbox doesn't, so such a file makes the value "unknown". An empty
+// managed file counts as `{}`, as in Claude Code; any other file must be strict JSON.
 // SIGNALBOX_CLAUDE_CONFIG_TRACE=1 logs every path it lists, stats or opens.
 import { join } from "node:path";
 import {
@@ -19,7 +22,7 @@ import {
   isValidRetentionDays,
   type RetentionInfo,
 } from "../../core/src/index.ts";
-import { CappedJsonReader, defaultConfigFs, type CappedRead } from "./capped-json.ts";
+import { CappedJsonReader, defaultConfigFs, type CappedJsonReaderOptions, type CappedRead } from "./capped-json.ts";
 import { errorCode, type ClaudeAppFs } from "./claude-app.ts";
 import { topLevelValue } from "./json-scan.ts";
 
@@ -30,9 +33,14 @@ export const MANAGED_SETTINGS_DIR_ENV = "SIGNALBOX_CLAUDE_MANAGED_SETTINGS_DIR";
 
 type Setting = { set: false } | { set: true; value: unknown };
 
-/** The `cleanupPeriodDays` member of a settings file's text; throws on a file that isn't whole JSON. */
+/** The `cleanupPeriodDays` member of a settings file's text; throws on a file that isn't strict JSON. */
 export function retentionFromSettingsText(text: string): Setting {
   return topLevelValue(text, RETENTION_KEY);
+}
+
+/** The same for a managed settings file, where an empty file counts as `{}`. */
+export function retentionFromManagedText(text: string): Setting {
+  return text.length === 0 ? { set: false } : retentionFromSettingsText(text);
 }
 
 /** Claude Code's system folder for managed settings files on this platform, or $SIGNALBOX_CLAUDE_MANAGED_SETTINGS_DIR. */
@@ -52,6 +60,8 @@ function describe(r: CappedRead<Setting>): string {
       return `${r.path} is over 1 MiB`;
     case "unparsable":
       return `${r.path} isn't valid JSON`;
+    case "changed":
+      return `${r.path} changed while it was read`;
     case "unreadable":
       return `${r.path} can't be read (${r.code})`;
     default:
@@ -63,16 +73,20 @@ export interface RetentionReaderOptions {
   /** The managed settings folder; false skips it. Default: defaultManagedSettingsDir(). */
   managedDir?: string | false;
   fs?: ClaudeAppFs;
+  /** The grace period and clock for files caught mid-write (tests). */
+  reader?: CappedJsonReaderOptions;
 }
 
 export class RetentionReader {
   private readonly files: CappedJsonReader<Setting>;
+  private readonly managedFiles: CappedJsonReader<Setting>;
   private readonly fs: ClaudeAppFs;
   private readonly managedDir: string | false;
 
   constructor(opts: RetentionReaderOptions = {}) {
     this.fs = opts.fs ?? defaultConfigFs();
-    this.files = new CappedJsonReader(retentionFromSettingsText, SETTINGS_MAX_BYTES, this.fs);
+    this.files = new CappedJsonReader(retentionFromSettingsText, SETTINGS_MAX_BYTES, this.fs, opts.reader);
+    this.managedFiles = new CappedJsonReader(retentionFromManagedText, SETTINGS_MAX_BYTES, this.fs, opts.reader);
     this.managedDir = opts.managedDir ?? defaultManagedSettingsDir();
   }
 
@@ -101,7 +115,10 @@ export class RetentionReader {
     return out;
   }
 
-  /** The managed value (the last managed file that sets it), or why it can't be told. */
+  /**
+   * The managed value (the last managed file that sets it), or why it can't be told: a file that can't be read only
+   * matters when no later file sets the value, since a later file would override whatever it says.
+   */
   private async managed(): Promise<{ found?: { value: unknown; file: string }; problem?: string }> {
     if (!this.managedDir) return {};
     const files = [join(this.managedDir, "managed-settings.json")];
@@ -114,12 +131,17 @@ export class RetentionReader {
       if (code !== "ENOENT" && code !== "ENOTDIR") return { problem: `${dropIns} can't be listed (${code})` };
     }
     let found: { value: unknown; file: string } | undefined;
+    let problem: string | undefined;
     for (const file of files) {
-      const r = await this.files.read(file);
+      const r = await this.managedFiles.read(file);
       if (r.state === "missing") continue;
-      if (r.state !== "ok") return { problem: describe(r) };
-      if (r.value?.set) found = { value: r.value.value, file };
+      if (r.state !== "ok") problem = describe(r);
+      else if (r.value?.set) {
+        found = { value: r.value.value, file };
+        problem = undefined;
+      }
     }
+    if (problem) return { problem };
     return found ? { found } : {};
   }
 }

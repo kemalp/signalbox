@@ -237,6 +237,8 @@ function loginText(l: LoginRead | undefined): string {
       return `${l.path} is over 32 MiB; not read`;
     case "unparsable":
       return `${l.path} could not be parsed`;
+    case "changed":
+      return `${l.path} changed while it was read`;
     case "unreadable":
       return `${l.path} could not be read (${l.code})`;
   }
