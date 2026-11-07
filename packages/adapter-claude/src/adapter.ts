@@ -145,6 +145,8 @@ const SPOOL_ONLY_LIVE_MS = 24 * 60 * 60 * 1000;
 const LOGINS_TTL_MS = 30_000;
 /** The fleet re-reads the Claude app's list at most this often (the history reads it every time). */
 const APP_FLEET_TTL_MS = 60_000;
+/** How soon the list is re-read when a desktop session reporting limits isn't in it yet (it was just started). */
+const APP_MISS_TTL_MS = 10_000;
 
 /** One Claude Code config dir: its transcripts, registry, `agents --json` and terminal login. */
 interface Root {
@@ -191,6 +193,17 @@ interface EvidenceCtx {
  */
 function inferable(entrypoint: string | undefined): boolean {
   return entrypoint !== undefined && entrypoint !== "claude-desktop" && !entrypoint.startsWith("sdk");
+}
+
+/** Each session's account as the app's list records it (the newest record's folders when a session has several). */
+function appEvidenceBySession(app: ClaudeAppRead | undefined): Map<string, AccountEvidence> {
+  const out = new Map<string, AccountEvidence>();
+  for (const r of app?.records ?? []) {
+    if (!r.agentSessionId || !r.accountEvidence) continue;
+    const prev = out.get(r.agentSessionId);
+    if (!prev || (r.accountEvidence.atMs ?? -Infinity) > (prev.atMs ?? -Infinity)) out.set(r.agentSessionId, r.accountEvidence);
+  }
+  return out;
 }
 
 function newestSpools(spools: TapSpool[]): Map<string, TapSpool> {
@@ -242,6 +255,8 @@ function range(opts: ScanOptions): { since: number; until: number } {
 interface HistoryBucket {
   main?: TranscriptParse;
   mainPath?: string;
+  /** The chosen main transcript's mtime: with the same session in two unshared trees (a copy), the newest copy wins. */
+  mainMtimeMs?: number;
   /** The config dir of the main transcript's tree, when only one config dir shares it. */
   configDir?: string;
   /** The config dir a resume runs with (see TranscriptFile.resumeDir). */
@@ -251,7 +266,8 @@ interface HistoryBucket {
   firstTsMs?: number;
   lastTsMs?: number;
   mtimeMs: number;
-  subagentFiles: number;
+  /** Subagent transcript names, so a session copied into a second tree doesn't count its subagents twice. */
+  subagents: Set<string>;
   /** wf_<id> directories with at least one agent transcript. */
   workflows: Set<string>;
 }
@@ -527,7 +543,7 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
     for (const r of app?.records ?? []) if (r.agentSessionId && appTime(r) >= since) active.add(r.agentSessionId);
     const buckets = new Map<string, HistoryBucket>();
     for (const sid of active) {
-      if (mains.has(sid)) buckets.set(sid, { records: [], ledger: [], mtimeMs: 0, subagentFiles: 0, workflows: new Set() });
+      if (mains.has(sid)) buckets.set(sid, { records: [], ledger: [], mtimeMs: 0, subagents: new Set(), workflows: new Set() });
     }
     // Path order and one seen-set across files, like scanUsage, so a response is counted once.
     const seen = new Set<string>();
@@ -538,12 +554,15 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
       const parsed = await this.parse(file, stamp);
       if (!parsed) continue;
       if (file.kind === "main") {
-        b.main = parsed;
-        b.mainPath = file.path;
-        b.configDir = file.configDir;
-        b.resumeDir = file.resumeDir;
+        if (!b.main || stamp.mtimeMs > (b.mainMtimeMs ?? -Infinity)) {
+          b.main = parsed;
+          b.mainPath = file.path;
+          b.mainMtimeMs = stamp.mtimeMs;
+          b.configDir = file.configDir;
+          b.resumeDir = file.resumeDir;
+        }
       } else if (file.kind === "subagent") {
-        b.subagentFiles++;
+        b.subagents.add(basename(file.path));
       } else if (file.kind === "workflow") {
         b.workflows.add(basename(dirname(file.path)));
       }
@@ -576,7 +595,7 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
         lastActivityAt: new Date(last).toISOString(),
         records: b.records,
         compactions: b.main.compactions.length,
-        subagentFiles: b.subagentFiles,
+        subagentFiles: b.subagents.size,
         workflowRuns: b.workflows.size,
       };
       if (project) s.project = project;
@@ -596,7 +615,7 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
     // An account-only id completed by the one full id with the same account seen anywhere (after the loop above,
     // which noted every transcript's account lines).
     const known = await this.knownAccounts(logins);
-    for (const s of out) if (s.accountEvidence) s.accountEvidence.push(...accountMatches(s.accountEvidence, known));
+    for (const s of out) if (s.accountEvidence) s.accountEvidence.push(...accountMatches(s.accountEvidence, known, { recordedOnly: !inferable(s.entrypoint) }));
     const titles: Record<string, number> = { custom: 0, ai: 0, "agent-name": 0, none: 0 };
     for (const s of out) titles[s.titleSource] = (titles[s.titleSource] ?? 0) + 1;
     this.titleStats = titles;
@@ -735,14 +754,8 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
       quick ? Promise.resolve(this.lastApp?.read) : this.readApp(APP_FLEET_TTL_MS),
       readSpoolDir(this.spoolDir, this.spoolCache),
     ]);
-    const byApp = new Map<string, AccountEvidence>();
-    for (const r of app?.records ?? []) {
-      if (!r.agentSessionId || !r.accountEvidence) continue;
-      const prev = byApp.get(r.agentSessionId);
-      if (!prev || (r.accountEvidence.atMs ?? -Infinity) > (prev.atMs ?? -Infinity)) byApp.set(r.agentSessionId, r.accountEvidence);
-    }
     const known = await this.knownAccounts(logins);
-    return { idx, logins, app: byApp, spools: spoolRead.spools, spoolBySession: newestSpools(spoolRead.spools), known };
+    return { idx, logins, app: appEvidenceBySession(app), spools: spoolRead.spools, spoolBySession: newestSpools(spoolRead.spools), known };
   }
 
   /**
@@ -762,7 +775,7 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
     const evidence = this.transcriptEvidence(meta, { entrypoint: hint.entrypoint, configDir: hint.configDir ?? main?.configDir }, ctx.logins, ctx.spoolBySession.get(sessionId));
     const app = ctx.app.get(sessionId);
     if (app) evidence.push(app);
-    evidence.push(...accountMatches(evidence, ctx.known));
+    evidence.push(...accountMatches(evidence, ctx.known, { recordedOnly: !inferable(hint.entrypoint ?? meta?.entrypoint) }));
     return resolveAccount(evidence).account;
   }
 
@@ -773,10 +786,20 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
     for (const f of folders) found.push({ ev: f, sighting: { ref: f.ref, claudeAppFolder: true } });
     for (const ev of this.seenEvidence.values()) found.push({ ev, sighting: { ref: ev.ref } });
     // An account named without its organization (a transcript's artifact line) is completed by the one full id with
-    // that account half (resolveAccount), so it isn't listed apart; with no such id, or several, it is.
-    const fullIds = new Map<string, Set<string>>();
-    for (const x of found) if (x.ev.ref.orgKnown) fullIds.set(x.ev.accountKey, (fullIds.get(x.ev.accountKey) ?? new Set()).add(x.ev.ref.id));
-    return accountDirectory(found.filter((x) => x.ev.ref.orgKnown || fullIds.get(x.ev.accountKey)?.size !== 1).map((x) => x.sighting));
+    // that account half (accountMatches), so it isn't listed apart; with no such id, several, or one known only as a
+    // login (which never completes a desktop session's id), it is.
+    const fullIds = new Map<string, Map<string, boolean>>();
+    for (const x of found) {
+      if (!x.ev.ref.orgKnown) continue;
+      const ids = fullIds.get(x.ev.accountKey) ?? new Map<string, boolean>();
+      ids.set(x.ev.ref.id, (ids.get(x.ev.ref.id) ?? false) || x.ev.ref.quality === "recorded");
+      fullIds.set(x.ev.accountKey, ids);
+    }
+    const completes = (key: string) => {
+      const ids = fullIds.get(key);
+      return ids?.size === 1 && [...ids.values()][0] === true;
+    };
+    return accountDirectory(found.filter((x) => x.ev.ref.orgKnown || !completes(x.ev.accountKey)).map((x) => x.sighting));
   }
 
   private claudeBin(): string | undefined {
@@ -880,7 +903,8 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
 
   async readLimits(): Promise<LimitSnapshot[]> {
     const nowMs = this.now().getTime();
-    const [ctx, regs] = await Promise.all([this.evidenceCtx(false), Promise.all(this.roots.map((r) => readRegistry(r.sessionsDir)))]);
+    const [firstCtx, regs] = await Promise.all([this.evidenceCtx(false), Promise.all(this.roots.map((r) => readRegistry(r.sessionsDir)))]);
+    let ctx = firstCtx;
     // Each live session's registry row says where it runs (entrypoint, config dir), read here rather than taken from
     // another call, so a reading's account doesn't depend on which call ran first.
     const hints = new Map<string, { entrypoint?: string; configDir?: string }>();
@@ -889,6 +913,15 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
     });
     // Only sessions with a reading still worth showing: old spools (never deleted) would otherwise cost a transcript read each.
     const reporting = new Set(spoolsWithCurrentReadings(ctx.spools, nowMs).map((sp) => sp.sessionId));
+    // A desktop session just started isn't in the app's list as last read (up to a minute ago): re-read it sooner, so
+    // its readings don't sit on the "Account unknown" card and then move.
+    const entrypointOf = (sid: string) => {
+      const main = ctx.idx.get(sid)?.path;
+      return hints.get(sid)?.entrypoint ?? (main ? this.transcripts.peek(main)?.meta.entrypoint : undefined);
+    };
+    if (this.claudeApp && [...reporting].some((sid) => !ctx.app.has(sid) && entrypointOf(sid) === "claude-desktop")) {
+      ctx = { ...ctx, app: appEvidenceBySession(await this.readApp(APP_MISS_TTL_MS)) };
+    }
     const accounts = new Map<string, AccountRef>();
     await Promise.all(
       [...reporting].map(async (sid) => {

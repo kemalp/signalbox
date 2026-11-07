@@ -96,21 +96,27 @@ function completed(winner: AccountEvidence, all: readonly AccountEvidence[]): Ac
   return { id: m.ref.id, orgKnown: true, source: m.ref.source, quality: "inferred" };
 }
 
-/** Full evidence from `known` that completes an account-only id in `evidence` (exactly one full id per account half). */
-export function accountMatches(evidence: readonly AccountEvidence[], known: Iterable<AccountEvidence>): AccountEvidence[] {
+/**
+ * Full evidence from `known` that completes an account-only id in `evidence` (exactly one full id per account half).
+ * `recordedOnly`: the one id must have been recorded somewhere (an app folder, a transcript line), not only seen as a
+ * config dir's login; for sessions a login says nothing about (desktop, SDK). Logins still count as rivals.
+ */
+export function accountMatches(evidence: readonly AccountEvidence[], known: Iterable<AccountEvidence>, opts: { recordedOnly?: boolean } = {}): AccountEvidence[] {
   const partialKeys = new Set(evidence.filter((e) => !e.ref.orgKnown).map((e) => e.accountKey));
   if (partialKeys.size === 0) return [];
-  const byKey = new Map<string, Map<string, AccountEvidence>>();
+  const byKey = new Map<string, Map<string, { ev: AccountEvidence; recorded: boolean }>>();
   for (const k of known) {
     if (!k.ref.orgKnown || !partialKeys.has(k.accountKey)) continue;
-    const ids = byKey.get(k.accountKey) ?? new Map<string, AccountEvidence>();
-    ids.set(k.ref.id, k);
+    const ids = byKey.get(k.accountKey) ?? new Map<string, { ev: AccountEvidence; recorded: boolean }>();
+    const prev = ids.get(k.ref.id);
+    ids.set(k.ref.id, { ev: prev?.ev ?? k, recorded: (prev?.recorded ?? false) || k.ref.quality === "recorded" });
     byKey.set(k.accountKey, ids);
   }
   const out: AccountEvidence[] = [];
   for (const ids of byKey.values()) {
     if (ids.size !== 1) continue;
-    const k = [...ids.values()][0]!;
+    const { ev: k, recorded } = [...ids.values()][0]!;
+    if (opts.recordedOnly && !recorded) continue;
     out.push({ ref: { ...k.ref, source: "account-match", quality: "inferred" }, accountKey: k.accountKey });
   }
   return out;

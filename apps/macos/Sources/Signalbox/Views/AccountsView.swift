@@ -80,8 +80,7 @@ struct AccountsView: View {
 
     /// Sessions with no account: counted, never given a default one.
     @ViewBuilder private var unknown: some View {
-        let live = store.sessions.filter { $0.agent == .claudeCode && $0.account == nil && $0.status != .ended }.count
-        let past = (store.history?.entries ?? []).filter { $0.agent == .claudeCode && $0.account == nil }.count
+        let (live, past) = store.unknownAccountCounts
         if live + past > 0 {
             Label {
                 Text("Account unknown: \(live) live and \(past) past Claude Code \(live + past == 1 ? "session" : "sessions"). Nothing on this Mac names their account, and a desktop session runs on the Claude app's own login, so no folder login applies.")

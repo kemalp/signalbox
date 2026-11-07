@@ -171,6 +171,11 @@ public struct NotificationPolicy: Sendable {
         var resetsAt: Date?
         var fired: Set<Double> = []
         var observedAt: Date
+        /// What the reading is, apart from its account: so when the same session's window comes back under another
+        /// account id (found later, or completed), what already fired carries over instead of alerting again.
+        var agent: AgentID? = nil
+        var kind: String? = nil
+        var sessionId: String? = nil
     }
 
     private(set) var sessions: [String: SessionMemory] = [:]
@@ -253,8 +258,12 @@ public struct NotificationPolicy: Sendable {
             if state == .resetPassed { continue }
             // A stale reading never notifies; at app start it still records what was already passed.
             if state == .stale, !startup { continue }
-            var m = limits[l.id] ?? LimitMemory(resetsAt: l.resetsAt, observedAt: l.observedAt)
-            if limits[l.id] != nil {
+            let existing = sameReading(l) ?? limits[l.id]
+            var m = existing ?? LimitMemory(resetsAt: l.resetsAt, observedAt: l.observedAt)
+            m.agent = l.agent
+            m.kind = l.kind
+            m.sessionId = l.sessionId
+            if existing != nil {
                 // An older reading arriving late changes nothing.
                 if l.observedAt < m.observedAt { continue }
                 if Self.isNewWindow(old: m.resetsAt, new: l.resetsAt) {
@@ -276,6 +285,15 @@ public struct NotificationPolicy: Sendable {
             limits[l.id] = m
         }
         return out
+    }
+
+    /// The newest memory of this same reading (agent, kind, session, window) under any account id, so a reading whose
+    /// account moved (or moved back) keeps what already fired.
+    private func sameReading(_ l: LimitSnapshot) -> LimitMemory? {
+        guard let sid = l.sessionId else { return nil }
+        return limits.values
+            .filter { $0.agent == l.agent && $0.kind == l.kind && $0.sessionId == sid && !Self.isNewWindow(old: $0.resetsAt, new: l.resetsAt) }
+            .max { $0.observedAt < $1.observedAt }
     }
 
     static func isNewWindow(old: Date?, new: Date?) -> Bool {

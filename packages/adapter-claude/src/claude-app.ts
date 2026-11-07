@@ -35,14 +35,21 @@ export type ClaudeAppSetting = { dir: string } | { off: ClaudeAppOffReason; deta
  * The reader's setting for this run. `enabled` false is --no-claude-app. The app's records describe sessions of
  * its own Claude Code config (~/.claude): with CLAUDE_CONFIG_DIR pointing anywhere else, every record would look
  * like a session whose transcript is gone (and an experiment's temporary config would pull in the real app's
- * titles), so the reader is off then, unless SIGNALBOX_CLAUDE_APP_DIR names a list explicitly.
+ * titles), so the reader is off then, unless ~/.claude is also read as an extra config dir (`extraConfigDirs`) or
+ * SIGNALBOX_CLAUDE_APP_DIR names a list explicitly.
  */
-export function claudeAppSetting(enabled: boolean, env: Record<string, string | undefined> = process.env, home = homedir()): ClaudeAppSetting {
+export function claudeAppSetting(
+  enabled: boolean,
+  env: Record<string, string | undefined> = process.env,
+  home = homedir(),
+  extraConfigDirs: readonly string[] = [],
+): ClaudeAppSetting {
   if (!enabled) return { off: "flag", detail: "off (--no-claude-app): history lists sessions with a transcript only" };
   const explicit = env[CLAUDE_APP_DIR_ENV];
   if (explicit) return { dir: explicit };
   const configDir = env.CLAUDE_CONFIG_DIR;
-  if (configDir && resolve(configDir) !== resolve(home, ".claude")) {
+  const isDefault = (dir: string) => resolve(dir) === resolve(home, ".claude");
+  if (configDir && !isDefault(configDir) && !extraConfigDirs.some(isDefault)) {
     return {
       off: "claude-config-dir",
       detail:
@@ -126,15 +133,24 @@ export function tracedClaudeAppFs(fs: ClaudeAppFs, log: (line: string) => void):
   };
 }
 
-/** A path with every UUID-shaped folder name (the app's account and organization folders) replaced by "<id>". */
-export function redactIdFolders(path: string): string {
-  return path.replace(/(^|\/)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?=\/|$)/gi, "$1<id>");
+/**
+ * A path (or trace line) with the app's account and organization folders replaced by "<id>": the first two folders
+ * under `base`, whatever their shape, and any other UUID-shaped folder name.
+ */
+export function redactIdFolders(path: string, base?: string): string {
+  let out = path;
+  if (base) {
+    const trimmed = base.replace(/\/+$/, "");
+    const root = trimmed.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    out = out.replace(new RegExp(`${root}/[^/\\s]+(/[^/\\s]+)?`, "g"), (_m, second?: string) => `${trimmed}/<id>${second ? "/<id>" : ""}`);
+  }
+  return out.replace(/(^|\/)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?=\/|$|\s)/gi, "$1<id>");
 }
 
-/** The real calls, traced to stderr when $SIGNALBOX_CLAUDE_APP_TRACE is 1 (account folder names redacted). */
-export function defaultClaudeAppFs(env: Record<string, string | undefined> = process.env): ClaudeAppFs {
+/** The real calls, traced to stderr when $SIGNALBOX_CLAUDE_APP_TRACE is 1 (account folder names under `base` redacted). */
+export function defaultClaudeAppFs(env: Record<string, string | undefined> = process.env, base?: string): ClaudeAppFs {
   if (env[CLAUDE_APP_TRACE_ENV] !== "1") return nodeClaudeAppFs;
-  return tracedClaudeAppFs(nodeClaudeAppFs, (line) => process.stderr.write(`signalbox claude-app: ${redactIdFolders(line)}\n`));
+  return tracedClaudeAppFs(nodeClaudeAppFs, (line) => process.stderr.write(`signalbox claude-app: ${redactIdFolders(line, base)}\n`));
 }
 
 export interface ClaudeAppRead {
@@ -248,7 +264,7 @@ export class ClaudeAppReader {
     readonly dir: string,
     opts: ClaudeAppReaderOptions = {},
   ) {
-    this.fs = opts.fs ?? defaultClaudeAppFs();
+    this.fs = opts.fs ?? defaultClaudeAppFs(process.env, dir);
     this.now = opts.now ?? Date.now;
   }
 

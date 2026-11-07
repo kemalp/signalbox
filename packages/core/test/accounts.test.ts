@@ -91,6 +91,18 @@ describe("resolveAccount", () => {
     expect(resolveAccount([partial]).account?.orgKnown).toBe(false);
   });
 
+  test("recordedOnly: a login alone never completes the id, but still counts as a rival", () => {
+    const partial = ev(ACCT_A, undefined, "transcript", "recorded", 5);
+    const login = (org: string) => ev(ACCT_A, org, "config-login", "inferred");
+    // Only a terminal login knows the organization: fine for a terminal session, not for a desktop one.
+    expect(accountMatches([partial], [login(ORG_X)]).map((m) => m.ref.id)).toEqual([accountId(ACCT_A, ORG_X)]);
+    expect(accountMatches([partial], [login(ORG_X)], { recordedOnly: true })).toEqual([]);
+    // Recorded somewhere too (the same id): it completes.
+    expect(accountMatches([partial], [login(ORG_X), ev(ACCT_A, ORG_X, "claude-app-folder", "recorded")], { recordedOnly: true }).map((m) => m.ref.id)).toEqual([accountId(ACCT_A, ORG_X)]);
+    // A login in another organization makes the recorded one ambiguous.
+    expect(accountMatches([partial], [ev(ACCT_A, ORG_X, "claude-app-folder", "recorded"), login(ORG_Y)], { recordedOnly: true })).toEqual([]);
+  });
+
   test("inferred only: the newest inference, marked inferred", () => {
     const login = ev(ACCT_A, ORG_X, "config-login", "inferred");
     const r = resolveAccount([inferredFrom(login, "config-login", 1)]);

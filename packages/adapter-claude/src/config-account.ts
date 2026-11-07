@@ -42,24 +42,26 @@ export function loginFromConfigText(text: string): AccountEvidence | undefined {
 
 /**
  * The raw text of the root object's `key` member when it is an object, found by scanning (strings, escapes and nesting
- * respected) instead of parsing the whole document; undefined when there is none.
+ * respected) instead of parsing the whole document; undefined when there is none. Throws a SyntaxError when the text
+ * is cut off (a string, the member or the root object never closes), so a file caught mid-write never reads as
+ * "signed out".
  */
 export function topLevelObjectText(text: string, key: string): string | undefined {
   const n = text.length;
-  /** Index just past the string that opens at `j`, or -1 if it never closes. */
+  const cut = () => new SyntaxError("unparsable");
+  /** Index just past the string that opens at `j`. */
   const past = (j: number): number => {
     for (j++; j < n; j++) {
       if (text[j] === "\\") j++;
       else if (text[j] === '"') return j + 1;
     }
-    return -1;
+    throw cut();
   };
   let depth = 0;
   for (let i = 0; i < n; ) {
     const c = text[i];
     if (c === '"') {
       const end = past(i);
-      if (end < 0) return undefined;
       if (depth === 1) {
         let k = end;
         while (k < n && /\s/.test(text[k]!)) k++;
@@ -68,18 +70,18 @@ export function topLevelObjectText(text: string, key: string): string | undefine
           try {
             name = JSON.parse(text.slice(i, end));
           } catch {
-            return undefined;
+            throw cut();
           }
           if (name === key) {
             let v = k + 1;
             while (v < n && /\s/.test(text[v]!)) v++;
+            if (v >= n) throw cut();
             if (text[v] !== "{") return undefined;
             let d = 0;
             for (let j = v; j < n; ) {
               const ch = text[j];
               if (ch === '"') {
                 j = past(j);
-                if (j < 0) return undefined;
                 continue;
               }
               if (ch === "{" || ch === "[") d++;
@@ -89,7 +91,7 @@ export function topLevelObjectText(text: string, key: string): string | undefine
               }
               j++;
             }
-            return undefined;
+            throw cut();
           }
         }
       }
@@ -100,6 +102,7 @@ export function topLevelObjectText(text: string, key: string): string | undefine
     else if (c === "}" || c === "]") depth--;
     i++;
   }
+  if (depth !== 0) throw cut();
   return undefined;
 }
 

@@ -187,8 +187,8 @@ export interface SessionInfo {
 }
 
 /**
- * A plan/rate-limit reading. Limits are account-wide: the reading of the latest window (resetsAt), then the newest,
- * wins per (agent, account, kind), so two subscriptions never share a gauge.
+ * A plan/rate-limit reading. Limits are account-wide: per (agent, account, kind), a reading whose window hasn't reset
+ * yet beats one whose window has, then the newest reading wins, so two subscriptions never share a gauge.
  */
 export interface LimitSnapshot {
   agent: AgentId;
@@ -378,7 +378,7 @@ export interface FleetSession extends SessionInfo {
 export interface FleetSnapshot {
   generatedAt: string;
   sessions: FleetSession[];
-  /** One reading per (agent, account, kind): the latest window, then the newest reading. */
+  /** One reading per (agent, account, kind): a window not yet reset first, then the newest reading. */
   limits: LimitSnapshot[];
   compactions: CompactionEvent[];
   health: AdapterHealth[];

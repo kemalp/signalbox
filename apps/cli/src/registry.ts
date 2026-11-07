@@ -75,7 +75,7 @@ export const ADAPTERS: readonly AdapterEntry[] = [
     bin: { name: "claude", envVar: "SIGNALBOX_CLAUDE_BIN", versionArgs: ["--version"] },
     // Resolved here rather than by the adapter's own PATH lookup, so a Finder-launched app (bare PATH) still finds claude.
     create: (opts) => {
-      const app = claudeAppSetting(opts?.claudeApp !== false);
+      const app = claudeAppSetting(opts?.claudeApp !== false, undefined, undefined, opts?.claudeConfigDirs ?? []);
       return createClaudeAdapter({
         claudeBin: findBinary("claude", { envVar: "SIGNALBOX_CLAUDE_BIN" })?.path,
         extraConfigDirs: opts?.claudeConfigDirs ?? [],

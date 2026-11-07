@@ -185,7 +185,8 @@ struct MenuBarContent: View {
                             .lineLimit(1)
                             .truncationMode(.middle)
                         if let account = row.group?.account {
-                            AccountChip(account: account)
+                            // Fits the 92 pt name column with its padding.
+                            AccountChip(account: account, maxWidth: 80)
                         } else if several, row.group != nil {
                             Text("Account unknown")
                                 .font(.caption2)

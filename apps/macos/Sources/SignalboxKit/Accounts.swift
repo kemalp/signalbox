@@ -25,7 +25,7 @@ public struct AccountRef: Codable, Hashable, Sendable {
 
     public init(from decoder: any Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
-        id = try c.decode(String.self, forKey: .id)
+        id = try AccountNaming.checkedID(c.decode(String.self, forKey: .id), codingPath: c.codingPath + [CodingKeys.id])
         orgKnown = (try? c.decodeIfPresent(Bool.self, forKey: .orgKnown)).flatMap { $0 } ?? false
         source = (try? c.decodeIfPresent(String.self, forKey: .source)).flatMap { $0 } ?? "unknown"
         // An unknown quality reads as inferred: the weaker claim.
@@ -74,7 +74,7 @@ public struct AccountInfo: Codable, Hashable, Sendable, Identifiable {
 
     public init(from decoder: any Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
-        id = try c.decode(String.self, forKey: .id)
+        id = try AccountNaming.checkedID(c.decode(String.self, forKey: .id), codingPath: c.codingPath + [CodingKeys.id])
         orgKnown = (try? c.decodeIfPresent(Bool.self, forKey: .orgKnown)).flatMap { $0 } ?? false
         label = (try? c.decodeIfPresent(String.self, forKey: .label)).flatMap { $0 }
         sources = c.lossyArray(String.self, forKey: .sources)
@@ -85,6 +85,19 @@ public struct AccountInfo: Codable, Hashable, Sendable, Identifiable {
 }
 
 public enum AccountNaming {
+    /// The only id shape the CLI sends (a hash). Anything else, an email or a raw vendor id say, is refused, so it is
+    /// never shown and the account reads as unknown.
+    public static func isValidID(_ id: String) -> Bool {
+        id.range(of: #"^acct-[0-9a-f]{12}$"#, options: .regularExpression) != nil
+    }
+
+    static func checkedID(_ id: String, codingPath: [any CodingKey]) throws -> String {
+        guard isValidID(id) else {
+            throw DecodingError.dataCorrupted(.init(codingPath: codingPath, debugDescription: "not an account id (acct- and 12 hex)"))
+        }
+        return id
+    }
+
     /// The 6 characters after "acct-" (core's accountShortId).
     public static func shortID(_ id: String) -> String {
         id.hasPrefix("acct-") ? String(id.dropFirst(5).prefix(6)) : String(id.prefix(6))
@@ -186,33 +199,43 @@ public struct LimitGroup: Identifiable, Hashable, Sendable {
 /// `signalbox history` show the same names). Ids are hashes, so the file holds no vendor ids or emails.
 @MainActor
 public protocol AccountLabelStore: AnyObject {
+    /// True when this is the file the CLI reads too: then its labels are the whole truth, and a label the CLI
+    /// reported (read a moment ago) never stands in for one you cleared.
+    var isShared: Bool { get }
     func load() -> [String: String]
     func save(_ labels: [String: String]) throws
 }
 
-/// Labels in memory only (tests, fixtures, the snapshot renderer).
+/// Labels in memory only (tests, fixtures, the snapshot renderer): the CLI's (a fixture's) labels fill the gaps.
 @MainActor
 public final class InMemoryAccountLabels: AccountLabelStore {
     public private(set) var labels: [String: String]
-    public init(_ labels: [String: String] = [:]) { self.labels = labels }
+    public let isShared: Bool
+    public init(_ labels: [String: String] = [:], shared: Bool = false) {
+        self.labels = labels
+        self.isShared = shared
+    }
     public func load() -> [String: String] { labels }
     public func save(_ labels: [String: String]) throws { self.labels = labels }
 }
 
-/// ~/Library/Application Support/signalbox/accounts.json (or $SIGNALBOX_ACCOUNTS_FILE): written atomically, 0600,
-/// in a 0700 folder, only when you rename an account.
+/// ~/Library/Application Support/signalbox/accounts.json (or $SIGNALBOX_ACCOUNTS_FILE), written only when you rename
+/// an account: a 0600 temporary file renamed into place (a folder it has to create is made 0700).
 @MainActor
 public final class FileAccountLabels: AccountLabelStore {
     public static let environmentKey = "SIGNALBOX_ACCOUNTS_FILE"
     public static let maxBytes = 64 * 1024
     public let url: URL
+    public let isShared = true
 
     public init(url: URL) { self.url = url }
 
+    /// $HOME first, like the CLI (os.homedir()), so the app and the CLI it runs always name the same file.
     public static func defaultURL(environment: [String: String] = ProcessInfo.processInfo.environment) -> URL {
         if let path = environment[environmentKey], !path.isEmpty { return URL(fileURLWithPath: path) }
-        return FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent("Library/Application Support/signalbox/accounts.json")
+        let home = environment["HOME"].flatMap { $0.hasPrefix("/") ? URL(fileURLWithPath: $0, isDirectory: true) : nil }
+            ?? FileManager.default.homeDirectoryForCurrentUser
+        return home.appendingPathComponent("Library/Application Support/signalbox/accounts.json")
     }
 
     public func load() -> [String: String] {
@@ -228,8 +251,16 @@ public final class FileAccountLabels: AccountLabelStore {
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
         let body: [String: Any] = ["v": 1, "labels": labels]
         let data = try JSONSerialization.data(withJSONObject: body, options: [.prettyPrinted, .sortedKeys])
-        try data.write(to: url, options: .atomic)
-        try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: url.path)
+        // Created 0600 from the start (never readable by others, even briefly), then renamed over the old file.
+        let tmp = dir.appendingPathComponent(".\(url.lastPathComponent).\(UUID().uuidString).tmp")
+        guard FileManager.default.createFile(atPath: tmp.path, contents: data, attributes: [.posixPermissions: 0o600]) else {
+            throw CocoaError(.fileWriteUnknown, userInfo: [NSFilePathErrorKey: tmp.path])
+        }
+        guard rename(tmp.path, url.path) == 0 else {
+            let code = errno
+            try? FileManager.default.removeItem(at: tmp)
+            throw POSIXError(POSIXErrorCode(rawValue: code) ?? .EIO)
+        }
     }
 
     /// `{ "v": 1, "labels": { "<acct-…>": "label" } }` → id → label; ids of another shape and empty labels are dropped.
@@ -238,8 +269,7 @@ public final class FileAccountLabels: AccountLabelStore {
               let labels = obj["labels"] as? [String: Any] else { return [:] }
         var out: [String: String] = [:]
         for (id, raw) in labels {
-            guard id.range(of: #"^acct-[0-9a-f]{12}$"#, options: .regularExpression) != nil,
-                  let s = raw as? String, let label = AccountNaming.sanitize(s) else { continue }
+            guard AccountNaming.isValidID(id), let s = raw as? String, let label = AccountNaming.sanitize(s) else { continue }
             out[id] = label
         }
         return out

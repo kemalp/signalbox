@@ -39,7 +39,9 @@ codesign --force --sign - "$app" 2>/dev/null
 : >"$work/log"
 set -- # the app's own arguments: none, or the fixture
 [ -n "${FIXTURE:-}" ] && set -- --args --fixture "$(cd "$(dirname "$FIXTURE")" && pwd)/$(basename "$FIXTURE")"
+# Its own labels file too, so a rename during the probe never touches your accounts.json.
 open -n --env SIGNALBOX_CLICK_PROBE=1 --env SIGNALBOX_NOTIFY_DRYRUN=1 --env SIGNALBOX_DEFAULTS_SUITE=dev.signalbox.app.clickprobe.tmp \
+  --env SIGNALBOX_ACCOUNTS_FILE="$work/accounts.json" \
   --stdout "$work/log" --stderr "$work/log" "$app" "$@"
 i=0
 while [ $i -lt 20 ] && [ -z "$pid" ]; do pid=$(pgrep -f "$(basename "$work")/SignalboxProbe.app/Contents/MacOS/Signalbox" | head -1 || true); sleep 0.5; i=$((i + 1)); done

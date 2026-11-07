@@ -200,15 +200,15 @@ public enum HistoryBrowser {
         guard !words.isEmpty else { return true }
         let haystack = normalize([entry.displayTitle, entry.projectName].compactMap { $0 }.joined(separator: " "))
         if words.allSatisfy({ haystack.contains($0) }) { return true }
+        // An account's short id (as the chip's tooltip shows it) finds its sessions too, within the other filters.
+        if words.count == 1, let account = entry.account, normalize(account.shortID) == words[0] { return true }
         return matchesSessionId(entry, words: words)
     }
 
     /// The search is one word of six or more characters that starts the session id, or the Claude app's id for it.
     static func matchesSessionId(_ entry: SessionHistoryEntry, words: [String]) -> Bool {
         guard words.count == 1, words[0].count >= 6 else { return false }
-        if [entry.sessionId, entry.appSessionId].contains(where: { $0.map { normalize($0).hasPrefix(words[0]) } ?? false }) { return true }
-        // An account's short id (as the chip's tooltip shows it) finds its sessions too.
-        return entry.account.map { normalize($0.shortID) == words[0] } ?? false
+        return [entry.sessionId, entry.appSessionId].contains(where: { $0.map { normalize($0).hasPrefix(words[0]) } ?? false })
     }
 
     /// The accounts with entries (by id), and whether any entry has no account, for the account filter menu.

@@ -238,7 +238,7 @@ public struct FleetSession: Codable, Hashable, Sendable, Identifiable {
     }
 }
 
-/// A plan/rate-limit reading: one per (agent, account, kind), the latest window's newest reading.
+/// A plan/rate-limit reading: one per (agent, account, kind), the newest reading of a window not yet reset.
 public struct LimitSnapshot: Codable, Hashable, Sendable, Identifiable {
     public var agent: AgentID
     /// e.g. "five_hour", "seven_day", "codex.primary". Unknown kinds are kept verbatim.

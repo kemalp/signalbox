@@ -1,7 +1,7 @@
 // Accounts: transcript account lines, the Claude app's folder names, each config dir's login (Claude Code's global
 // config), several config dirs, and limits kept apart per account. Every id, email and title here is SYNTHETIC; the
 // canaries must never reach any output, and neither may a raw account or organization id.
-import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { afterAll, beforeAll, describe, expect, setSystemTime, test } from "bun:test";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, utimesSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -358,6 +358,26 @@ describe("config login reader", () => {
     }
   });
 
+  test("a file cut off mid-write that happens to end in } is unparsable, not signed out", async () => {
+    const cut = '{"numStartups":3,"projects":{"/x":{"a":{}';
+    expect(() => topLevelObjectText(cut, "oauthAccount")).toThrow();
+    expect(() => loginFromConfigText(cut)).toThrow();
+    expect(() => loginFromConfigText('{"numStartups":3,"note":"}')).toThrow();
+    expect(() => loginFromConfigText('{"oauthAccount": {"accountUuid": "x", "n": {}')).toThrow();
+    const dir = mkdtempSync(join(tmpdir(), "signalbox-login-"));
+    try {
+      const f = join(dir, "claude.json");
+      writeFileSync(f, globalConfig(ACCT_MAX, ORG_MAX));
+      const r = new ConfigLoginReader();
+      expect((await r.read(f)).state).toBe("ok");
+      writeFileSync(f, cut);
+      const mid = await r.read(f);
+      expect(mid.state === "ok" && mid.evidence?.ref.id).toBe(MAX);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   test("refuses symlinks, oversized files and parse failures; a missing file is just missing", async () => {
     const dir = mkdtempSync(join(tmpdir(), "signalbox-login-"));
     try {
@@ -388,5 +408,85 @@ describe("the Claude app trace", () => {
   test("account and organization folder names are redacted; file names are kept", () => {
     expect(redactIdFolders(`/base/${ACCT_MAX}/${ORG_MAX}/local_${ACCT_TEAM}.json`)).toBe(`/base/<id>/<id>/local_${ACCT_TEAM}.json`);
     expect(redactIdFolders(`/base/${ACCT_MAX}`)).toBe("/base/<id>");
+  });
+
+  test("under the list's folder, the first two folders are redacted whatever their shape", () => {
+    const base = "/x/Application Support/Claude/claude-code-sessions";
+    expect(redactIdFolders(`readdir ${base}`, base)).toBe(`readdir ${base}`);
+    expect(redactIdFolders(`readdir ${base}/acct_123`, base)).toBe(`readdir ${base}/<id>`);
+    expect(redactIdFolders(`lstat ${base}/acct_123/org.456/local_abc.json`, base)).toBe(`lstat ${base}/<id>/<id>/local_abc.json`);
+  });
+});
+
+describe("edge cases", () => {
+  test("a desktop session's account-only id isn't completed by a terminal login alone; a terminal session's is", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "signalbox-partial-"));
+    try {
+      const cfg = join(dir, "claude");
+      const ledger = { type: "artifact-autoreact-ledger", v: 1, sessionId: SID_LEDGER, accountUuid: ACCT_TEAM, artifacts: [] };
+      writeTranscript(cfg, SID_LEDGER, transcript(SID_LEDGER, "claude-desktop", [ledger]));
+      writeTranscript(cfg, SID_TERM, transcript(SID_TERM, "cli", [{ ...ledger, sessionId: SID_TERM }]));
+      writeFileSync(join(cfg, ".claude.json"), globalConfig(ACCT_TEAM, ORG_TEAM));
+      const ad = createClaudeAdapter({ configDir: cfg, spoolDir: join(dir, "spool"), claudeBin: fakeClaude, claudeAppDir: false, now: () => new Date(T0 + 10 * 60_000) });
+      const snap = buildHistory({ sessions: await ad.listHistory(), tables: embeddedPriceTables() });
+      const by = new Map(snap.entries.map((e) => [e.sessionId, e]));
+      expect(by.get(SID_LEDGER)!.account).toEqual({ id: TEAM_PARTIAL, orgKnown: false, source: "transcript", quality: "recorded" });
+      expect(by.get(SID_TERM)!.account).toMatchObject({ id: TEAM, orgKnown: true, quality: "inferred" });
+      // The account-only id is still in use, so it is listed beside the full one.
+      expect((await ad.readAccounts()).map((x) => x.id).sort()).toEqual([TEAM, TEAM_PARTIAL].sort());
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("the same session copied into two unshared trees: the newest copy wins, subagents count once", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "signalbox-copy-"));
+    try {
+      const a = join(dir, "a");
+      const b = join(dir, "b");
+      // The newer copy is in the first tree read, so "the last one read" would get it wrong.
+      for (const [cfg, min] of [[a, 8], [b, 5]] as const) {
+        writeTranscript(cfg, SID_TERM, transcript(SID_TERM, "cli"));
+        const t = new Date(T0 + min * 60_000);
+        utimesSync(join(cfg, "projects", "-Users-test-accounts", `${SID_TERM}.jsonl`), t, t);
+        const sub = join(cfg, "projects", "-Users-test-accounts", SID_TERM, "subagents");
+        mkdirSync(sub, { recursive: true });
+        writeFileSync(join(sub, "agent-a1.jsonl"), transcript(SID_TERM, "cli"));
+      }
+      const ad = createClaudeAdapter({ configDir: a, extraConfigDirs: [b], spoolDir: join(dir, "spool"), claudeBin: fakeClaude, claudeAppDir: false, now: () => new Date(T0 + 10 * 60_000) });
+      const sessions = await ad.listHistory();
+      expect(sessions.length).toBe(1);
+      expect(sessions[0]).toMatchObject({ configDir: a, subagentFiles: 1, resume: { command: `claude --resume ${SID_TERM}` } });
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("a desktop session just started gets its account on limits within seconds, not a minute", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "signalbox-newdesk-"));
+    const start = Date.now();
+    try {
+      const cfg = join(dir, "claude");
+      const app = join(dir, "app");
+      mkdirSync(app, { recursive: true });
+      writeTranscript(cfg, SID_BARE, transcript(SID_BARE, "claude-desktop"));
+      registry(cfg, SID_BARE, "claude-desktop");
+      const sp = join(dir, "spool");
+      mkdirSync(sp);
+      writeFileSync(
+        join(sp, `${SID_BARE}.json`),
+        JSON.stringify({ v: 1, seq: 1, agent: "claude-code", sessionId: SID_BARE, writtenAt: iso(4), event: "session.measure", usage: { rateLimits: [{ kind: "five_hour", percentUsed: 30, resetsAt: iso(200) }] } }),
+      );
+      const ad = createClaudeAdapter({ configDir: cfg, spoolDir: sp, claudeBin: fakeClaude, claudeAppDir: app, now: () => new Date(T0 + 10 * 60_000) });
+      expect((await ad.readLimits())[0]!.account).toBeUndefined();
+      // The app writes its record a moment later.
+      mkdirSync(join(app, ACCT_TEAM, ORG_TEAM), { recursive: true });
+      writeFileSync(join(app, ACCT_TEAM, ORG_TEAM, "local_20000000-0000-4000-8000-000000000005.json"), JSON.stringify({ sessionId: "local_20000000-0000-4000-8000-000000000005", cliSessionId: SID_BARE, createdAt: T0, lastActivityAt: T0 }));
+      setSystemTime(new Date(start + 11_000));
+      expect((await ad.readLimits())[0]!.account).toEqual({ id: TEAM, orgKnown: true, source: "claude-app-folder", quality: "recorded" });
+    } finally {
+      setSystemTime();
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

@@ -97,10 +97,12 @@ export async function captureSyntheticStream(): Promise<string> {
       response("msg_S1", 3_600_000, "claude-opus-5-5"),
       ...titles,
       response("msg_S2", 1_800_000, "claude-opus-5-5"),
+      // A desktop bridge line naming the other account: with the app's folder, two recorded accounts (a conflict).
+      // It sits before the last response, so it dates from 30 minutes ago and the app's record (15) is clearly newer;
+      // at the same minute the winner would depend on the milliseconds this script takes.
+      JSON.stringify({ type: "bridge-session", sessionId: SID, bridgeSessionId: "bridge-synthetic", lastSequenceNum: 1, ownerAccountUuid: TEAM.account, ownerOrganizationUuid: TEAM.org }),
       costState,
       response("msg_S3", 900_000, "claude-experimental-x"),
-      // A desktop bridge line naming the other account: with the app's folder, two recorded accounts (a conflict).
-      JSON.stringify({ type: "bridge-session", sessionId: SID, bridgeSessionId: "bridge-synthetic", lastSequenceNum: 1, ownerAccountUuid: TEAM.account, ownerOrganizationUuid: TEAM.org }),
     ].join("\n")}\n`,
   );
   // The Team dir's terminal session: no account line, so its account is inferred from that dir's login.

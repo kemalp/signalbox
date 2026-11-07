@@ -333,6 +333,7 @@ public final class SignalboxStore {
 
         case let .fleet(at, data):
             fleet = data
+            refreshLabelsIfChanged(data.accounts)
             fleetUpdatedAt = at ?? now
             streamErrors[.fleet] = nil
             if health == nil, !data.health.isEmpty { health = data.health }
@@ -463,19 +464,34 @@ public final class SignalboxStore {
         accountLabels = store.load()
     }
 
-    /// Your label for the account, else its short id.
+    /// Your label for the account, else its short id. With the shared labels file, only its labels count: the CLI's
+    /// copy can be a fleet behind (a label you just cleared).
     public func accountName(_ id: String) -> String {
-        AccountNaming.name(id, accounts: accounts, local: accountLabels)
+        AccountNaming.name(id, accounts: labelStore.isShared ? [] : accounts, local: accountLabels)
     }
 
-    /// Sets (or, with an empty or nil label, clears) your name for an account and saves it.
+    /// Sets (or, with an empty or nil label, clears) your name for an account and saves it. The file is read again
+    /// first, so a label another copy of the app saved is kept.
     public func renameAccount(_ id: String, to label: String?) throws {
-        var next = accountLabels
-        // Keep labels the CLI reported that this app hasn't loaded yet (another copy of the app may have set them).
-        for a in accounts where next[a.id] == nil { if let l = a.label { next[a.id] = l } }
+        var next = labelStore.load()
         if let label, let clean = AccountNaming.sanitize(label) { next[id] = clean } else { next[id] = nil }
         try labelStore.save(next)
         accountLabels = next
+    }
+
+    /// The CLI reads the same labels file: when its labels differ from ours, the file changed (another copy of the
+    /// app saved it), so read it again.
+    private func refreshLabelsIfChanged(_ infos: [AccountInfo]?) {
+        guard labelStore.isShared, let infos else { return }
+        if infos.contains(where: { $0.label != accountLabels[$0.id] }) { accountLabels = labelStore.load() }
+    }
+
+    /// Claude Code sessions with no account: live ones from the fleet, past ones from History (whose live entries are
+    /// the same sessions, so they aren't counted twice).
+    public var unknownAccountCounts: (live: Int, past: Int) {
+        let live = sessions.filter { $0.agent == .claudeCode && $0.account == nil && $0.status != .ended }.count
+        let past = (history?.entries ?? []).filter { $0.agent == .claudeCode && $0.account == nil && !$0.live }.count
+        return (live, past)
     }
 
     /// One group of plan windows per (agent, account), for `agent`; the unknown-account group last.

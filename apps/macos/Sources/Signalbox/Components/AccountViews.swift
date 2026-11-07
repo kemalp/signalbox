@@ -7,6 +7,8 @@ import SwiftUI
 struct AccountChip: View {
     @Environment(SignalboxStore.self) private var store
     let account: AccountRef?
+    /// The widest the name may be (the chip adds 12 pt of padding).
+    var maxWidth: CGFloat = 110
 
     var body: some View {
         if let account {
@@ -15,7 +17,7 @@ struct AccountChip: View {
                 .font(.caption2.weight(.semibold))
                 .lineLimit(1)
                 .truncationMode(.tail)
-                .frame(maxWidth: 110, alignment: .leading)
+                .frame(maxWidth: maxWidth, alignment: .leading)
                 .fixedSize(horizontal: true, vertical: false)
                 .padding(.horizontal, 6)
                 .padding(.vertical, 2)

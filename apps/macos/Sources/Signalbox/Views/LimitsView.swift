@@ -9,7 +9,7 @@ struct LimitsView: View {
             LiveNow(anchors: store.limits.flatMap { [$0.observedAt, $0.resetsAt] }) { now in
                 ScrollView {
                     VStack(alignment: .leading, spacing: 14) {
-                        Text("One card per account: limits belong to a subscription, not a session. The latest window's newest reading wins. A reading older than 15 minutes, or from before its window reset, shows no fill: limits also move with use elsewhere.")
+                        Text("One card per account: limits belong to a subscription, not a session. The newest reading of a window not yet reset wins. A reading older than 15 minutes, or from before its window reset, shows no fill: limits also move with use elsewhere.")
                             .fixedSize(horizontal: false, vertical: true)
                             .font(.callout)
                             .foregroundStyle(.secondary)

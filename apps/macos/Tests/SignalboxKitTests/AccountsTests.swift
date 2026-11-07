@@ -63,17 +63,48 @@ struct AccountsTests {
         #expect((AccountNaming.sanitize(String(repeating: "a", count: 90)) ?? "").count == AccountNaming.maxLabelLength)
     }
 
-    @Test func renamingSavesTheLabelsAndKeepsTheOnesTheCLIReported() throws {
+    @Test func renamingSavesTheLabelsAndKeepsTheOnesAnotherCopySaved() throws {
         let store = SignalboxStore(clock: { date("2026-10-09T14:30:00Z") })
-        let labels = InMemoryAccountLabels()
+        let labels = InMemoryAccountLabels(shared: true)
         store.useAccountLabels(labels)
-        store.handle(.message(.fleet(at: t0, FleetSnapshot(generatedAt: t0, accounts: [AccountInfo(id: max, label: "Max"), AccountInfo(id: team)]))))
+        store.handle(.message(.fleet(at: t0, FleetSnapshot(generatedAt: t0, accounts: [AccountInfo(id: max), AccountInfo(id: team)]))))
+        // Another copy of the app saves a label after this one loaded the file.
+        try labels.save([max: "Max"])
         try store.renameAccount(team, to: "  Team ")
         #expect(labels.labels == [max: "Max", team: "Team"])
         #expect(store.accountName(team) == "Team")
         try store.renameAccount(team, to: "")
         #expect(labels.labels == [max: "Max"])
         #expect(store.accountName(team) == "bbbbbb")
+    }
+
+    @Test func aClearedLabelNeitherShowsNorComesBack() throws {
+        let store = SignalboxStore(clock: { date("2026-10-09T14:30:00Z") })
+        let labels = InMemoryAccountLabels([max: "Max"], shared: true)
+        store.useAccountLabels(labels)
+        // The CLI read the file before the label was cleared.
+        store.handle(.message(.fleet(at: t0, FleetSnapshot(generatedAt: t0, accounts: [AccountInfo(id: max, label: "Max"), AccountInfo(id: team)]))))
+        try store.renameAccount(max, to: nil)
+        #expect(store.accountName(max) == "aaaaaa", "the CLI's copy is a fleet behind")
+        try store.renameAccount(team, to: "Team")
+        #expect(labels.labels == [team: "Team"], "the cleared label isn't written back")
+    }
+
+    @Test func aLabelAnotherCopySavedShowsOnTheNextFleet() throws {
+        let store = SignalboxStore(clock: { date("2026-10-09T14:30:00Z") })
+        let labels = InMemoryAccountLabels(shared: true)
+        store.useAccountLabels(labels)
+        try labels.save([team: "Team"])
+        #expect(store.accountName(team) == "bbbbbb")
+        store.handle(.message(.fleet(at: t0, FleetSnapshot(generatedAt: t0, accounts: [AccountInfo(id: team, label: "Team")]))))
+        #expect(store.accountName(team) == "Team")
+    }
+
+    @Test func withoutTheSharedFileTheCLIsLabelsFillTheGaps() {
+        let store = SignalboxStore(clock: { date("2026-10-09T14:30:00Z") })
+        store.useAccountLabels(InMemoryAccountLabels())
+        store.handle(.message(.fleet(at: t0, FleetSnapshot(generatedAt: t0, accounts: [AccountInfo(id: max, label: "Max")]))))
+        #expect(store.accountName(max) == "Max")
     }
 
     @Test func theLabelsFileIsPrivateAndParsedStrictly() throws {
@@ -87,6 +118,34 @@ struct AccountsTests {
         let messy = #"{"v":1,"labels":{"acct-aaaaaaaaaaaa":" Max\n","acct-XYZ":"bad","other":"x","acct-bbbbbbbbbbbb":""}}"#
         #expect(FileAccountLabels.parse(Data(messy.utf8)) == [max: "Max"])
         #expect(FileAccountLabels.parse(Data("{nope".utf8)).isEmpty)
+    }
+
+    @Test func aSaveIntoAnExistingFolderIsPrivateFromTheStart() throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("signalbox-labels-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o755])
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let file = FileAccountLabels(url: dir.appendingPathComponent("accounts.json"))
+        try "{}".write(to: file.url, atomically: false, encoding: .utf8)
+        try FileManager.default.setAttributes([.posixPermissions: 0o644], ofItemAtPath: file.url.path)
+        try file.save([team: "Team"])
+        #expect((try FileManager.default.attributesOfItem(atPath: file.url.path)[.posixPermissions] as? Int) == 0o600)
+        #expect(file.load() == [team: "Team"])
+        #expect(try FileManager.default.contentsOfDirectory(atPath: dir.path) == ["accounts.json"], "no temporary file left behind")
+    }
+
+    @Test func theLabelsFileFollowsHOMELikeTheCLI() {
+        #expect(FileAccountLabels.defaultURL(environment: ["HOME": "/tmp/h"]).path == "/tmp/h/Library/Application Support/signalbox/accounts.json")
+        #expect(FileAccountLabels.defaultURL(environment: ["HOME": "/tmp/h", "SIGNALBOX_ACCOUNTS_FILE": "/tmp/x.json"]).path == "/tmp/x.json")
+    }
+
+    @Test func anIdThatIsntAHashIsUnknown() throws {
+        for bad in ["someone@example.invalid", "", "acct-ABCDEFABCDEF", "0a0a0a0a-1111-4111-8111-00000000000a"] {
+            let json = #"{"generatedAt":"2026-10-09T14:30:00Z","sessions":[{"agent":"claude-code","sessionId":"s1","status":"idle","account":{"id":"\#(bad)","orgKnown":true,"source":"transcript","quality":"recorded"}}],"limits":[],"compactions":[],"health":[],"accounts":[{"id":"\#(bad)","sources":[]},{"id":"acct-aaaaaaaaaaaa","sources":[]}]}"#
+            let fleet = try SignalboxJSON.decoder().decode(FleetSnapshot.self, from: Data(json.utf8))
+            #expect(fleet.sessions.count == 1)
+            #expect(fleet.sessions.first?.account == nil, "\(bad)")
+            #expect(fleet.accounts?.map(\.id) == [max])
+        }
     }
 
     // MARK: History
@@ -107,6 +166,28 @@ struct AccountsTests {
         #expect(found.hasUnknown, "a Claude Code session without one; Codex sessions don't count")
         // The short id (as the chip's tooltip shows it) finds an account's sessions.
         #expect(ids(HistoryFilter(query: "bbbbbb")) == ["a2"])
+    }
+
+    @Test func anAccountSearchKeepsArchivedSessionsHidden() {
+        let entries = [
+            SessionHistoryEntry(agent: .claudeCode, sessionId: "a1", title: "one", startedAt: t0, lastActivityAt: t0, responses: 3, account: ref(team)),
+            SessionHistoryEntry(agent: .claudeCode, sessionId: "a2", title: "two", startedAt: t0, lastActivityAt: t0, responses: 3, archived: true, account: ref(team)),
+        ]
+        let ids = { (f: HistoryFilter) in HistoryBrowser.filtered(entries, filter: f, now: self.t0).map(\.sessionId) }
+        #expect(ids(HistoryFilter(query: "bbbbbb")) == ["a1"])
+        #expect(Set(ids(HistoryFilter(query: "bbbbbb", showArchived: true))) == ["a1", "a2"])
+    }
+
+    @Test func unknownAccountsCountLiveSessionsOnce() {
+        let store = SignalboxStore(clock: { date("2026-10-09T14:30:00Z") })
+        let live = FleetSession(agent: .claudeCode, sessionId: "s1", status: .busy)
+        store.handle(.message(.fleet(at: t0, FleetSnapshot(generatedAt: t0, sessions: [live]))))
+        store.load(history: HistorySnapshot(entries: [
+            SessionHistoryEntry(agent: .claudeCode, sessionId: "s1", startedAt: t0, lastActivityAt: t0, live: true),
+            SessionHistoryEntry(agent: .claudeCode, sessionId: "s2", startedAt: t0, lastActivityAt: t0),
+            SessionHistoryEntry(agent: "codex", sessionId: "c1", startedAt: t0, lastActivityAt: t0),
+        ]))
+        #expect(store.unknownAccountCounts == (live: 1, past: 1))
     }
 
     // MARK: Limits
@@ -130,6 +211,40 @@ struct AccountsTests {
         let out = h.step([], limits: [reading(85, ref(max)), reading(86, ref(team))], at: t0.addingTimeInterval(15))
         #expect(out.count == 2, "one account passing 80% doesn't hide the other")
         #expect(Set(out.map(\.title)) == ["Claude Code (aaaaaa): 5-hour window at 85%", "Claude Code (bbbbbb): 5-hour window at 86%"])
+    }
+
+    @Test func aReadingWhoseAccountTurnsUpLaterDoesntAlertAgain() {
+        var h = PolicyHarness()
+        var r = reading(85, nil)
+        r.sessionId = "s1"
+        // Already past 80% at app start: recorded, not notified.
+        #expect(h.step([], limits: [r], at: t0).isEmpty)
+        // The same session's window, now with its account (found, or completed, a moment later).
+        var known = r
+        known.account = ref(max)
+        known.observedAt = r.observedAt.addingTimeInterval(15)
+        #expect(h.step([], limits: [known], at: t0.addingTimeInterval(15)).isEmpty)
+        // And back again (a partial id the completion no longer applies to): still nothing new.
+        var back = known
+        back.account = AccountRef(id: max, orgKnown: false, source: "transcript", quality: "recorded")
+        back.observedAt = known.observedAt.addingTimeInterval(15)
+        #expect(h.step([], limits: [back], at: t0.addingTimeInterval(30)).isEmpty)
+        // A threshold not passed yet still alerts, once.
+        var higher = back
+        higher.usedPercent = 96
+        higher.observedAt = back.observedAt.addingTimeInterval(15)
+        #expect(h.step([], limits: [higher], at: t0.addingTimeInterval(45)).count == 1)
+    }
+
+    @Test func anotherSessionUnderANewAccountStillAlerts() {
+        var h = PolicyHarness()
+        var a = reading(85, nil)
+        a.sessionId = "s1"
+        _ = h.step([], limits: [a], at: t0)
+        var b = reading(85, ref(team))
+        b.sessionId = "s2"
+        b.observedAt = a.observedAt.addingTimeInterval(15)
+        #expect(h.step([], limits: [a, b], at: t0.addingTimeInterval(15)).count == 1)
     }
 
     @Test func oneAccountAlertsWithoutAName() {

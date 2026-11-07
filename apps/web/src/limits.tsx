@@ -129,7 +129,7 @@ export function Limits(props: {
   const ordered = [...agents].sort(agentOrder);
 
   return (
-    <Section id="limits" title="Plan limits" note="One gauge per account and window; the latest window's newest reading wins">
+    <Section id="limits" title="Plan limits" note="One gauge per account and window; the newest reading of a window not yet reset wins">
       {props.limits === undefined ? (
         <p class="empty">Loading limits…</p>
       ) : (
