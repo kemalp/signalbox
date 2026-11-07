@@ -24,6 +24,8 @@ SwiftUI views ──▶ SignalboxStore (@MainActor, @Observable) ──▶ CLIPr
   shell-quoted resume line).
 - And accounts: `Accounts.swift` (the CLI's `account` and `accounts` fields, names and labels, the per-account limit groups and
   Signalbox's own accounts.json for the labels you set).
+- And transcript retention: `Retention.swift` (the CLI's `retention` field: each config folder's `cleanupPeriodDays` as
+  read, judged against your threshold here, so changing it needs no CLI restart; the popover line and Health's texts).
 - `Sources/Signalbox`: the app: a `NavigationSplitView` window (Sessions, History, Commands, Usage, Limits, Accounts, Health; ⌘1…⌘7),
   a `MenuBarExtra`, the Settings window (⌘,), the About window, the Diagnostics sheet (CLI stderr and events), the macOS bridges in
   `App/SystemServices.swift` (UNUserNotificationCenter, SMAppService), and the offscreen snapshot renderer.
@@ -88,6 +90,8 @@ Also reachable from the gear button in the menu bar popover (the only way in whe
 - **Advanced**: a CLI path override (`SIGNALBOX_CLI` in the environment still wins; Apply restarts the CLI),
   **Include the Claude app's session list** (on by default; see History below), **Claude Code folders** (more config
   folders to read, a `CLAUDE_CONFIG_DIR` per account say: the CLI restarts with a `--claude-config-dir` per folder),
+  **Transcript retention** (warn when a folder keeps transcripts for less than 60, 90 (default), 180 or 365 days, or
+  never: the menu bar popover gets a line that opens Health, whose Transcript retention section lists every folder),
   Diagnostics, and Reset All Settings
   (launch at login is left alone). Turning the session list off restarts the CLI with `--no-claude-app` (the flag is
   added only when it's off, so a CLI from before it still starts), and History says it's reading until the new list

@@ -135,6 +135,14 @@ function addStress(): void {
     { id: third.id, orgKnown: true, label: "Client work (shared seat for the acme-corporation contract)", sources: ["claude-app-folder"], claudeAppFolder: true, liveSessions: 3 },
     { id: partial.id, orgKnown: false, sources: ["transcript"], liveSessions: 2 },
   ];
+  // Retention: a managed value, an invalid one, a file that can't be read, and a long path.
+  fleet.retention = [
+    ...(fleet.retention ?? []),
+    { agent: "claude-code", configDir: `${LONG_CWD}/.claude-client`, source: "managed", file: "/Library/Application Support/ClaudeCode/managed-settings.json", days: 14, defaultDays: 30 },
+    { agent: "claude-code", configDir: "/Users/you/.claude-zero", source: "user", file: "/Users/you/.claude-zero/settings.json", invalid: "0", defaultDays: 30 },
+    { agent: "claude-code", configDir: "/Users/you/.claude-broken", source: "default", defaultDays: 30, problem: "/Users/you/.claude-broken/settings.json isn't valid JSON" },
+    { agent: "aider", configDir: "/Users/you/.aider", source: "default", defaultDays: 7, sharesTranscriptsWith: ["/Users/you/.aider-2"] },
+  ];
 
   const longModel = "claude-experimental-research-preview-2026-10-01";
   const unpricedRow = (key: string, from: GroupTotals): GroupTotals => ({

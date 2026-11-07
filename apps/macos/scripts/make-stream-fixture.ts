@@ -53,6 +53,9 @@ export async function captureSyntheticStream(): Promise<string> {
     });
   writeFileSync(join(claude, ".claude.json"), globalConfig(MAX));
   writeFileSync(join(team, ".claude.json"), globalConfig(TEAM));
+  // Retention: the main dir keeps a year (next to a secret that must never be read into the stream); the Team dir
+  // sets nothing, so Claude Code's 30-day default applies.
+  writeFileSync(join(claude, "settings.json"), JSON.stringify({ env: { ANTHROPIC_API_KEY: "synthetic-secret-never-read" }, cleanupPeriodDays: 365 }));
   const labels = join(root, "accounts.json");
   writeFileSync(labels, JSON.stringify({ v: 1, labels: { [accountId(MAX.account, MAX.org)]: "Max (synthetic)" } }));
 
@@ -192,6 +195,8 @@ export async function captureSyntheticStream(): Promise<string> {
       CLAUDE_CONFIG_DIR: claude,
       CODEX_HOME: join(home, ".codex"),
       SIGNALBOX_CLAUDE_APP_DIR: appSessions,
+      // No managed settings folder: the fixture must not depend on the machine it is made on.
+      SIGNALBOX_CLAUDE_MANAGED_SETTINGS_DIR: "",
       SIGNALBOX_CLAUDE_BIN: "/nonexistent",
       SIGNALBOX_BIN_DIRS: "",
       PATH: join(root, "bin"),
