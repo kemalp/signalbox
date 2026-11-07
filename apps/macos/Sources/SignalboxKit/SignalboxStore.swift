@@ -502,7 +502,7 @@ public final class SignalboxStore {
     }
 
     /// The popover's line: the worst folder that is invalid or kept too briefly (the shortest first), or nil when none
-    /// is, or when the check is off.
+    /// is. "Never warn" (0) turns the line off altogether, invalid values included; Health still shows every folder.
     public func retentionWarning(warnBelowDays: Int) -> String? {
         guard warnBelowDays > 0 else { return nil }
         let rows = retention(warnBelowDays: warnBelowDays)

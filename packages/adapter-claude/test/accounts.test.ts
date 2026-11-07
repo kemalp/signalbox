@@ -339,6 +339,9 @@ describe("config login reader", () => {
     expect(loginFromConfigText(text)!.ref.id).toBe(MAX);
     expect(topLevelObjectText(JSON.stringify({ a: { oauthAccount: {} } }), "oauthAccount")).toBeUndefined();
     expect(topLevelObjectText(JSON.stringify({ oauthAccount: "not an object" }), "oauthAccount")).toBeUndefined();
+    // Duplicate keys: the last one wins, as with JSON.parse.
+    const dup = `{"oauthAccount":{"accountUuid":"${ACCT_TEAM}"},"numStartups":1,"oauthAccount":{"accountUuid":"${ACCT_MAX}","organizationUuid":"${ORG_MAX}"}}`;
+    expect(loginFromConfigText(dup)!.ref.id).toBe(MAX);
   });
 
   test("a read that fails in passing keeps the last good login; a removed file doesn't", async () => {

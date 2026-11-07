@@ -766,7 +766,7 @@ enum SnapshotRenderer {
     static func render<V: View>(_ view: V, size: CGSize, appearance: NSAppearance.Name, titled: Bool, to url: URL) -> Bool {
         if let only = onlyPrefixes, !only.contains(where: { url.lastPathComponent.hasPrefix($0) }) { return false }
         let style: NSWindow.StyleMask = titled ? [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView] : [.borderless]
-        let window = NSWindow(contentRect: NSRect(origin: .zero, size: size), styleMask: style, backing: .buffered, defer: false)
+        let window = UnconstrainedWindow(contentRect: NSRect(origin: .zero, size: size), styleMask: style, backing: .buffered, defer: false)
         let nsAppearance = NSAppearance(named: appearance)
         window.appearance = nsAppearance
         window.title = "Signalbox"
@@ -1014,4 +1014,9 @@ private final class InertTransport: SignalboxTransport, @unchecked Sendable {
     func start(days: Int) async {}
     func send(_ command: StreamCommand) async {}
     func stop() async { continuation.finish() }
+}
+
+/// A titled window AppKit doesn't fit to a screen, so a tall render isn't cut off at the display's height.
+private final class UnconstrainedWindow: NSWindow {
+    override func constrainFrameRect(_ frameRect: NSRect, to screen: NSScreen?) -> NSRect { frameRect }
 }

@@ -8,7 +8,7 @@
 // app's records sit under made-up account and organization folders, the main session's transcript also names the
 // other account (a conflict, newest wins), and a labels file names one account. Regenerate with:
 //   bun apps/macos/scripts/make-stream-fixture.ts > apps/macos/Fixtures/stream-v1.ndjson
-import { cpSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { accountId } from "../../../packages/core/src/accounts.ts";
@@ -40,6 +40,7 @@ export async function captureSyntheticStream(): Promise<string> {
   const appSessions = join(home, "Library", "Application Support", "Claude", "claude-code-sessions");
   const appAccount = join(appSessions, MAX.account, MAX.org);
   const team = join(home, ".claude-team");
+  const extra = join(home, ".claude-extra");
   const teamProject = join(team, "projects", CWD.replaceAll("/", "-"));
   for (const dir of [project, join(claude, "sessions"), spool, appAccount, teamProject, join(team, "sessions"), join(root, "bin"), join(root, "tmp")]) {
     mkdirSync(dir, { recursive: true });
@@ -54,8 +55,14 @@ export async function captureSyntheticStream(): Promise<string> {
   writeFileSync(join(claude, ".claude.json"), globalConfig(MAX));
   writeFileSync(join(team, ".claude.json"), globalConfig(TEAM));
   // Retention: the main dir keeps a year (next to a secret that must never be read into the stream); the Team dir
-  // sets nothing, so Claude Code's 30-day default applies.
+  // sets an invalid 0; a third dir shares the main dir's transcripts folder, and its settings.json is a symlink,
+  // which isn't followed, so its period is unknown. Every RetentionInfo field shows up in the stream.
   writeFileSync(join(claude, "settings.json"), JSON.stringify({ env: { ANTHROPIC_API_KEY: "synthetic-secret-never-read" }, cleanupPeriodDays: 365 }));
+  writeFileSync(join(team, "settings.json"), JSON.stringify({ cleanupPeriodDays: 0 }));
+  mkdirSync(extra);
+  symlinkSync(join(claude, "projects"), join(extra, "projects"));
+  writeFileSync(join(root, "linked-settings.json"), JSON.stringify({ cleanupPeriodDays: 365 }));
+  symlinkSync(join(root, "linked-settings.json"), join(extra, "settings.json"));
   const labels = join(root, "accounts.json");
   writeFileSync(labels, JSON.stringify({ v: 1, labels: { [accountId(MAX.account, MAX.org)]: "Max (synthetic)" } }));
 
@@ -188,7 +195,7 @@ export async function captureSyntheticStream(): Promise<string> {
     filter: (src) => !/auth/.test(src.slice(src.lastIndexOf("/") + 1)),
   });
 
-  const proc = Bun.spawn([process.execPath, MAIN, "watch", "--ndjson", "--claude-config-dir", team], {
+  const proc = Bun.spawn([process.execPath, MAIN, "watch", "--ndjson", "--claude-config-dir", team, "--claude-config-dir", extra], {
     env: {
       SIGNALBOX_ACCOUNTS_FILE: labels,
       HOME: home,

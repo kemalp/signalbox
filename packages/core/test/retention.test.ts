@@ -63,8 +63,42 @@ describe("retention", () => {
 
   test("the warning says what to add, and mentions a shared transcripts folder", () => {
     const w = retentionWarning(base({ configDir: "/Users/you/.claude-team", sharesTranscriptsWith: ["/Users/you/.claude"] }))!;
-    expect(w).toContain("older than 30 days in /Users/you/.claude-team (cleanupPeriodDays isn't set)");
+    expect(w).toContain("terminal and SDK session transcripts older than 30 days in /Users/you/.claude-team (cleanupPeriodDays isn't set)");
     expect(w).toContain('Add "cleanupPeriodDays": 365 to /Users/you/.claude-team/settings.json');
+    expect(w).toContain("Desktop app sessions are kept from Claude Code 2.1.248 on, unless desktopSessionCleanupPeriodDays is set");
     expect(w).toContain("shared with /Users/you/.claude; the shortest setting wins");
+  });
+
+  test("a managed value covers desktop sessions too, and the files can be replaced by sources Signalbox can't see", () => {
+    const w = retentionWarning(base({ source: "managed", days: 14, file: "/Library/Application Support/ClaudeCode/managed-settings.json" }))!;
+    expect(w).toContain("desktop app sessions included, older than 14 days");
+    expect(w).toContain("cleanupPeriodDays is 14 in /Library/Application Support/ClaudeCode/managed-settings.json");
+    expect(w).toContain("an MDM profile or console-served settings");
+    expect(w).not.toContain("Add ");
+  });
+
+  test("an invalid value pauses the cleanup; it never falls back to the default", () => {
+    const w = retentionWarning(base({ source: "user", invalid: "0", file: "/Users/you/.claude/settings.json" }))!;
+    expect(w).toContain("pauses its transcript cleanup, so nothing is deleted");
+    expect(w).not.toContain("fall back");
+  });
+
+  test("one day is singular", () => {
+    const one = base({ source: "user", days: 1, file: "/Users/you/.claude/settings.json" });
+    expect(retentionText(one)).toBe("1 day (settings.json)");
+    expect(retentionWarning(one)).toContain("older than 1 day in");
+  });
+
+  test("a value that isn't a whole number of days, or a missing one from a file, is unknown, never the default", () => {
+    for (const days of [0, -3, 1.5, Number.NaN]) {
+      const r = base({ source: "user", days, file: "/Users/you/.claude/settings.json" });
+      expect(retentionDays(r)).toBeUndefined();
+      expect(retentionStatus(r, 30)).toBe("unknown");
+    }
+    const noValue = base({ source: "managed" });
+    expect(retentionDays(noValue)).toBeUndefined();
+    expect(retentionStatus(noValue)).toBe("unknown");
+    expect(retentionText(noValue)).toBe("unknown (no valid value from managed settings)");
+    expect(retentionWarning(noValue)).toContain("Can't tell");
   });
 });
