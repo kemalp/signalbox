@@ -69,7 +69,9 @@ export interface ResolvedAccount {
 /**
  * One account for a session. Recorded evidence beats inferred; among recorded, a full (account, organization) id
  * beats an account-only one, and the newest wins. A conflict is recorded evidence for a different account (or, for
- * full ids, a different organization). No evidence: undefined, never a default.
+ * full ids, a different organization). An account-only winner becomes the full id when the evidence holds exactly
+ * one full id with the same account half (marked inferred: the organization is assumed). No evidence: undefined,
+ * never a default.
  */
 export function resolveAccount(evidence: readonly AccountEvidence[] | undefined): ResolvedAccount {
   const all = evidence ?? [];
@@ -78,10 +80,40 @@ export function resolveAccount(evidence: readonly AccountEvidence[] | undefined)
     const full = recorded.filter((e) => e.ref.orgKnown);
     const winner = newest(full.length > 0 ? full : recorded)!;
     const conflict = recorded.some((e) => e.accountKey !== winner.accountKey || (e.ref.orgKnown && winner.ref.orgKnown && e.ref.id !== winner.ref.id));
-    return { account: { ...winner.ref }, conflict };
+    return { account: completed(winner, all), conflict };
   }
   const inferred = newest(all);
-  return inferred ? { account: { ...inferred.ref }, conflict: false } : { conflict: false };
+  return inferred ? { account: completed(inferred, all), conflict: false } : { conflict: false };
+}
+
+/** An account-only ref completed by the one full id with the same account half, if there is exactly one. */
+function completed(winner: AccountEvidence, all: readonly AccountEvidence[]): AccountRef {
+  if (winner.ref.orgKnown) return { ...winner.ref };
+  const matches = all.filter((e) => e.ref.orgKnown && e.accountKey === winner.accountKey);
+  const ids = new Set(matches.map((e) => e.ref.id));
+  if (ids.size !== 1) return { ...winner.ref };
+  const m = matches[0]!;
+  return { id: m.ref.id, orgKnown: true, source: m.ref.source, quality: "inferred" };
+}
+
+/** Full evidence from `known` that completes an account-only id in `evidence` (exactly one full id per account half). */
+export function accountMatches(evidence: readonly AccountEvidence[], known: Iterable<AccountEvidence>): AccountEvidence[] {
+  const partialKeys = new Set(evidence.filter((e) => !e.ref.orgKnown).map((e) => e.accountKey));
+  if (partialKeys.size === 0) return [];
+  const byKey = new Map<string, Map<string, AccountEvidence>>();
+  for (const k of known) {
+    if (!k.ref.orgKnown || !partialKeys.has(k.accountKey)) continue;
+    const ids = byKey.get(k.accountKey) ?? new Map<string, AccountEvidence>();
+    ids.set(k.ref.id, k);
+    byKey.set(k.accountKey, ids);
+  }
+  const out: AccountEvidence[] = [];
+  for (const ids of byKey.values()) {
+    if (ids.size !== 1) continue;
+    const k = [...ids.values()][0]!;
+    out.push({ ref: { ...k.ref, source: "account-match", quality: "inferred" }, accountKey: k.accountKey });
+  }
+  return out;
 }
 
 /** A limit reading with its spool sequence number, for tie-breaks. */
@@ -94,30 +126,47 @@ function limitKey(s: LimitSnapshot): string {
   return `${s.agent}\n${s.account?.id ?? ""}\n${s.kind}`;
 }
 
-function rank(c: LimitCandidate): [number, number, number] {
-  const resets = c.snap.resetsAt ? Date.parse(c.snap.resetsAt) : NaN;
-  const observed = Date.parse(c.snap.observedAt);
-  return [Number.isNaN(resets) ? -Infinity : resets, Number.isNaN(observed) ? -Infinity : observed, c.seq ?? -Infinity];
+/** A reading whose window reset more than this long ago is dropped (spool files are never deleted). */
+export const LIMIT_RESET_GRACE_MS = 24 * 60 * 60 * 1000;
+/** A reading older than this is dropped whatever its window (longer than a weekly window). */
+export const LIMIT_MAX_AGE_MS = 8 * 24 * 60 * 60 * 1000;
+
+/** True for a reading too old to show: its window reset over a day ago, or it is over 8 days old. */
+export function isExpiredReading(s: Pick<LimitSnapshot, "observedAt" | "resetsAt">, nowMs: number): boolean {
+  const resets = s.resetsAt ? Date.parse(s.resetsAt) : NaN;
+  if (!Number.isNaN(resets) && resets < nowMs - LIMIT_RESET_GRACE_MS) return true;
+  const observed = Date.parse(s.observedAt);
+  return Number.isNaN(observed) || observed < nowMs - LIMIT_MAX_AGE_MS;
 }
 
-function better(a: LimitCandidate, b: LimitCandidate): boolean {
-  const [ra, rb] = [rank(a), rank(b)];
+function rank(c: LimitCandidate, nowMs: number): [number, number, number] {
+  const resets = c.snap.resetsAt ? Date.parse(c.snap.resetsAt) : NaN;
+  const observed = Date.parse(c.snap.observedAt);
+  // A window that hasn't reset yet (or has no reset time) beats one that has; then the newest reading wins.
+  const current = Number.isNaN(resets) || resets > nowMs ? 1 : 0;
+  return [current, Number.isNaN(observed) ? -Infinity : observed, c.seq ?? -Infinity];
+}
+
+function better(a: LimitCandidate, b: LimitCandidate, nowMs: number): boolean {
+  const [ra, rb] = [rank(a, nowMs), rank(b, nowMs)];
   for (let i = 0; i < 3; i++) if (ra[i] !== rb[i]) return ra[i]! > rb[i]!;
   return false;
 }
 
 /**
- * One reading per (agent, account, kind). The latest window wins (resetsAt; a reading without one ranks below any
- * with one), then the newest reading, then the higher spool seq: a session idle since an earlier window can report
- * that window's numbers again later, and must not replace the current one. Sorted by agent, then account (unknown
- * last), then kind.
+ * One reading per (agent, account, kind). Readings too old to show are dropped (isExpiredReading). A reading of a
+ * window that hasn't reset beats one whose window has (a session idle since an earlier window can report it again
+ * later); then the newest reading wins, then the higher spool seq. Newest-first, not latest-window-first: two
+ * subscriptions' readings can land in one group (a config dir's login changed), and the fresh one must win. Sorted by
+ * agent, then account (unknown last), then kind.
  */
-export function pickLimits(candidates: Iterable<LimitCandidate>): LimitSnapshot[] {
+export function pickLimits(candidates: Iterable<LimitCandidate>, nowMs: number = Date.now()): LimitSnapshot[] {
   const best = new Map<string, LimitCandidate>();
   for (const c of candidates) {
+    if (isExpiredReading(c.snap, nowMs)) continue;
     const k = limitKey(c.snap);
     const prev = best.get(k);
-    if (!prev || better(c, prev)) best.set(k, c);
+    if (!prev || better(c, prev, nowMs)) best.set(k, c);
   }
   const acct = (s: LimitSnapshot) => s.account?.id ?? "￿";
   return [...best.values()]

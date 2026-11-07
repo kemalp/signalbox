@@ -3,7 +3,7 @@
 // good copy of that file.
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
-import { pickLimits, type AccountRef, type ContextSnapshot, type LimitCandidate, type LimitSnapshot, type TapSpool } from "../../core/src/index.ts";
+import { isExpiredReading, pickLimits, type AccountRef, type ContextSnapshot, type LimitCandidate, type LimitSnapshot, type TapSpool } from "../../core/src/index.ts";
 import { isObj, num, str, toIso } from "./util.ts";
 
 const SPOOL_FILE = /^[A-Za-z0-9][A-Za-z0-9._-]*\.json$/;
@@ -88,7 +88,11 @@ const WINDOW_MINUTES: Record<string, number> = { five_hour: 300, seven_day: 7 * 
  * `accountOf` names the account of the session that wrote a spool; a session it can't name groups as unknown.
  * Kinds are kept verbatim.
  */
-export function limitsFromSpools(spools: TapSpool[], accountOf: (sessionId: string) => AccountRef | undefined = () => undefined): LimitSnapshot[] {
+export function limitsFromSpools(
+  spools: TapSpool[],
+  accountOf: (sessionId: string) => AccountRef | undefined = () => undefined,
+  nowMs: number = Date.now(),
+): LimitSnapshot[] {
   const candidates: LimitCandidate[] = [];
   for (const sp of spools) {
     const list = sp.usage?.rateLimits;
@@ -117,7 +121,16 @@ export function limitsFromSpools(spools: TapSpool[], accountOf: (sessionId: stri
       candidates.push({ snap, seq: sp.seq });
     }
   }
-  return pickLimits(candidates);
+  return pickLimits(candidates, nowMs);
+}
+
+/** The spools with at least one rate-limit reading not too old to show (core isExpiredReading). */
+export function spoolsWithCurrentReadings(spools: TapSpool[], nowMs: number): TapSpool[] {
+  return spools.filter((sp) =>
+    (Array.isArray(sp.usage?.rateLimits) ? (sp.usage.rateLimits as unknown[]) : []).some(
+      (rl) => isObj(rl) && !isExpiredReading({ observedAt: sp.writtenAt, resetsAt: toIso(rl.resetsAt) }, nowMs),
+    ),
+  );
 }
 
 /** Official context reading from a spool, when it carries one. */

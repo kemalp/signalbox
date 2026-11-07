@@ -40,6 +40,15 @@ struct AccountsTests {
         #expect(fleet.accounts == nil, "no accounts key: a CLI from before accounts")
     }
 
+    @Test func anUnreadableAccountIsUnknownAndKeepsItsRow() throws {
+        let json = #"{"generatedAt":"2026-10-09T14:30:00Z","sessions":[{"agent":"claude-code","sessionId":"s1","status":"idle","account":{"source":"transcript"}},{"agent":"claude-code","sessionId":"s2","status":"idle","account":"acct-aaaaaaaaaaaa"}],"limits":[{"agent":"claude-code","kind":"five_hour","usedPercent":40,"observedAt":"2026-10-09T14:29:00Z","account":{"id":7}}],"compactions":[],"health":[]}"#
+        let fleet = try SignalboxJSON.decoder().decode(FleetSnapshot.self, from: Data(json.utf8))
+        #expect(fleet.sessions.map(\.sessionId) == ["s1", "s2"])
+        #expect(fleet.sessions.allSatisfy { $0.account == nil })
+        #expect(fleet.limits.count == 1)
+        #expect(fleet.limits.first?.account == nil)
+    }
+
     // MARK: Names and labels
 
     @Test func namesPreferYourLabelThenTheCLIsThenTheShortId() {
@@ -91,7 +100,7 @@ struct AccountsTests {
         ]
         let ids = { (f: HistoryFilter) in HistoryBrowser.filtered(entries, filter: f, now: self.t0).map(\.sessionId) }
         #expect(ids(HistoryFilter(account: .account(team))) == ["a2"])
-        #expect(Set(ids(HistoryFilter(account: .unknown))) == ["a3", "c1"])
+        #expect(ids(HistoryFilter(account: .unknown)) == ["a3"], "Codex reports no accounts, so it is never unknown")
         #expect(HistoryFilter(account: .unknown).hasFilters)
         let found = HistoryBrowser.accounts(entries)
         #expect(found.ids == [max, team])

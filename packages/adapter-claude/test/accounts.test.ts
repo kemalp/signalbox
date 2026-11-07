@@ -6,7 +6,8 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, utimesSync, 
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { accountId, buildHistory, embeddedPriceTables } from "../../core/src/index.ts";
-import { ConfigLoginReader, loginFromConfigText, type LoginFs } from "../src/config-account.ts";
+import { redactIdFolders } from "../src/claude-app.ts";
+import { ConfigLoginReader, loginFromConfigText, topLevelObjectText, type LoginFs } from "../src/config-account.ts";
 import { createClaudeAdapter, type ClaudeAdapterOptions } from "../src/index.ts";
 
 const CANARY = "CANARY_SECRET";
@@ -23,6 +24,8 @@ const SID_TERM = "d0000000-0000-4000-8000-000000000003"; // terminal in the main
 const SID_TEAM = "d0000000-0000-4000-8000-000000000004"; // terminal in the Team dir (inferred Team)
 const SID_BARE = "d0000000-0000-4000-8000-000000000005"; // desktop, nothing names its account
 const SID_APP = "d0000000-0000-4000-8000-000000000006"; // desktop, only the app's folder names it (Team)
+const SID_SDK = "d0000000-0000-4000-8000-000000000007"; // SDK run in the Team dir: often an API key, so not inferred
+const SID_OLD = "d0000000-0000-4000-8000-000000000008"; // an old spool whose transcript is gone
 
 const T0 = Date.parse("2026-11-01T10:00:00.000Z");
 const iso = (min: number) => new Date(T0 + min * 60_000).toISOString();
@@ -135,6 +138,7 @@ beforeAll(() => {
   writeTranscript(mainDir, SID_BARE, transcript(SID_BARE, "claude-desktop"));
   writeTranscript(mainDir, SID_APP, transcript(SID_APP, "claude-desktop"));
   writeTranscript(teamDir, SID_TEAM, transcript(SID_TEAM, "cli"));
+  writeTranscript(teamDir, SID_SDK, transcript(SID_SDK, "sdk-ts"));
   writeFileSync(join(mainDir, ".claude.json"), globalConfig(ACCT_MAX, ORG_MAX));
   writeFileSync(join(teamDir, ".claude.json"), globalConfig(ACCT_TEAM, ORG_TEAM));
   registry(mainDir, SID_TERM, "cli");
@@ -145,6 +149,11 @@ beforeAll(() => {
   spool(SID_TERM, 40, iso(200));
   spool(SID_TEAM, 90, iso(250));
   spool(SID_BARE, 10, iso(260));
+  // Weeks old, its window long reset: never shown, and no transcript is read for it.
+  writeFileSync(
+    join(spoolDir, `${SID_OLD}.json`),
+    JSON.stringify({ v: 1, seq: 1, agent: "claude-code", sessionId: SID_OLD, writtenAt: "2026-09-20T10:00:00.000Z", event: "session.measure", usage: { rateLimits: [{ kind: "seven_day", percentUsed: 88, resetsAt: "2026-09-25T00:00:00.000Z" }] } }),
+  );
 });
 
 afterAll(() => rmSync(root, { recursive: true, force: true }));
@@ -166,15 +175,17 @@ describe("history accounts", () => {
     const snap = buildHistory({ sessions: await a.listHistory(), tables: embeddedPriceTables() });
     const by = new Map(snap.entries.map((e) => [e.sessionId, e]));
     expect(by.get(SID_DESK)!.account).toEqual({ id: MAX, orgKnown: true, source: "claude-app-folder", quality: "recorded" });
-    expect(by.get(SID_LEDGER)!.account).toEqual({ id: TEAM_PARTIAL, orgKnown: false, source: "transcript", quality: "recorded" });
+    // Only the account half is on record; the one full id with that account (Team) completes it, marked inferred.
+    expect(by.get(SID_LEDGER)!.account).toEqual({ id: TEAM, orgKnown: true, source: "account-match", quality: "inferred" });
     expect(by.get(SID_APP)!.account).toEqual({ id: TEAM, orgKnown: true, source: "claude-app-folder", quality: "recorded" });
     expect(by.get(SID_TERM)!.account).toEqual({ id: MAX, orgKnown: true, source: "config-login", quality: "inferred" });
     expect(by.get(SID_TEAM)!.account).toEqual({ id: TEAM, orgKnown: true, source: "config-login", quality: "inferred" });
     expect(by.get(SID_TEAM)!.configDir).toBe(teamDir);
     // `claude` finds a session only in the config dir it runs with, so the resume command names it.
     expect(by.get(SID_TEAM)!.resume?.command).toBe(`CLAUDE_CONFIG_DIR='${teamDir}' claude --resume ${SID_TEAM}`);
-    // A desktop session runs on the app's own login: no inference from the folder's terminal login.
+    // A desktop session runs on the app's own login, and an SDK run often on an API key: no inference for either.
     expect(by.get(SID_BARE)!.account).toBeUndefined();
+    expect(by.get(SID_SDK)!.account).toBeUndefined();
     expect("account" in by.get(SID_BARE)!).toBe(false);
     assertNoLeak(snap);
   });
@@ -184,8 +195,8 @@ describe("history accounts", () => {
     await a.listHistory();
     const h = await a.health();
     const accounts = h.find((r) => r.name === "claude-code:accounts")!;
-    expect(accounts.detail).toContain("5 of 6 sessions have an account");
-    expect(accounts.detail).toContain("2 from the Claude app's folder names, 1 from transcript account lines, 2 inferred");
+    expect(accounts.detail).toContain("5 of 7 sessions have an account");
+    expect(accounts.detail).toContain("2 from the Claude app's folder names, 0 from transcript account lines, 3 inferred");
     const logins = h.find((r) => r.name === "claude-code:logins")!;
     expect(logins.ok).toBe(true);
     expect(logins.detail).toContain(`${mainDir}: signed in as account ${MAX.slice(5, 11)}`);
@@ -206,13 +217,13 @@ describe("live sessions and limits", () => {
     assertNoLeak(sessions);
   });
 
-  test("agents --json runs once per config dir; only the extra dir gets CLAUDE_CONFIG_DIR", async () => {
+  test("agents --json runs once per config dir, each with its own CLAUDE_CONFIG_DIR (the primary was given explicitly)", async () => {
     rmSync(envLog, { force: true });
     await adapter().listSessions();
     expect(readFileSync(envLog, "utf8").trim().split("\n").sort()).toEqual([teamDir, mainDir].sort());
   });
 
-  test("two accounts never share a gauge; an unknown-account reading stays apart", async () => {
+  test("two accounts never share a gauge; an unknown-account reading stays apart; an old spool shows nothing", async () => {
     const a = adapter();
     await a.listSessions();
     const limits = await a.readLimits();
@@ -235,6 +246,32 @@ describe("live sessions and limits", () => {
     expect(accounts.find((x) => x.id === MAX)).toMatchObject({ loginConfigDirs: [mainDir], claudeAppFolder: true });
     expect(accounts.find((x) => x.id === TEAM)).toMatchObject({ loginConfigDirs: [teamDir], claudeAppFolder: true });
     assertNoLeak(accounts);
+  });
+});
+
+describe("Claude Code's default dir as an extra one", () => {
+  test("agents --json without CLAUDE_CONFIG_DIR, its login from ~/.claude.json, and a resume that unsets the variable", async () => {
+    const home = mkdtempSync(join(tmpdir(), "signalbox-home-"));
+    try {
+      const def = join(home, ".claude");
+      const work = join(home, ".claude-work");
+      writeTranscript(def, SID_TERM, transcript(SID_TERM, "cli"));
+      writeTranscript(work, SID_TEAM, transcript(SID_TEAM, "cli"));
+      writeFileSync(join(home, ".claude.json"), globalConfig(ACCT_MAX, ORG_MAX));
+      writeFileSync(join(work, ".claude.json"), globalConfig(ACCT_TEAM, ORG_TEAM));
+      mkdirSync(join(def, "sessions"), { recursive: true });
+      rmSync(envLog, { force: true });
+      const ad = createClaudeAdapter({ configDir: work, extraConfigDirs: [def], spoolDir: join(home, "spool"), claudeBin: fakeClaude, homeDir: home, now: () => new Date(T0 + 10 * 60_000) });
+      await ad.listSessions();
+      expect(readFileSync(envLog, "utf8").trim().split("\n").sort()).toEqual(["unset", work].sort());
+      const snap = buildHistory({ sessions: await ad.listHistory(), tables: embeddedPriceTables() });
+      const by = new Map(snap.entries.map((e) => [e.sessionId, e]));
+      expect(by.get(SID_TERM)!.account?.id).toBe(MAX);
+      expect(by.get(SID_TERM)!.resume?.command).toBe(`env -u CLAUDE_CONFIG_DIR claude --resume ${SID_TERM}`);
+      expect(by.get(SID_TEAM)!.resume?.command).toBe(`claude --resume ${SID_TEAM}`);
+    } finally {
+      rmSync(home, { recursive: true, force: true });
+    }
   });
 });
 
@@ -267,6 +304,14 @@ describe("shared transcript trees", () => {
       expect(by.get(SID_TEAM)!.account).toEqual({ id: TEAM, orgKnown: true, source: "tap-config-dir", quality: "inferred" });
       const h = await ad.health();
       expect(h.find((r) => r.name === "claude-code:transcripts")!.detail).toContain("shared by");
+      // The primary shares the tree, so a plain `claude` finds every session in it.
+      expect(by.get(SID_TEAM)!.resume?.command).toBe(`claude --resume ${SID_TEAM}`);
+      // Two extra dirs sharing a tree without the primary: the resume names the first of them.
+      const p = join(shared, "primary");
+      mkdirSync(p, { recursive: true });
+      const ad2 = createClaudeAdapter({ configDir: p, extraConfigDirs: [a, b], spoolDir: sp, claudeBin: fakeClaude, now: () => new Date(T0 + 10 * 60_000) });
+      const snap2 = buildHistory({ sessions: await ad2.listHistory(), tables: embeddedPriceTables() });
+      expect(snap2.entries.find((e) => e.sessionId === SID_TERM)!.resume?.command).toBe(`CLAUDE_CONFIG_DIR='${a}' claude --resume ${SID_TERM}`);
     } finally {
       rmSync(shared, { recursive: true, force: true });
     }
@@ -281,6 +326,36 @@ describe("config login reader", () => {
     expect(loginFromConfigText(JSON.stringify({ numStartups: 1 }))).toBeUndefined();
     expect(loginFromConfigText(JSON.stringify({ oauthAccount: { emailAddress: EMAIL } }))).toBeUndefined();
     expect(() => loginFromConfigText("{oops")).toThrow();
+  });
+
+  test("only the top-level oauthAccount object is cut out and parsed", () => {
+    const text = JSON.stringify({
+      projects: { "/x": { note: '"oauthAccount": {"accountUuid": "decoy"}', oauthAccount: { accountUuid: ACCT_TEAM } } },
+      mcpServers: { s: { env: { KEY: "}{\\\"" } } },
+      oauthAccount: { accountUuid: ACCT_MAX, organizationUuid: ORG_MAX, emailAddress: EMAIL },
+      after: [1, { oauthAccount: 2 }],
+    });
+    expect(JSON.parse(topLevelObjectText(text, "oauthAccount")!)).toEqual({ accountUuid: ACCT_MAX, organizationUuid: ORG_MAX, emailAddress: EMAIL });
+    expect(loginFromConfigText(text)!.ref.id).toBe(MAX);
+    expect(topLevelObjectText(JSON.stringify({ a: { oauthAccount: {} } }), "oauthAccount")).toBeUndefined();
+    expect(topLevelObjectText(JSON.stringify({ oauthAccount: "not an object" }), "oauthAccount")).toBeUndefined();
+  });
+
+  test("a read that fails in passing keeps the last good login; a removed file doesn't", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "signalbox-login-"));
+    try {
+      const f = join(dir, "claude.json");
+      writeFileSync(f, globalConfig(ACCT_MAX, ORG_MAX));
+      const r = new ConfigLoginReader();
+      expect((await r.read(f)).state).toBe("ok");
+      writeFileSync(f, '{"oauthAccount": {"accountUu'); // caught mid-write
+      const mid = await r.read(f);
+      expect(mid.state === "ok" && mid.evidence?.ref.id).toBe(MAX);
+      rmSync(f);
+      expect((await r.read(f)).state).toBe("missing");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   test("refuses symlinks, oversized files and parse failures; a missing file is just missing", async () => {
@@ -306,5 +381,12 @@ describe("config login reader", () => {
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
+  });
+});
+
+describe("the Claude app trace", () => {
+  test("account and organization folder names are redacted; file names are kept", () => {
+    expect(redactIdFolders(`/base/${ACCT_MAX}/${ORG_MAX}/local_${ACCT_TEAM}.json`)).toBe(`/base/<id>/<id>/local_${ACCT_TEAM}.json`);
+    expect(redactIdFolders(`/base/${ACCT_MAX}`)).toBe("/base/<id>");
   });
 });

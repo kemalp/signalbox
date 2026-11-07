@@ -3,6 +3,7 @@ import { homedir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import {
   accountDirectory,
+  accountMatches,
   accountShortId,
   chooseTitle,
   claudeResumePrefix,
@@ -50,7 +51,7 @@ import {
   type TranscriptFile,
 } from "./paths.ts";
 import { isPidAlive, isRegistryFileName, mergeSessions, readRegistry, runAgentsJson, type AgentsRun } from "./sessions.ts";
-import { contextFromSpool, limitsFromSpools, readSpoolDir } from "./spool.ts";
+import { contextFromSpool, limitsFromSpools, readSpoolDir, spoolsWithCurrentReadings } from "./spool.ts";
 import { TranscriptReader, type TranscriptMeta, type TranscriptParse } from "./transcript.ts";
 import { emptyUsageStats, type UsageStats } from "./usage.ts";
 import { watchDir, type DirWatchMode } from "./watch.ts";
@@ -88,6 +89,8 @@ export interface ClaudeAdapterOptions {
   claudeAppFs?: ClaudeAppFs;
   /** Filesystem calls of the config-login reader (tests). */
   loginFs?: LoginFs;
+  /** The home folder for Claude Code's defaults (~/.claude, ~/.claude.json). Default os.homedir(); tests set it. */
+  homeDir?: string;
 }
 
 /** What the last listHistory took from the Claude app's list. */
@@ -178,11 +181,16 @@ interface EvidenceCtx {
   spools: TapSpool[];
   /** The newest spool per session. */
   spoolBySession: Map<string, TapSpool>;
+  /** Full account ids seen anywhere (logins, the app's folders, transcripts), to complete account-only ones. */
+  known: AccountEvidence[];
 }
 
-/** Desktop sessions run on the Claude app's own login, so a config dir's terminal login says nothing about them. */
+/**
+ * Whether a config dir's terminal login says anything about a session: not for desktop sessions (the Claude app has
+ * its own login), nor for SDK runs (they often authenticate with an API key instead). Unknown entrypoint: no.
+ */
 function inferable(entrypoint: string | undefined): boolean {
-  return entrypoint !== undefined && entrypoint !== "claude-desktop";
+  return entrypoint !== undefined && entrypoint !== "claude-desktop" && !entrypoint.startsWith("sdk");
 }
 
 function newestSpools(spools: TapSpool[]): Map<string, TapSpool> {
@@ -236,6 +244,8 @@ interface HistoryBucket {
   mainPath?: string;
   /** The config dir of the main transcript's tree, when only one config dir shares it. */
   configDir?: string;
+  /** The config dir a resume runs with (see TranscriptFile.resumeDir). */
+  resumeDir?: string;
   records: UsageRecord[];
   ledger: LedgerEntry[];
   firstTsMs?: number;
@@ -263,13 +273,15 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
   private readonly spoolCache = new Map<string, TapSpool>();
   private lastWatch?: { readonly mode: DirWatchMode };
   private readonly logins: ConfigLoginReader;
+  /** Claude Code's own default config dir, ~/.claude. */
+  private readonly claudeDefaultDir: string;
   private loginCache?: { at: number; reads: Map<string, LoginRead> };
   private lastApp?: { at: number; read: ClaudeAppRead };
   private appInFlight?: Promise<ClaudeAppRead>;
   /** Recorded account evidence seen in transcripts and the Claude app's records (by id), for readAccounts. */
   private readonly seenEvidence = new Map<string, AccountEvidence>();
-  /** Registry hints per live session from the last listSessions, for attributing its limit readings. */
-  private sessionHints = new Map<string, { entrypoint?: string; configDir?: string }>();
+  /** The Claude app's account folders (names only), re-listed at most every APP_FLEET_TTL_MS. */
+  private appFolders?: { at: number; evidence: AccountEvidence[] };
   /** How the last listHistory's sessions got their account. */
   private accountStats?: { sessions: number; app: number; transcript: number; inferred: number; conflicts: number };
   private usageStats?: UsageStats;
@@ -293,6 +305,8 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
     // Only point the child at a config dir we were explicitly given; setting CLAUDE_CONFIG_DIR
     // to the default path is not a no-op for Claude Code (its global config moves into the dir).
     const explicit = opts.configDir ?? (process.env.CLAUDE_CONFIG_DIR || undefined);
+    const homeDir = opts.homeDir ?? homedir();
+    this.claudeDefaultDir = join(homeDir, ".claude");
     this.roots = [
       {
         configDir: this.configDir,
@@ -300,11 +314,11 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
         sessionsDir: join(this.configDir, "sessions"),
         primary: true,
         agentsEnv: opts.configDir ? { ...process.env, CLAUDE_CONFIG_DIR: opts.configDir } : process.env,
-        globalConfig: explicit ? join(explicit, ".claude.json") : join(homedir(), ".claude.json"),
+        globalConfig: explicit ? join(explicit, ".claude.json") : join(homeDir, ".claude.json"),
       },
     ];
     const seen = new Set([resolve(this.configDir)]);
-    const home = resolve(homedir(), ".claude");
+    const home = resolve(this.claudeDefaultDir);
     for (const dir of opts.extraConfigDirs ?? []) {
       const r = resolve(dir);
       if (seen.has(r)) continue;
@@ -320,7 +334,7 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
         sessionsDir: join(dir, "sessions"),
         primary: false,
         agentsEnv: env,
-        globalConfig: isDefault ? join(homedir(), ".claude.json") : join(dir, ".claude.json"),
+        globalConfig: isDefault ? join(homeDir, ".claude.json") : join(dir, ".claude.json"),
       });
     }
     this.configDirs = this.roots.map((r) => r.configDir);
@@ -363,7 +377,9 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
     const out: TranscriptFile[] = [];
     for (const t of await this.trees()) {
       const owner = t.roots.length === 1 ? t.roots[0]!.configDir : undefined;
-      for (const f of await listTranscripts(t.projectsDir)) out.push(owner ? { ...f, configDir: owner } : f);
+      // Any config dir sharing the tree finds the session; the primary (a plain `claude`) when it is one of them.
+      const resumeDir = t.roots.some((r) => r.primary) ? this.configDir : t.roots[0]!.configDir;
+      for (const f of await listTranscripts(t.projectsDir)) out.push(owner ? { ...f, configDir: owner, resumeDir } : { ...f, resumeDir });
     }
     return out;
   }
@@ -525,6 +541,7 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
         b.main = parsed;
         b.mainPath = file.path;
         b.configDir = file.configDir;
+        b.resumeDir = file.resumeDir;
       } else if (file.kind === "subagent") {
         b.subagentFiles++;
       } else if (file.kind === "workflow") {
@@ -568,7 +585,7 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
       if (meta.version) s.version = meta.version;
       if (b.ledger.length > 0) s.ledger = b.ledger;
       // The primary dir is the one a plain `claude` uses (Signalbox runs with the same CLAUDE_CONFIG_DIR as your shell).
-      const resume = resumeCommand(claudeResumePrefix(b.configDir, this.configDir), sessionId, project);
+      const resume = resumeCommand(claudeResumePrefix(b.resumeDir, this.configDir, this.claudeDefaultDir), sessionId, project);
       if (resume) s.resume = resume;
       if (b.mainPath) s.transcriptPath = b.mainPath;
       if (b.configDir) s.configDir = b.configDir;
@@ -576,6 +593,10 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
       if (evidence.length > 0) s.accountEvidence = evidence;
       out.push(s);
     }
+    // An account-only id completed by the one full id with the same account seen anywhere (after the loop above,
+    // which noted every transcript's account lines).
+    const known = await this.knownAccounts(logins);
+    for (const s of out) if (s.accountEvidence) s.accountEvidence.push(...accountMatches(s.accountEvidence, known));
     const titles: Record<string, number> = { custom: 0, ai: 0, "agent-name": 0, none: 0 };
     for (const s of out) titles[s.titleSource] = (titles[s.titleSource] ?? 0) + 1;
     this.titleStats = titles;
@@ -660,7 +681,7 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
   /** The config dir a tap spool names ($CLAUDE_CONFIG_DIR, or ~/.claude when unset), if it is one of ours. */
   private spoolRootDir(sp: TapSpool): string | undefined {
     if (sp.configDir === undefined) return undefined;
-    const want = resolve(sp.configDir ?? join(homedir(), ".claude"));
+    const want = resolve(sp.configDir ?? this.claudeDefaultDir);
     return this.roots.find((r) => resolve(r.configDir) === want)?.configDir;
   }
 
@@ -688,6 +709,25 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
     return read;
   }
 
+  /** The Claude app's account folders, hashed (names only; nothing is opened), at most every APP_FLEET_TTL_MS. */
+  private async readAppFolders(): Promise<AccountEvidence[]> {
+    if (!this.claudeApp) return [];
+    const c = this.appFolders;
+    if (c && Date.now() - c.at < APP_FLEET_TTL_MS) return c.evidence;
+    const evidence = await this.claudeApp.folderAccounts();
+    this.appFolders = { at: Date.now(), evidence };
+    return evidence;
+  }
+
+  /** Every full account id seen: each config dir's login, the app's folders, transcript account lines. */
+  private async knownAccounts(logins: Map<string, LoginRead>): Promise<AccountEvidence[]> {
+    const out: AccountEvidence[] = [];
+    for (const l of logins.values()) if (l.state === "ok" && l.evidence?.ref.orgKnown) out.push(l.evidence);
+    out.push(...(await this.readAppFolders()));
+    for (const ev of this.seenEvidence.values()) if (ev.ref.orgKnown) out.push(ev);
+    return out;
+  }
+
   private async evidenceCtx(quick: boolean): Promise<EvidenceCtx> {
     const [idx, logins, app, spoolRead] = await Promise.all([
       this.indexAllMains(),
@@ -701,7 +741,8 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
       const prev = byApp.get(r.agentSessionId);
       if (!prev || (r.accountEvidence.atMs ?? -Infinity) > (prev.atMs ?? -Infinity)) byApp.set(r.agentSessionId, r.accountEvidence);
     }
-    return { idx, logins, app: byApp, spools: spoolRead.spools, spoolBySession: newestSpools(spoolRead.spools) };
+    const known = await this.knownAccounts(logins);
+    return { idx, logins, app: byApp, spools: spoolRead.spools, spoolBySession: newestSpools(spoolRead.spools), known };
   }
 
   /**
@@ -721,19 +762,21 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
     const evidence = this.transcriptEvidence(meta, { entrypoint: hint.entrypoint, configDir: hint.configDir ?? main?.configDir }, ctx.logins, ctx.spoolBySession.get(sessionId));
     const app = ctx.app.get(sessionId);
     if (app) evidence.push(app);
+    evidence.push(...accountMatches(evidence, ctx.known));
     return resolveAccount(evidence).account;
   }
 
   async readAccounts(): Promise<AccountInfo[]> {
-    const [logins, folders] = await Promise.all([this.readLogins(), this.claudeApp ? this.claudeApp.folderAccounts() : Promise.resolve([])]);
+    const [logins, folders] = await Promise.all([this.readLogins(), this.readAppFolders()]);
     const found: Array<{ ev: AccountEvidence; sighting: AccountSighting }> = [];
     for (const [dir, l] of logins) if (l.state === "ok" && l.evidence) found.push({ ev: l.evidence, sighting: { ref: l.evidence.ref, loginConfigDir: dir } });
     for (const f of folders) found.push({ ev: f, sighting: { ref: f.ref, claudeAppFolder: true } });
     for (const ev of this.seenEvidence.values()) found.push({ ev, sighting: { ref: ev.ref } });
-    // An account named without its organization (a transcript's artifact line) is the same person as a full id with
-    // that account half: list the full one only. A session that resolved to the partial id still shows it.
-    const full = new Set(found.filter((x) => x.ev.ref.orgKnown).map((x) => x.ev.accountKey));
-    return accountDirectory(found.filter((x) => x.ev.ref.orgKnown || !full.has(x.ev.accountKey)).map((x) => x.sighting));
+    // An account named without its organization (a transcript's artifact line) is completed by the one full id with
+    // that account half (resolveAccount), so it isn't listed apart; with no such id, or several, it is.
+    const fullIds = new Map<string, Set<string>>();
+    for (const x of found) if (x.ev.ref.orgKnown) fullIds.set(x.ev.accountKey, (fullIds.get(x.ev.accountKey) ?? new Set()).add(x.ev.ref.id));
+    return accountDirectory(found.filter((x) => x.ev.ref.orgKnown || fullIds.get(x.ev.accountKey)?.size !== 1).map((x) => x.sighting));
   }
 
   private claudeBin(): string | undefined {
@@ -826,29 +869,34 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
         if (!s.version && last.version) s.version = last.version;
       }),
     );
-    const hints = new Map<string, { entrypoint?: string; configDir?: string }>();
     await Promise.all(
       sessions.map(async (s) => {
-        hints.set(s.sessionId, { entrypoint: s.entrypoint, configDir: s.configDir });
         const account = await this.accountFor(s.sessionId, ctx, { entrypoint: s.entrypoint, configDir: s.configDir }, !quick);
         if (account) s.account = account;
       }),
     );
-    this.sessionHints = hints;
     return sessions;
   }
 
   async readLimits(): Promise<LimitSnapshot[]> {
-    const ctx = await this.evidenceCtx(false);
+    const nowMs = this.now().getTime();
+    const [ctx, regs] = await Promise.all([this.evidenceCtx(false), Promise.all(this.roots.map((r) => readRegistry(r.sessionsDir)))]);
+    // Each live session's registry row says where it runs (entrypoint, config dir), read here rather than taken from
+    // another call, so a reading's account doesn't depend on which call ran first.
+    const hints = new Map<string, { entrypoint?: string; configDir?: string }>();
+    regs.forEach((reg, i) => {
+      for (const e of reg.entries) if (e.sessionId && !hints.has(e.sessionId)) hints.set(e.sessionId, { entrypoint: e.entrypoint, configDir: this.roots[i]!.configDir });
+    });
+    // Only sessions with a reading still worth showing: old spools (never deleted) would otherwise cost a transcript read each.
+    const reporting = new Set(spoolsWithCurrentReadings(ctx.spools, nowMs).map((sp) => sp.sessionId));
     const accounts = new Map<string, AccountRef>();
-    const reporting = new Set(ctx.spools.filter((sp) => Array.isArray(sp.usage?.rateLimits)).map((sp) => sp.sessionId));
     await Promise.all(
       [...reporting].map(async (sid) => {
-        const account = await this.accountFor(sid, ctx, this.sessionHints.get(sid) ?? {}, true);
+        const account = await this.accountFor(sid, ctx, hints.get(sid) ?? {}, true);
         if (account) accounts.set(sid, account);
       }),
     );
-    return limitsFromSpools(ctx.spools, (sid) => accounts.get(sid));
+    return limitsFromSpools(ctx.spools, (sid) => accounts.get(sid), nowMs);
   }
 
   async readContext(): Promise<ContextSnapshot[]> {

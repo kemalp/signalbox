@@ -84,11 +84,13 @@ export function shellQuote(s: string): string {
 
 /**
  * The resume command prefix for a Claude Code session whose transcript is in `configDir`: plain `claude --resume`
- * for the dir a plain `claude` uses (`defaultDir`) or no known dir, else with CLAUDE_CONFIG_DIR set, since `claude`
- * only finds a session in the config dir it runs with.
+ * for the dir a plain `claude` uses (`plainDir`) or no known dir; with CLAUDE_CONFIG_DIR unset for Claude Code's own
+ * default (`claudeDefaultDir`, ~/.claude: setting the variable to it is not the same, the global config moves); else
+ * with CLAUDE_CONFIG_DIR set. `claude` only finds a session in the config dir it runs with.
  */
-export function claudeResumePrefix(configDir: string | undefined, defaultDir: string): string {
-  if (!configDir || stripSlash(configDir) === stripSlash(defaultDir)) return "claude --resume";
+export function claudeResumePrefix(configDir: string | undefined, plainDir: string, claudeDefaultDir: string): string {
+  if (!configDir || stripSlash(configDir) === stripSlash(plainDir)) return "claude --resume";
+  if (stripSlash(configDir) === stripSlash(claudeDefaultDir)) return "env -u CLAUDE_CONFIG_DIR claude --resume";
   return `CLAUDE_CONFIG_DIR=${shellQuote(configDir)} claude --resume`;
 }
 

@@ -126,10 +126,15 @@ export function tracedClaudeAppFs(fs: ClaudeAppFs, log: (line: string) => void):
   };
 }
 
-/** The real calls, traced to stderr when $SIGNALBOX_CLAUDE_APP_TRACE is 1. */
+/** A path with every UUID-shaped folder name (the app's account and organization folders) replaced by "<id>". */
+export function redactIdFolders(path: string): string {
+  return path.replace(/(^|\/)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?=\/|$)/gi, "$1<id>");
+}
+
+/** The real calls, traced to stderr when $SIGNALBOX_CLAUDE_APP_TRACE is 1 (account folder names redacted). */
 export function defaultClaudeAppFs(env: Record<string, string | undefined> = process.env): ClaudeAppFs {
   if (env[CLAUDE_APP_TRACE_ENV] !== "1") return nodeClaudeAppFs;
-  return tracedClaudeAppFs(nodeClaudeAppFs, (line) => process.stderr.write(`signalbox claude-app: ${line}\n`));
+  return tracedClaudeAppFs(nodeClaudeAppFs, (line) => process.stderr.write(`signalbox claude-app: ${redactIdFolders(line)}\n`));
 }
 
 export interface ClaudeAppRead {

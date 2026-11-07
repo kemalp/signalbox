@@ -392,7 +392,7 @@ export interface FleetSnapshot {
 // belong to the (account, organization) pair: one person can be in a personal organization (e.g. Max) and a Team one.
 
 /** Where an account id came from. Adapters list the stability of each in their health rows. */
-export type AccountSource = "claude-app-folder" | "transcript" | "config-login" | "tap-config-dir" | (string & {});
+export type AccountSource = "claude-app-folder" | "transcript" | "config-login" | "tap-config-dir" | "account-match" | (string & {});
 
 export interface AccountRef {
   /**
@@ -404,8 +404,8 @@ export interface AccountRef {
   source: AccountSource;
   /**
    * "recorded": the session's own files name the account (the Claude app's folder for it, a transcript line).
-   * "inferred": the current terminal login of the config dir the session ran from; a later /login there would make
-   * it wrong, so UIs mark it.
+   * "inferred": the current terminal login of the config dir the session ran from (a later /login there would make
+   * it wrong), or an account-only id completed by the one full id with the same account ("account-match"); UIs mark it.
    */
   quality: "recorded" | "inferred";
 }

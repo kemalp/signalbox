@@ -35,9 +35,11 @@ export class FileCache<T> {
     return e.value;
   }
 
-  /** The value stored for `path` whatever its stamp (possibly stale), without marking it used. */
+  /** The value stored for `path` whatever its stamp (possibly stale); marks it used, like `get`. */
   peek(path: string): T | undefined {
-    return this.entries.get(path)?.value;
+    const e = this.entries.get(path);
+    if (e) e.usedAt = this.clock();
+    return e?.value;
   }
 
   /**

@@ -33,9 +33,10 @@
 // Accounts (added without a version change, like "commands" and "history"): fleet sessions, limits and history
 // entries carry an optional `account` (core AccountRef: a hashed id, whether the organization is known, the source,
 // and "recorded" or "inferred"); its absence means unknown, never a default account. Limits are one per (agent,
-// account, kind). The fleet adds `accounts` (AccountInfo[]: every account seen, with the user's labels from
-// Signalbox's accounts.json and live session counts), and Claude Code sessions and history entries name their
-// `configDir` when Signalbox reads more than one (--claude-config-dir) or it is otherwise known.
+// account, kind): a window that hasn't reset beats one that has, then the newest reading; readings whose window reset
+// over a day ago, or over 8 days old, are dropped. The fleet adds `accounts` (AccountInfo[]: every account seen, with
+// the user's labels from Signalbox's accounts.json and live session counts), and Claude Code sessions and history
+// entries name their `configDir` when it is known (one config dir holds the session's registry row or transcript).
 //
 // Status pushes: adapters that can watch their sessions (Claude Code's registry dir, Codex's newest
 // rollouts) signal a possible change; signals within `statusDebounceMs` of the first are coalesced into

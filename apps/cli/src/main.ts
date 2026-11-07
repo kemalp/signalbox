@@ -263,6 +263,7 @@ export async function main(argv: string[]): Promise<number> {
   let args;
   try {
     const extra = takeClaudeConfigDirs(argv, process.env, homedir());
+    for (const w of extra.warnings) console.error(`signalbox: ${w}`);
     configureLoad({ claudeConfigDirs: extra.dirs });
     args = parseArgs(extra.argv, adapterIds(), CATALOG_AGENTS);
     switch (args.command) {

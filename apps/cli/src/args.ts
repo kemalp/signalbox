@@ -120,9 +120,14 @@ const CLAUDE_CONFIG_DIR_FLAG = "--claude-config-dir";
  * alongside $CLAUDE_CONFIG_DIR or ~/.claude. A leading `~` expands to `home`; each dir must then be absolute.
  * Duplicates are dropped, the first kept.
  */
-export function takeClaudeConfigDirs(argv: string[], env: Record<string, string | undefined>, home: string): { dirs: string[]; argv: string[] } {
+export function takeClaudeConfigDirs(
+  argv: string[],
+  env: Record<string, string | undefined>,
+  home: string,
+): { dirs: string[]; argv: string[]; warnings: string[] } {
   const rest: string[] = [];
   const raw: string[] = [];
+  const warnings: string[] = [];
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]!;
     if (arg === CLAUDE_CONFIG_DIR_FLAG) {
@@ -135,15 +140,22 @@ export function takeClaudeConfigDirs(argv: string[], env: Record<string, string 
       raw.push(v);
     } else rest.push(arg);
   }
-  for (const v of (env[CLAUDE_CONFIG_DIRS_ENV] ?? "").split(":")) if (v.trim() !== "") raw.push(v.trim());
+  const fromEnv = (env[CLAUDE_CONFIG_DIRS_ENV] ?? "").split(":").map((v) => v.trim()).filter((v) => v !== "");
   const dirs: string[] = [];
-  for (const v of raw) {
+  const add = (v: string, fromFlag: boolean) => {
     const dir = v === "~" ? home : v.startsWith("~/") ? `${home.replace(/\/+$/, "")}/${v.slice(2)}` : v;
-    if (!dir.startsWith("/")) throw new UsageError(`${CLAUDE_CONFIG_DIR_FLAG}: expected an absolute path, got "${v}"`);
+    if (!dir.startsWith("/")) {
+      // A bad flag is a usage error; a bad environment entry is skipped with a warning, so it can't break every command.
+      if (fromFlag) throw new UsageError(`${CLAUDE_CONFIG_DIR_FLAG}: expected an absolute path, got "${v}"`);
+      warnings.push(`${CLAUDE_CONFIG_DIRS_ENV}: skipped "${v}", not an absolute path`);
+      return;
+    }
     const clean = dir.length > 1 ? dir.replace(/\/+$/, "") : dir;
     if (!dirs.includes(clean)) dirs.push(clean);
-  }
-  return { dirs, argv: rest };
+  };
+  for (const v of raw) add(v, true);
+  for (const v of fromEnv) add(v, false);
+  return { dirs, argv: rest, warnings };
 }
 
 /** Splits `--flag=value` and reads `--flag value`, rejecting unknown flags. */

@@ -252,8 +252,9 @@ needs the 30-day range, with a "Switch to 30 days" link, instead of prorating (t
   agent-side is written), where its id came from, which config folder's terminal login it is, its live and past
   sessions with their recorded cost, and its plan windows. "Current logins" maps each config folder and the Claude
   app to an account. Sessions with no account are counted, never given one. Sessions and History rows carry an account
-  chip (dashed when inferred from a folder's login), the inspectors say where it came from (or why it is unknown) and
-  the config folder, and History filters by account, "Unknown" included. Limits and the menu bar show one card or row
+  chip (dashed when inferred: from a folder's login, or an id found without its organization completed by the one full
+  id with the same account), the inspectors say where it came from (or why it is unknown) and the config folder, and
+  History filters by account, "Unknown" (Claude Code sessions) included. Limits and the menu bar show one card or row
   of rings per account; with more than one, the menu bar label names the account ("Team 72%") and limit alerts name
   it too.
 - **Limits** fill only when the reading is current. A reading older than 15 minutes, or one whose window has

@@ -36,7 +36,8 @@ public enum HistoryRange: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
-/// The History screen's account filter: one account, or the sessions whose account is unknown.
+/// The History screen's account filter: one account, or the Claude Code sessions whose account is unknown (other
+/// agents don't report accounts, so they are never "unknown").
 public enum HistoryAccountFilter: Hashable, Sendable {
     case account(String)
     case unknown
@@ -44,7 +45,7 @@ public enum HistoryAccountFilter: Hashable, Sendable {
     public func keeps(_ entry: SessionHistoryEntry) -> Bool {
         switch self {
         case let .account(id): entry.account?.id == id
-        case .unknown: entry.account == nil
+        case .unknown: entry.agent == .claudeCode && entry.account == nil
         }
     }
 }

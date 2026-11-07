@@ -37,6 +37,15 @@ public struct AccountRef: Codable, Hashable, Sendable {
     public var shortID: String { AccountNaming.shortID(id) }
 }
 
+extension KeyedDecodingContainer {
+    /// An `account` that can't be read is unknown, never a reason to drop the session or limit row it sits on. The
+    /// synthesized decoders of `FleetSession` and `LimitSnapshot` pick this overload over the generic one.
+    public func decodeIfPresent(_ type: AccountRef.Type, forKey key: Key) throws -> AccountRef? {
+        guard (try? decodeNil(forKey: key)) == false else { return nil }
+        return try? decode(AccountRef.self, forKey: key)
+    }
+}
+
 /// One account the CLI has seen (the fleet's `accounts`).
 public struct AccountInfo: Codable, Hashable, Sendable, Identifiable {
     public var id: String
@@ -109,6 +118,7 @@ public enum AccountNaming {
         case "transcript": "the session's transcript"
         case "config-login": "this folder's current login"
         case "tap-config-dir": "the tap's folder and its current login"
+        case "account-match": "the same account seen with its organization"
         default: source
         }
     }

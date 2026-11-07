@@ -405,8 +405,8 @@ for (const a of APP_ONLY) {
 
 // Accounts, assigned after the fact so the generator's sequence (and every other value) stays as it was. The same
 // two made-up subscriptions as apps/web/src/mock.ts: desktop and app-only sessions carry the app folder's account
-// (recorded), terminal and SDK sessions the current login of the config dir they ran from (inferred), and a session
-// whose files name nothing has no account. One desktop session names two accounts, one only an account half.
+// (recorded), terminal sessions the current login of the config dir they ran from (inferred; never SDK runs, which often
+// use an API key), and a session whose files name nothing has no account. One desktop session names two accounts, one only an account half.
 const MAX = accountId("00000000-0000-4000-8000-0000000000a1", "00000000-0000-4000-8000-0000000000b1");
 const TEAM = accountId("00000000-0000-4000-8000-0000000000a2", "00000000-0000-4000-8000-0000000000b2");
 const PARTIAL = accountId("00000000-0000-4000-8000-0000000000a4");
@@ -420,7 +420,7 @@ for (const e of entries) {
     e.account = { id: n % 4 === 3 ? TEAM : MAX, orgKnown: true, source: "claude-app-folder", quality: "recorded" };
     if (n === 2) e.accountConflict = true;
     if (n === 5) e.account = { id: PARTIAL, orgKnown: false, source: "transcript", quality: "recorded" };
-  } else if (e.entrypoint === "cli" || e.entrypoint === "sdk") {
+  } else if (e.entrypoint === "cli") {
     const team = nTerm++ % 3 === 1;
     e.account = { id: team ? TEAM : MAX, orgKnown: true, source: "config-login", quality: "inferred" };
     if (team) {
