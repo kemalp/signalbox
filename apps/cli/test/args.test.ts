@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { calendarSince, helpText, parseArgs, parseDateArg, reportWindow, reportWindowLabel, UsageError, type ReportArgs } from "../src/args.ts";
+import { calendarSince, helpText, parseArgs, parseDateArg, reportWindow, reportWindowLabel, takeClaudeConfigDirs, UsageError, type ReportArgs } from "../src/args.ts";
 
 const AGENTS = ["claude-code", "codex"];
 const parse = (s: string) => parseArgs(s ? s.split(" ") : [], AGENTS);
@@ -157,5 +157,25 @@ describe("windows", () => {
     expect(() => parseDateArg("2026-13-01", "--since")).toThrow(UsageError);
     // Years 0-99 are real years, not 1900-1999.
     expect(parseDateArg("0001-01-01", "--since").getFullYear()).toBe(1);
+  });
+});
+
+describe("takeClaudeConfigDirs", () => {
+  const home = "/Users/test";
+
+  test("every --claude-config-dir comes out of argv, for any command; ~ expands; duplicates go", () => {
+    const r = takeClaudeConfigDirs(["history", "--claude-config-dir", "~/.claude-team", "--json", "--claude-config-dir=/x/y/", "--claude-config-dir", "/x/y"], {}, home);
+    expect(r.dirs).toEqual(["/Users/test/.claude-team", "/x/y"]);
+    expect(r.argv).toEqual(["history", "--json"]);
+    expect(r.warnings).toEqual([]);
+  });
+
+  test("a bad flag is a usage error; a bad environment entry is skipped with a warning", () => {
+    expect(() => takeClaudeConfigDirs(["report", "--claude-config-dir", "relative"], {}, home)).toThrow(UsageError);
+    expect(() => takeClaudeConfigDirs(["report", "--claude-config-dir"], {}, home)).toThrow(UsageError);
+    const r = takeClaudeConfigDirs(["--help"], { SIGNALBOX_CLAUDE_CONFIG_DIRS: "relative/dir::/abs/team" }, home);
+    expect(r.dirs).toEqual(["/abs/team"]);
+    expect(r.argv).toEqual(["--help"]);
+    expect(r.warnings).toEqual(['SIGNALBOX_CLAUDE_CONFIG_DIRS: skipped "relative/dir", not an absolute path']);
   });
 });

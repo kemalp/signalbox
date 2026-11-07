@@ -118,7 +118,7 @@ row "$pid_b" dryrun-beta "dry run beta" busy "" 600
 echo "==> Starting the copy (dry run, synthetic homes)"
 env -i HOME="$work/home" PATH=/usr/bin:/bin:/usr/sbin:/sbin TMPDIR="$work/tmp/" \
   CLAUDE_CONFIG_DIR="$cfg" SIGNALBOX_CLAUDE_BIN="$work/bin/claude" CODEX_HOME="$work/codex" SIGNALBOX_BIN_DIRS= \
-  SIGNALBOX_NOTIFY_DRYRUN=1 SIGNALBOX_DEBUG=1 SIGNALBOX_DEFAULTS_SUITE="$id.settings" \
+  SIGNALBOX_NOTIFY_DRYRUN=1 SIGNALBOX_DEBUG=1 SIGNALBOX_DEFAULTS_SUITE="$id.settings" SIGNALBOX_ACCOUNTS_FILE="$work/accounts.json" \
   "$app/Contents/MacOS/Signalbox" > "$log" 2>&1 &
 app_pid=$!
 

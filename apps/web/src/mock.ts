@@ -1,7 +1,10 @@
 // Synthetic data for developing the page (`bun apps/web/src/dev.ts`) and for tests.
 // Everything here is generated; nothing is copied from real transcripts.
 import {
+  accountId,
   embeddedCommandCatalogs,
+  type AccountInfo,
+  type AccountRef,
   type AdapterHealth,
   type AgentId,
   type CommandsSnapshot,
@@ -23,6 +26,14 @@ import type { ReportQuery } from "./server.ts";
 export type { DayTotals };
 
 const HOME = "/Users/you/code";
+
+/** Two made-up subscriptions (hashed like the real ids; the UUIDs below are synthetic). */
+export const MOCK_ACCOUNTS = {
+  max: accountId("00000000-0000-4000-8000-0000000000a1", "00000000-0000-4000-8000-0000000000b1"),
+  team: accountId("00000000-0000-4000-8000-0000000000a2", "00000000-0000-4000-8000-0000000000b2"),
+} as const;
+const MAX_APP: AccountRef = { id: MOCK_ACCOUNTS.max, orgKnown: true, source: "claude-app-folder", quality: "recorded" };
+const TEAM_LOGIN: AccountRef = { id: MOCK_ACCOUNTS.team, orgKnown: true, source: "config-login", quality: "inferred" };
 const PROJECTS = [`${HOME}/api-refactor`, `${HOME}/signalbox`, `${HOME}/web-app`, `${HOME}/infra`];
 
 // USD per MTok, mock-only (shaped like pricing/anthropic.json). gpt-5.5-codex is deliberately unpriced.
@@ -349,6 +360,8 @@ export function mockFleet(now: Date = new Date()): FleetSnapshot {
       startedAt: iso(now, -5 * HOUR),
       lastActivity: iso(now, -4_000),
       source: "agents --json",
+      account: MAX_APP,
+      configDir: "/Users/you/.claude",
       costUsd: 18.42,
       context: {
         agent: "claude-code",
@@ -379,6 +392,8 @@ export function mockFleet(now: Date = new Date()): FleetSnapshot {
       startedAt: iso(now, -2 * HOUR),
       lastActivity: iso(now, -4 * MIN - 31_000),
       source: "agents --json",
+      account: MAX_APP,
+      configDir: "/Users/you/.claude",
       costUsd: 3.17,
       context: {
         agent: "claude-code",
@@ -408,6 +423,8 @@ export function mockFleet(now: Date = new Date()): FleetSnapshot {
       startedAt: iso(now, -7 * HOUR),
       lastActivity: iso(now, -26 * MIN),
       source: "registry",
+      account: TEAM_LOGIN,
+      configDir: "/Users/you/.claude-team",
       costUsd: 41.9,
       context: {
         agent: "claude-code",
@@ -435,6 +452,7 @@ export function mockFleet(now: Date = new Date()): FleetSnapshot {
       startedAt: iso(now, -41 * MIN),
       lastActivity: iso(now, -18_000),
       source: "agents --json",
+      configDir: "/Users/you/.claude",
     },
     {
       agent: "codex",
@@ -474,6 +492,7 @@ export function mockFleet(now: Date = new Date()): FleetSnapshot {
       plan: "Max 20x",
       sessionId: "7f3a91c2-0b4e-4d8a-9a51-2c6f1e8d4b10",
       source: "tap",
+      account: MAX_APP,
     },
     {
       agent: "claude-code",
@@ -485,6 +504,29 @@ export function mockFleet(now: Date = new Date()): FleetSnapshot {
       plan: "Max 20x",
       sessionId: "7f3a91c2-0b4e-4d8a-9a51-2c6f1e8d4b10",
       source: "tap",
+      account: MAX_APP,
+    },
+    {
+      agent: "claude-code",
+      kind: "five_hour",
+      usedPercent: 28,
+      resetsAt: iso(now, 4 * HOUR + 40 * MIN),
+      windowMinutes: 300,
+      observedAt: iso(now, -26 * MIN),
+      sessionId: "c41d2e77-5a90-4f3b-8e2d-91b0a7c3f562",
+      source: "tap",
+      account: TEAM_LOGIN,
+    },
+    {
+      agent: "claude-code",
+      kind: "seven_day",
+      usedPercent: 71,
+      resetsAt: iso(now, 5 * DAY + 1 * HOUR),
+      windowMinutes: 10080,
+      observedAt: iso(now, -26 * MIN),
+      sessionId: "c41d2e77-5a90-4f3b-8e2d-91b0a7c3f562",
+      source: "tap",
+      account: TEAM_LOGIN,
     },
     {
       agent: "claude-code",
@@ -495,6 +537,7 @@ export function mockFleet(now: Date = new Date()): FleetSnapshot {
       observedAt: iso(now, -47 * MIN),
       sessionId: "c41d2e77-5a90-4f3b-8e2d-91b0a7c3f562",
       source: "tap",
+      account: TEAM_LOGIN,
     },
     {
       agent: "codex",
@@ -527,7 +570,28 @@ export function mockFleet(now: Date = new Date()): FleetSnapshot {
     { agent: "codex", sessionId: "rollout-2026-10-09T08-12-44-019a", ts: iso(now, -2 * DAY), trigger: "unknown" },
   ];
 
-  return { generatedAt: now.toISOString(), sessions, limits, compactions, health: mockHealth() };
+  const accounts: AccountInfo[] = [
+    {
+      id: MOCK_ACCOUNTS.max,
+      orgKnown: true,
+      label: "Max",
+      sources: ["claude-app-folder", "config-login"],
+      loginConfigDirs: ["/Users/you/.claude"],
+      claudeAppFolder: true,
+      liveSessions: 2,
+    },
+    {
+      id: MOCK_ACCOUNTS.team,
+      orgKnown: true,
+      label: "Team",
+      sources: ["claude-app-folder", "config-login"],
+      loginConfigDirs: ["/Users/you/.claude-team"],
+      claudeAppFolder: true,
+      liveSessions: 1,
+    },
+  ];
+
+  return { generatedAt: now.toISOString(), sessions, limits, compactions, health: mockHealth(), accounts };
 }
 
 export function mockHealth(): AdapterHealth[] {
@@ -537,6 +601,19 @@ export function mockHealth(): AdapterHealth[] {
     { name: "claude-code:transcripts", stability: "internal", ok: true, detail: "312 transcript files in range" },
     { name: "claude-code:cost-state", stability: "internal", ok: true, detail: "52 ledger rows in 32 transcripts" },
     { name: "claude-code:spool", stability: "preview", ok: true, detail: "3 sessions reporting via signalbox-tap" },
+    {
+      name: "claude-code:logins",
+      stability: "internal",
+      ok: true,
+      detail: `/Users/you/.claude: signed in as account ${MOCK_ACCOUNTS.max.slice(5, 11)}; /Users/you/.claude-team: signed in as account ${MOCK_ACCOUNTS.team.slice(5, 11)} (Claude Code's global config: the two oauthAccount ids only, hashed; read-only)`,
+    },
+    {
+      name: "claude-code:accounts",
+      stability: "internal",
+      ok: true,
+      detail:
+        "last history: 58 of 61 sessions have an account (21 from the Claude app's folder names, 2 from transcript account lines, 35 inferred from a config dir's current login); 3 accounts recorded so far",
+    },
     {
       name: "claude-app:sessions",
       stability: "internal",

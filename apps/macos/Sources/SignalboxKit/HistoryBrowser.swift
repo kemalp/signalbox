@@ -36,10 +36,26 @@ public enum HistoryRange: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
+/// The History screen's account filter: one account, or the Claude Code sessions whose account is unknown (other
+/// agents don't report accounts, so they are never "unknown").
+public enum HistoryAccountFilter: Hashable, Sendable {
+    case account(String)
+    case unknown
+
+    public func keeps(_ entry: SessionHistoryEntry) -> Bool {
+        switch self {
+        case let .account(id): entry.account?.id == id
+        case .unknown: entry.agent == .claudeCode && entry.account == nil
+        }
+    }
+}
+
 /// The History screen's filters and search.
 public struct HistoryFilter: Equatable, Sendable {
     /// nil: every agent.
     public var agent: AgentID?
+    /// nil: every account.
+    public var account: HistoryAccountFilter?
     /// A project path; nil: every project.
     public var project: String?
     public var range: HistoryRange
@@ -49,9 +65,10 @@ public struct HistoryFilter: Equatable, Sendable {
     /// Also list sessions archived in the Claude app (`HistoryBrowser.isHiddenArchived`), hidden by default as in the app.
     public var showArchived: Bool
 
-    public init(agent: AgentID? = nil, project: String? = nil, range: HistoryRange = .all, query: String = "", showEmpty: Bool = false,
-                showArchived: Bool = false) {
+    public init(agent: AgentID? = nil, account: HistoryAccountFilter? = nil, project: String? = nil, range: HistoryRange = .all, query: String = "",
+                showEmpty: Bool = false, showArchived: Bool = false) {
         self.agent = agent
+        self.account = account
         self.project = project
         self.range = range
         self.query = query
@@ -61,7 +78,7 @@ public struct HistoryFilter: Equatable, Sendable {
 
     public var isSearching: Bool { !HistoryBrowser.words(query).isEmpty }
     /// True when anything other than the search narrows the list.
-    public var hasFilters: Bool { agent != nil || project != nil || range != .all }
+    public var hasFilters: Bool { agent != nil || account != nil || project != nil || range != .all }
 }
 
 /// A day or month of entries, under its header.
@@ -139,6 +156,7 @@ public enum HistoryBrowser {
         let words = words(filter.query)
         return entries.filter { e in
             if let agent = filter.agent, e.agent != agent { return false }
+            if let account = filter.account, !account.keeps(e) { return false }
             if let project = filter.project, e.project != project { return false }
             if let since, e.lastActivityAt < since { return false }
             if !filter.showEmpty, isEmpty(e), !matchesSessionId(e, words: words) { return false }
@@ -182,13 +200,30 @@ public enum HistoryBrowser {
         guard !words.isEmpty else { return true }
         let haystack = normalize([entry.displayTitle, entry.projectName].compactMap { $0 }.joined(separator: " "))
         if words.allSatisfy({ haystack.contains($0) }) { return true }
+        // An account's short id (as the chip's tooltip shows it) finds its sessions too, within the other filters.
+        if words.count == 1, let account = entry.account, normalize(account.shortID) == words[0] { return true }
         return matchesSessionId(entry, words: words)
     }
 
     /// The search is one word of six or more characters that starts the session id, or the Claude app's id for it.
     static func matchesSessionId(_ entry: SessionHistoryEntry, words: [String]) -> Bool {
         guard words.count == 1, words[0].count >= 6 else { return false }
-        return [entry.sessionId, entry.appSessionId].contains { $0.map { normalize($0).hasPrefix(words[0]) } ?? false }
+        return [entry.sessionId, entry.appSessionId].contains(where: { $0.map { normalize($0).hasPrefix(words[0]) } ?? false })
+    }
+
+    /// The accounts with entries (by id), and whether any entry has no account, for the account filter menu.
+    public static func accounts(_ entries: [SessionHistoryEntry]) -> (ids: [String], hasUnknown: Bool) {
+        var ids: [String] = []
+        var seen: Set<String> = []
+        var unknown = false
+        for e in entries where e.agent == .claudeCode || e.account != nil {
+            guard let a = e.account else {
+                unknown = true
+                continue
+            }
+            if seen.insert(a.id).inserted { ids.append(a.id) }
+        }
+        return (ids, unknown)
     }
 
     /// The agents with entries, in the usual agent order.

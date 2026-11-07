@@ -154,6 +154,7 @@ struct SessionRow: View {
                         .help(session.title)
                         .privacySensitive()
                     if showAgent { AgentBadge(agent: session.agent) }
+                    AccountChip(account: session.account)
                     if muted {
                         Image(systemName: "bell.slash.fill")
                             .imageScale(.small)

@@ -365,6 +365,36 @@ private struct AdvancedSettingsPane: View {
                 }
                 .disabled(controller.isFixture)
             }
+            Section("Claude Code folders") {
+                VStack(alignment: .leading, spacing: 6) {
+                    LabeledContent("Main") {
+                        Text(ProcessInfo.processInfo.environment["CLAUDE_CONFIG_DIR"].map { Fmt.shortPath($0) } ?? "~/.claude")
+                            .font(.callout.monospaced())
+                            .foregroundStyle(.secondary)
+                            .privacySensitive()
+                    }
+                    ForEach(settings.claudeConfigDirs, id: \.self) { dir in
+                        HStack {
+                            Text(Fmt.shortPath(dir))
+                                .font(.callout.monospaced())
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                                .help(dir)
+                                .privacySensitive()
+                            Spacer()
+                            Button("Remove") { controller.setClaudeConfigDirs(settings.claudeConfigDirs.filter { $0 != dir }) }
+                                .controlSize(.small)
+                        }
+                    }
+                    HStack {
+                        Spacer()
+                        Button("Add Folder…") { addFolder() }
+                            .controlSize(.small)
+                    }
+                    SettingsNote("Another Claude Code config folder (a CLAUDE_CONFIG_DIR you use for a second account, say). Signalbox reads its transcripts, live sessions and the account its terminal login uses, read-only, and the resume command it shows sets CLAUDE_CONFIG_DIR for that folder's sessions. Changing this restarts the CLI.")
+                }
+                .disabled(controller.isFixture)
+            }
             Section("Troubleshooting") {
                 HStack {
                     Button("Show Diagnostics") { controller.showDiagnostics() }
@@ -388,6 +418,20 @@ private struct AdvancedSettingsPane: View {
     private func apply() {
         settings.cliPathOverride = cliDraft.trimmingCharacters(in: .whitespaces)
         Task { await controller.restartCLI() }
+    }
+
+    /// A folder picker that shows hidden folders (config folders usually start with a dot).
+    private func addFolder() {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.allowsMultipleSelection = false
+        panel.showsHiddenFiles = true
+        panel.directoryURL = FileManager.default.homeDirectoryForCurrentUser
+        panel.prompt = "Add"
+        panel.message = "Choose a Claude Code config folder (the folder CLAUDE_CONFIG_DIR points to)"
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        controller.setClaudeConfigDirs(settings.claudeConfigDirs + [url.path])
     }
 
     private var cliText: String {

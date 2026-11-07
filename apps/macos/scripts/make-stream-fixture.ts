@@ -3,11 +3,15 @@
 // report (7 days, then 1 day), fleet, history and error line. The Swift contract tests decode every line and check
 // that no field is lost. Nothing here comes from a real machine: the Claude Code home, tap spool, registry row and
 // Claude app session records are written below, and the Codex home is the adapter's own test fixture (credential
-// decoys excluded). Regenerate with:
+// decoys excluded). Accounts: the main config dir and a second one (Team, read with --claude-config-dir) each have
+// a global config naming a made-up account (with an email and names that must never reach the stream), the Claude
+// app's records sit under made-up account and organization folders, the main session's transcript also names the
+// other account (a conflict, newest wins), and a labels file names one account. Regenerate with:
 //   bun apps/macos/scripts/make-stream-fixture.ts > apps/macos/Fixtures/stream-v1.ndjson
 import { cpSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { accountId } from "../../../packages/core/src/accounts.ts";
 
 const REPO = join(import.meta.dir, "..", "..", "..");
 const MAIN = join(REPO, "apps", "cli", "src", "main.ts");
@@ -19,6 +23,12 @@ const FAKE_PID = 4242;
 const APP_MERGED = "local_0a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d";
 const APP_ONLY = "local_1b2c3d4e-5f6a-4b7c-8d9e-0f1a2b3c4d5e";
 const APP_ARCHIVED = "local_2c3d4e5f-6a7b-4c8d-9e0f-1a2b3c4d5e6f";
+/** A live terminal session in the second (Team) config dir. */
+const SID_TEAM = "6f2a1d3b-4c5e-4f7a-9b0c-1d2e3f4a5b6c";
+/** Made-up account and organization ids (the same as apps/web/src/mock.ts); only their hashes may reach the stream. */
+const MAX = { account: "00000000-0000-4000-8000-0000000000a1", org: "00000000-0000-4000-8000-0000000000b1" };
+const TEAM = { account: "00000000-0000-4000-8000-0000000000a2", org: "00000000-0000-4000-8000-0000000000b2" };
+const DECOY = "synthetic-decoy@example.invalid";
 
 /** Runs the CLI against freshly written synthetic homes and returns the normalized NDJSON lines. */
 export async function captureSyntheticStream(): Promise<string> {
@@ -28,15 +38,30 @@ export async function captureSyntheticStream(): Promise<string> {
   const project = join(claude, "projects", CWD.replaceAll("/", "-"));
   const spool = join(home, "Library", "Application Support", "signalbox", "spool");
   const appSessions = join(home, "Library", "Application Support", "Claude", "claude-code-sessions");
-  const appAccount = join(appSessions, "acct-synthetic", "org-synthetic");
-  for (const dir of [project, join(claude, "sessions"), spool, appAccount, join(root, "bin"), join(root, "tmp")]) mkdirSync(dir, { recursive: true });
+  const appAccount = join(appSessions, MAX.account, MAX.org);
+  const team = join(home, ".claude-team");
+  const teamProject = join(team, "projects", CWD.replaceAll("/", "-"));
+  for (const dir of [project, join(claude, "sessions"), spool, appAccount, teamProject, join(team, "sessions"), join(root, "bin"), join(root, "tmp")]) {
+    mkdirSync(dir, { recursive: true });
+  }
+  // Each config dir's global config: the signed-in account, plus fields the login reader must drop.
+  const globalConfig = (ids: { account: string; org: string }) =>
+    JSON.stringify({
+      numStartups: 7,
+      oauthAccount: { accountUuid: ids.account, organizationUuid: ids.org, emailAddress: DECOY, displayName: "Synthetic Decoy", organizationName: "Synthetic Decoy Org" },
+      mcpServers: { synthetic: { env: { API_KEY: "synthetic-decoy-key" } } },
+    });
+  writeFileSync(join(claude, ".claude.json"), globalConfig(MAX));
+  writeFileSync(join(team, ".claude.json"), globalConfig(TEAM));
+  const labels = join(root, "accounts.json");
+  writeFileSync(labels, JSON.stringify({ v: 1, labels: { [accountId(MAX.account, MAX.org)]: "Max (synthetic)" } }));
 
   const ago = (ms: number) => new Date(Date.now() - ms).toISOString();
-  const response = (id: string, msAgo: number, model: string) =>
+  const response = (id: string, msAgo: number, model: string, sessionId = SID) =>
     JSON.stringify({
       type: "assistant",
       isSidechain: false,
-      sessionId: SID,
+      sessionId,
       cwd: CWD,
       gitBranch: "main",
       entrypoint: "cli",
@@ -68,7 +93,37 @@ export async function captureSyntheticStream(): Promise<string> {
   });
   writeFileSync(
     join(project, `${SID}.jsonl`),
-    `${[response("msg_S1", 3_600_000, "claude-opus-5-5"), ...titles, response("msg_S2", 1_800_000, "claude-opus-5-5"), costState, response("msg_S3", 900_000, "claude-experimental-x")].join("\n")}\n`,
+    `${[
+      response("msg_S1", 3_600_000, "claude-opus-5-5"),
+      ...titles,
+      response("msg_S2", 1_800_000, "claude-opus-5-5"),
+      // A desktop bridge line naming the other account: with the app's folder, two recorded accounts (a conflict).
+      // It sits before the last response, so it dates from 30 minutes ago and the app's record (15) is clearly newer;
+      // at the same minute the winner would depend on the milliseconds this script takes.
+      JSON.stringify({ type: "bridge-session", sessionId: SID, bridgeSessionId: "bridge-synthetic", lastSequenceNum: 1, ownerAccountUuid: TEAM.account, ownerOrganizationUuid: TEAM.org }),
+      costState,
+      response("msg_S3", 900_000, "claude-experimental-x"),
+    ].join("\n")}\n`,
+  );
+  // The Team dir's terminal session: no account line, so its account is inferred from that dir's login.
+  writeFileSync(join(teamProject, `${SID_TEAM}.jsonl`), `${response("msg_T1", 600_000, "claude-sonnet-5-5", SID_TEAM)}\n`);
+  writeFileSync(
+    join(team, "sessions", `${process.pid}.json`),
+    JSON.stringify({ pid: process.pid, sessionId: SID_TEAM, cwd: CWD, status: "idle", kind: "interactive", entrypoint: "cli", name: "synthetic team session" }),
+  );
+  // Its tap spool names the Team dir, and reports that account's own plan windows.
+  writeFileSync(
+    join(spool, `${SID_TEAM}.json`),
+    JSON.stringify({
+      v: 1,
+      seq: 2,
+      agent: "claude-code",
+      sessionId: SID_TEAM,
+      writtenAt: ago(120_000),
+      event: "session.measure",
+      configDir: team,
+      usage: { rateLimits: [{ kind: "five_hour", percentUsed: 12, resetsAt: new Date(Date.now() + 4 * 3_600_000).toISOString() }] },
+    }),
   );
   // A live session: the registry row points at this script's pid, which is alive while the CLI runs.
   writeFileSync(
@@ -130,8 +185,9 @@ export async function captureSyntheticStream(): Promise<string> {
     filter: (src) => !/auth/.test(src.slice(src.lastIndexOf("/") + 1)),
   });
 
-  const proc = Bun.spawn([process.execPath, MAIN, "watch", "--ndjson"], {
+  const proc = Bun.spawn([process.execPath, MAIN, "watch", "--ndjson", "--claude-config-dir", team], {
     env: {
+      SIGNALBOX_ACCOUNTS_FILE: labels,
       HOME: home,
       CLAUDE_CONFIG_DIR: claude,
       CODEX_HOME: join(home, ".codex"),

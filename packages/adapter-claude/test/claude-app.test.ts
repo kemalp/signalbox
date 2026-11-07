@@ -355,6 +355,11 @@ describe("claudeAppSetting (whether the CLI reads the list, and where)", () => {
     expect("detail" in off && off.detail).toContain("/tmp/experiment/.claude");
   });
 
+  test("~/.claude read as an extra config dir keeps it on", () => {
+    expect(claudeAppSetting(true, { CLAUDE_CONFIG_DIR: "/Users/you/.claude-work" }, home, ["/Users/you/.claude"])).toEqual({ dir: appDir });
+    expect(claudeAppSetting(true, { CLAUDE_CONFIG_DIR: "/Users/you/.claude-work" }, home, ["/Users/you/.claude-team"])).toMatchObject({ off: "claude-config-dir" });
+  });
+
   test("SIGNALBOX_CLAUDE_APP_DIR names a list explicitly, whatever CLAUDE_CONFIG_DIR is", () => {
     expect(claudeAppSetting(true, { SIGNALBOX_CLAUDE_APP_DIR: "/tmp/list", CLAUDE_CONFIG_DIR: "/tmp/experiment" }, home)).toEqual({ dir: "/tmp/list" });
   });

@@ -225,18 +225,28 @@ struct StoreTests {
     }
 
     @Test func menuBarKeepsTheMostPressingLimits() throws {
-        let store = makeStore()
-        let stress = try Snapshot.decode(Data(contentsOf: TestPaths.stressSnapshot))
-        store.load(snapshot: stress, name: "stress")
-        let now = stress.generatedAt
-        // Three Claude windows fit, so they all show.
         let base = try TestPaths.loadSnapshot()
-        let small = makeStore()
-        small.load(snapshot: base, name: "f")
-        #expect(small.menuBarLimits(for: .claudeCode, now: now).shown.count == 3)
-        #expect(small.menuBarLimits(for: .claudeCode, now: now).hidden == 0)
-        // Five don't: the three fresh ones with the highest use stay, in window order; the stale one goes.
-        let picked = store.menuBarLimits(for: .claudeCode, now: now)
+        let store = makeStore()
+        store.load(snapshot: base, name: "f")
+        let now = base.generatedAt
+        // Each account's windows fit (three at most), so they all show, one row of rings per account.
+        let groups = store.limitGroups(for: .claudeCode)
+        #expect(groups.count == 2)
+        for g in groups {
+            let p = store.menuBarLimits(for: g, now: now)
+            #expect(p.hidden == 0)
+            #expect(p.shown.count == g.limits.count)
+        }
+        // Five in one account's row don't: the three fresh ones with the highest use stay, in window order; the stale one goes.
+        let l = { (kind: String, used: Double, window: Double?, observedAgo: TimeInterval) in
+            LimitSnapshot(agent: .claudeCode, kind: kind, usedPercent: used, resetsAt: now.addingTimeInterval(30 * 3600), windowMinutes: window,
+                          observedAt: now.addingTimeInterval(-observedAgo))
+        }
+        let five = LimitGroup(agent: .claudeCode, account: nil, limits: [
+            l("five_hour", 63, 300, 40), l("seven_day", 41, 10080, 40), l("seven_day_fable", 88, 10080, 47 * 60),
+            l("seven_day_opus", 97, 10080, 120), l("monthly_overage_credits_pool", 104, nil, 120),
+        ])
+        let picked = store.menuBarLimits(for: five, now: now)
         #expect(picked.hidden == 2)
         #expect(picked.shown.map(\.kind) == ["five_hour", "seven_day_opus", "monthly_overage_credits_pool"])
         #expect(!picked.shown.contains { store.limitState($0, now: now) == .stale })

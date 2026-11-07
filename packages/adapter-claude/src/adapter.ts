@@ -1,12 +1,23 @@
+import { realpath } from "node:fs/promises";
 import { homedir } from "node:os";
-import { basename, dirname, join } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import {
+  accountDirectory,
+  accountMatches,
+  accountShortId,
   chooseTitle,
+  claudeResumePrefix,
   embeddedModelTables,
   fillContextWindow,
+  inferredFrom,
   mergeAppSessions,
   projectOf,
+  resolveAccount,
   resumeCommand,
+  type AccountEvidence,
+  type AccountInfo,
+  type AccountRef,
+  type AccountSighting,
   type Adapter,
   type AdapterHealth,
   type AppSessionRecord,
@@ -25,6 +36,7 @@ import {
   type UsageRecord,
 } from "../../core/src/index.ts";
 import { ClaudeAppReader, type ClaudeAppFs, type ClaudeAppRead } from "./claude-app.ts";
+import { ConfigLoginReader, defaultLoginFs, type LoginFs, type LoginRead } from "./config-account.ts";
 import { lastMainResponse } from "./context.ts";
 import { FileCache, type FileStamp } from "./file-cache.ts";
 import { forEachLine } from "./lines.ts";
@@ -39,14 +51,19 @@ import {
   type TranscriptFile,
 } from "./paths.ts";
 import { isPidAlive, isRegistryFileName, mergeSessions, readRegistry, runAgentsJson, type AgentsRun } from "./sessions.ts";
-import { contextFromSpool, limitsFromSpools, readSpoolDir } from "./spool.ts";
-import { TranscriptReader, type TranscriptParse } from "./transcript.ts";
+import { contextFromSpool, limitsFromSpools, readSpoolDir, spoolsWithCurrentReadings } from "./spool.ts";
+import { TranscriptReader, type TranscriptMeta, type TranscriptParse } from "./transcript.ts";
 import { emptyUsageStats, type UsageStats } from "./usage.ts";
 import { watchDir, type DirWatchMode } from "./watch.ts";
 
 export interface ClaudeAdapterOptions {
   /** Default: $CLAUDE_CONFIG_DIR, else ~/.claude. */
   configDir?: string;
+  /**
+   * More Claude Code config dirs to read alongside `configDir` (e.g. one per account): their transcripts (a projects/
+   * shared by symlink is read once), registries, `agents --json` (run with CLAUDE_CONFIG_DIR=<dir>) and logins.
+   */
+  extraConfigDirs?: string[];
   /** Default: $SIGNALBOX_CLAUDE_BIN, else `claude` on PATH. */
   claudeBin?: string;
   /** Default: ~/Library/Application Support/signalbox/spool. */
@@ -70,6 +87,10 @@ export interface ClaudeAdapterOptions {
   claudeAppOff?: { reason: ClaudeAppOffReason; detail: string };
   /** Filesystem calls of the Claude app reader (tests). */
   claudeAppFs?: ClaudeAppFs;
+  /** Filesystem calls of the config-login reader (tests). */
+  loginFs?: LoginFs;
+  /** The home folder for Claude Code's defaults (~/.claude, ~/.claude.json). Default os.homedir(); tests set it. */
+  homeDir?: string;
 }
 
 /** What the last listHistory took from the Claude app's list. */
@@ -89,7 +110,10 @@ export interface ClaudeAppStatus {
 }
 
 export interface ClaudeCodeAdapter extends Adapter {
+  /** The config dir Signalbox started with ($CLAUDE_CONFIG_DIR or ~/.claude). */
   readonly configDir: string;
+  /** Every config dir read: `configDir` first, then the extra ones. */
+  readonly configDirs: string[];
   readonly spoolDir: string;
   /** `quick`: status from the registry plus the last agents --json result, without running it again. */
   listSessions(opts?: SessionListOptions): Promise<SessionInfo[]>;
@@ -107,6 +131,8 @@ export interface ClaudeCodeAdapter extends Adapter {
   lastScanStats(): UsageStats | undefined;
   /** The Claude app reader's setting and what the last listHistory took from it; undefined when not configured. */
   claudeAppStatus(): ClaudeAppStatus | undefined;
+  /** Accounts seen so far: each config dir's login, the Claude app's folders, transcript account lines. */
+  readAccounts(): Promise<AccountInfo[]>;
 }
 
 /** Reuse one `claude agents --json` result across calls made in the same refresh. */
@@ -115,6 +141,97 @@ const AGENTS_TTL_MS = 2000;
 const AGENTS_FAILED_TTL_MS = 60_000;
 /** A spool for a session that no other source lists still counts as live for this long. */
 const SPOOL_ONLY_LIVE_MS = 24 * 60 * 60 * 1000;
+/** Logins (Claude Code's global config files) are re-read at most this often. */
+const LOGINS_TTL_MS = 30_000;
+/** The fleet re-reads the Claude app's list at most this often (the history reads it every time). */
+const APP_FLEET_TTL_MS = 60_000;
+/** How soon the list is re-read when a desktop session reporting limits isn't in it yet (it was just started). */
+const APP_MISS_TTL_MS = 10_000;
+
+/** One Claude Code config dir: its transcripts, registry, `agents --json` and terminal login. */
+interface Root {
+  configDir: string;
+  projectsDir: string;
+  sessionsDir: string;
+  /** The dir Signalbox started with; the others came from `extraConfigDirs`. */
+  primary: boolean;
+  agentsEnv: Record<string, string | undefined>;
+  /** Claude Code's global config: <dir>/.claude.json when CLAUDE_CONFIG_DIR points at the dir, else ~/.claude.json. */
+  globalConfig: string;
+  agentsCache?: { run: AgentsRun; at: number };
+  agentsInFlight?: Promise<AgentsRun>;
+}
+
+/** A transcript tree and the config dirs that share it (more than one when projects/ is a symlink into another). */
+interface Tree {
+  projectsDir: string;
+  roots: Root[];
+}
+
+/** A main transcript, and the config dir it belongs to when only one config dir shares its tree. */
+interface MainRef {
+  path: string;
+  configDir?: string;
+}
+
+/** What account resolution reads once per call. */
+interface EvidenceCtx {
+  idx: Map<string, MainRef>;
+  logins: Map<string, LoginRead>;
+  /** The newest Claude app record's folder per agent session id. */
+  app: Map<string, AccountEvidence>;
+  spools: TapSpool[];
+  /** The newest spool per session. */
+  spoolBySession: Map<string, TapSpool>;
+  /** Full account ids seen anywhere (logins, the app's folders, transcripts), to complete account-only ones. */
+  known: AccountEvidence[];
+}
+
+/**
+ * Whether a config dir's terminal login says anything about a session: not for desktop sessions (the Claude app has
+ * its own login), nor for SDK runs (they often authenticate with an API key instead). Unknown entrypoint: no.
+ */
+function inferable(entrypoint: string | undefined): boolean {
+  return entrypoint !== undefined && entrypoint !== "claude-desktop" && !entrypoint.startsWith("sdk");
+}
+
+/** Each session's account as the app's list records it (the newest record's folders when a session has several). */
+function appEvidenceBySession(app: ClaudeAppRead | undefined): Map<string, AccountEvidence> {
+  const out = new Map<string, AccountEvidence>();
+  for (const r of app?.records ?? []) {
+    if (!r.agentSessionId || !r.accountEvidence) continue;
+    const prev = out.get(r.agentSessionId);
+    if (!prev || (r.accountEvidence.atMs ?? -Infinity) > (prev.atMs ?? -Infinity)) out.set(r.agentSessionId, r.accountEvidence);
+  }
+  return out;
+}
+
+function newestSpools(spools: TapSpool[]): Map<string, TapSpool> {
+  const out = new Map<string, TapSpool>();
+  for (const sp of spools) {
+    const prev = out.get(sp.sessionId);
+    if (!prev || sp.writtenAt > prev.writtenAt || (sp.writtenAt === prev.writtenAt && sp.seq > prev.seq)) out.set(sp.sessionId, sp);
+  }
+  return out;
+}
+
+function loginText(l: LoginRead | undefined): string {
+  if (!l) return "not read yet";
+  switch (l.state) {
+    case "ok":
+      return l.evidence ? `signed in as account ${accountShortId(l.evidence.ref.id)}${l.evidence.ref.orgKnown ? "" : " (organization unknown)"}` : `no account in ${l.path} (signed out?)`;
+    case "missing":
+      return `no ${l.path} yet`;
+    case "not-a-file":
+      return `${l.path} is not a regular file; not read`;
+    case "too-large":
+      return `${l.path} is over 32 MiB; not read`;
+    case "unparsable":
+      return `${l.path} could not be parsed`;
+    case "unreadable":
+      return `${l.path} could not be read (${l.code})`;
+  }
+}
 
 export function createClaudeAdapter(opts: ClaudeAdapterOptions = {}): ClaudeCodeAdapter {
   return new ClaudeAdapter(opts);
@@ -138,12 +255,19 @@ function range(opts: ScanOptions): { since: number; until: number } {
 interface HistoryBucket {
   main?: TranscriptParse;
   mainPath?: string;
+  /** The chosen main transcript's mtime: with the same session in two unshared trees (a copy), the newest copy wins. */
+  mainMtimeMs?: number;
+  /** The config dir of the main transcript's tree, when only one config dir shares it. */
+  configDir?: string;
+  /** The config dir a resume runs with (see TranscriptFile.resumeDir). */
+  resumeDir?: string;
   records: UsageRecord[];
   ledger: LedgerEntry[];
   firstTsMs?: number;
   lastTsMs?: number;
   mtimeMs: number;
-  subagentFiles: number;
+  /** Subagent transcript names, so a session copied into a second tree doesn't count its subagents twice. */
+  subagents: Set<string>;
   /** wf_<id> directories with at least one agent transcript. */
   workflows: Set<string>;
 }
@@ -156,17 +280,26 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
   readonly id = "claude-code";
   readonly displayName = "Claude Code";
   readonly configDir: string;
+  readonly configDirs: string[];
   readonly spoolDir: string;
-  private readonly projectsDir: string;
-  private readonly sessionsDir: string;
+  private readonly roots: Root[];
   private readonly now: () => Date;
   private readonly agentsTimeoutMs: number;
-  private readonly agentsEnv: Record<string, string | undefined>;
   private readonly modelTables: ModelTable[];
   private readonly spoolCache = new Map<string, TapSpool>();
-  private agentsCache?: { run: AgentsRun; at: number };
-  private agentsInFlight?: Promise<AgentsRun>;
   private lastWatch?: { readonly mode: DirWatchMode };
+  private readonly logins: ConfigLoginReader;
+  /** Claude Code's own default config dir, ~/.claude. */
+  private readonly claudeDefaultDir: string;
+  private loginCache?: { at: number; reads: Map<string, LoginRead> };
+  private lastApp?: { at: number; read: ClaudeAppRead };
+  private appInFlight?: Promise<ClaudeAppRead>;
+  /** Recorded account evidence seen in transcripts and the Claude app's records (by id), for readAccounts. */
+  private readonly seenEvidence = new Map<string, AccountEvidence>();
+  /** The Claude app's account folders (names only), re-listed at most every APP_FLEET_TTL_MS. */
+  private appFolders?: { at: number; evidence: AccountEvidence[] };
+  /** How the last listHistory's sessions got their account. */
+  private accountStats?: { sessions: number; app: number; transcript: number; inferred: number; conflicts: number };
   private usageStats?: UsageStats;
   private ledgerStats?: { files: number; sessions: number; entries: number };
   /** Sessions per title source in the last listHistory. */
@@ -181,14 +314,46 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
   constructor(private readonly opts: ClaudeAdapterOptions) {
     this.configDir = opts.configDir ?? defaultConfigDir();
     this.spoolDir = opts.spoolDir ?? defaultSpoolDir();
-    this.projectsDir = join(this.configDir, "projects");
-    this.sessionsDir = join(this.configDir, "sessions");
     this.now = opts.now ?? (() => new Date());
     this.agentsTimeoutMs = opts.agentsTimeoutMs ?? 5000;
     this.modelTables = opts.modelTables ?? embeddedModelTables();
+    this.logins = new ConfigLoginReader(opts.loginFs ?? defaultLoginFs());
     // Only point the child at a config dir we were explicitly given; setting CLAUDE_CONFIG_DIR
-    // to the default path is not a no-op for Claude Code.
-    this.agentsEnv = opts.configDir ? { ...process.env, CLAUDE_CONFIG_DIR: opts.configDir } : process.env;
+    // to the default path is not a no-op for Claude Code (its global config moves into the dir).
+    const explicit = opts.configDir ?? (process.env.CLAUDE_CONFIG_DIR || undefined);
+    const homeDir = opts.homeDir ?? homedir();
+    this.claudeDefaultDir = join(homeDir, ".claude");
+    this.roots = [
+      {
+        configDir: this.configDir,
+        projectsDir: join(this.configDir, "projects"),
+        sessionsDir: join(this.configDir, "sessions"),
+        primary: true,
+        agentsEnv: opts.configDir ? { ...process.env, CLAUDE_CONFIG_DIR: opts.configDir } : process.env,
+        globalConfig: explicit ? join(explicit, ".claude.json") : join(homeDir, ".claude.json"),
+      },
+    ];
+    const seen = new Set([resolve(this.configDir)]);
+    const home = resolve(this.claudeDefaultDir);
+    for (const dir of opts.extraConfigDirs ?? []) {
+      const r = resolve(dir);
+      if (seen.has(r)) continue;
+      seen.add(r);
+      // ~/.claude as an extra dir is Claude Code's default: run it, and find its global config, without the variable.
+      const isDefault = r === home;
+      const env = { ...process.env };
+      if (isDefault) delete env.CLAUDE_CONFIG_DIR;
+      else env.CLAUDE_CONFIG_DIR = dir;
+      this.roots.push({
+        configDir: dir,
+        projectsDir: join(dir, "projects"),
+        sessionsDir: join(dir, "sessions"),
+        primary: false,
+        agentsEnv: env,
+        globalConfig: isDefault ? join(homeDir, ".claude.json") : join(dir, ".claude.json"),
+      });
+    }
+    this.configDirs = this.roots.map((r) => r.configDir);
     if (typeof opts.claudeAppDir === "string") {
       this.claudeApp = new ClaudeAppReader(opts.claudeAppDir, { fs: opts.claudeAppFs, now: () => this.now().getTime() });
       this.appStatus = { enabled: true, dir: opts.claudeAppDir };
@@ -202,7 +367,49 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
   }
 
   async detect(): Promise<boolean> {
-    return (await exists(this.projectsDir)) || (await exists(this.sessionsDir));
+    for (const r of this.roots) if ((await exists(r.projectsDir)) || (await exists(r.sessionsDir))) return true;
+    return false;
+  }
+
+  /** The transcript trees, one per real projects/ directory, in config-dir order. */
+  private async trees(): Promise<Tree[]> {
+    const byReal = new Map<string, Tree>();
+    for (const root of this.roots) {
+      let real: string;
+      try {
+        real = await realpath(root.projectsDir);
+      } catch {
+        real = resolve(root.projectsDir);
+      }
+      const t = byReal.get(real);
+      if (t) t.roots.push(root);
+      else byReal.set(real, { projectsDir: root.projectsDir, roots: [root] });
+    }
+    return [...byReal.values()];
+  }
+
+  /** Every transcript of every tree, each tree once; a file names its config dir when only one shares the tree. */
+  private async listAllTranscripts(): Promise<TranscriptFile[]> {
+    const out: TranscriptFile[] = [];
+    for (const t of await this.trees()) {
+      const owner = t.roots.length === 1 ? t.roots[0]!.configDir : undefined;
+      // Any config dir sharing the tree finds the session; the primary (a plain `claude`) when it is one of them.
+      const resumeDir = t.roots.some((r) => r.primary) ? this.configDir : t.roots[0]!.configDir;
+      for (const f of await listTranscripts(t.projectsDir)) out.push(owner ? { ...f, configDir: owner, resumeDir } : { ...f, resumeDir });
+    }
+    return out;
+  }
+
+  /** sessionId → main transcript across trees (the first tree wins). */
+  private async indexAllMains(): Promise<Map<string, MainRef>> {
+    const idx = new Map<string, MainRef>();
+    for (const t of await this.trees()) {
+      const owner = t.roots.length === 1 ? t.roots[0]!.configDir : undefined;
+      for (const [sid, path] of await indexMainTranscripts(t.projectsDir)) {
+        if (!idx.has(sid)) idx.set(sid, owner ? { path, configDir: owner } : { path });
+      }
+    }
+    return idx;
   }
 
   lastScanStats(): UsageStats | undefined {
@@ -237,7 +444,7 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
     const stats = emptyUsageStats();
     const seen = new Set<string>();
     this.transcripts.prune();
-    const files = await listTranscripts(this.projectsDir);
+    const files = await this.listAllTranscripts();
     const stamps: Array<{ mtimeMs: number; size: number } | undefined> = [];
     for (const file of files) stamps.push(await fileStamp(file.path));
     // wholeSessions: every file of a session that has any file touched since `since`, all records.
@@ -280,7 +487,7 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
     let files = 0;
     let sessions = 0;
     this.transcripts.prune();
-    for (const file of await listTranscripts(this.projectsDir)) {
+    for (const file of await this.listAllTranscripts()) {
       const stamp = await fileStamp(file.path);
       if (stamp === undefined || stamp.mtimeMs < since) continue;
       files++;
@@ -298,7 +505,7 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
     const { since, until } = range(opts);
     const out: CompactionEvent[] = [];
     this.transcripts.prune();
-    for (const file of await listTranscripts(this.projectsDir)) {
+    for (const file of await this.listAllTranscripts()) {
       // Main threads only: a subagent's compaction would otherwise look like the session's own.
       if (file.kind !== "main") continue;
       const stamp = await fileStamp(file.path);
@@ -318,8 +525,9 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
     this.transcripts.prune();
     // The Claude app's list first: a session it saw activity in since `since` needs its transcript read even
     // when no transcript file changed since then, or it would look like a session without one.
-    const app: ClaudeAppRead | undefined = this.claudeApp ? await this.claudeApp.read() : undefined;
-    const files = await listTranscripts(this.projectsDir);
+    const app: ClaudeAppRead | undefined = await this.readApp(0);
+    const [files, logins, spoolRead] = await Promise.all([this.listAllTranscripts(), this.readLogins(), readSpoolDir(this.spoolDir, this.spoolCache)]);
+    const spoolBySession = newestSpools(spoolRead.spools);
     const stamps: Array<FileStamp | undefined> = [];
     for (const file of files) stamps.push(await fileStamp(file.path));
     // A session counts when it has a main transcript and any of its files was written since `since`.
@@ -335,7 +543,7 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
     for (const r of app?.records ?? []) if (r.agentSessionId && appTime(r) >= since) active.add(r.agentSessionId);
     const buckets = new Map<string, HistoryBucket>();
     for (const sid of active) {
-      if (mains.has(sid)) buckets.set(sid, { records: [], ledger: [], mtimeMs: 0, subagentFiles: 0, workflows: new Set() });
+      if (mains.has(sid)) buckets.set(sid, { records: [], ledger: [], mtimeMs: 0, subagents: new Set(), workflows: new Set() });
     }
     // Path order and one seen-set across files, like scanUsage, so a response is counted once.
     const seen = new Set<string>();
@@ -346,10 +554,15 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
       const parsed = await this.parse(file, stamp);
       if (!parsed) continue;
       if (file.kind === "main") {
-        b.main = parsed;
-        b.mainPath = file.path;
+        if (!b.main || stamp.mtimeMs > (b.mainMtimeMs ?? -Infinity)) {
+          b.main = parsed;
+          b.mainPath = file.path;
+          b.mainMtimeMs = stamp.mtimeMs;
+          b.configDir = file.configDir;
+          b.resumeDir = file.resumeDir;
+        }
       } else if (file.kind === "subagent") {
-        b.subagentFiles++;
+        b.subagents.add(basename(file.path));
       } else if (file.kind === "workflow") {
         b.workflows.add(basename(dirname(file.path)));
       }
@@ -382,7 +595,7 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
         lastActivityAt: new Date(last).toISOString(),
         records: b.records,
         compactions: b.main.compactions.length,
-        subagentFiles: b.subagentFiles,
+        subagentFiles: b.subagents.size,
         workflowRuns: b.workflows.size,
       };
       if (project) s.project = project;
@@ -390,15 +603,26 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
       if (meta.entrypoint) s.entrypoint = meta.entrypoint;
       if (meta.version) s.version = meta.version;
       if (b.ledger.length > 0) s.ledger = b.ledger;
-      const resume = resumeCommand("claude --resume", sessionId, project);
+      // The primary dir is the one a plain `claude` uses (Signalbox runs with the same CLAUDE_CONFIG_DIR as your shell).
+      const resume = resumeCommand(claudeResumePrefix(b.resumeDir, this.configDir, this.claudeDefaultDir), sessionId, project);
       if (resume) s.resume = resume;
       if (b.mainPath) s.transcriptPath = b.mainPath;
+      if (b.configDir) s.configDir = b.configDir;
+      const evidence = this.transcriptEvidence(meta, { entrypoint: meta.entrypoint, configDir: b.configDir }, logins, spoolBySession.get(sessionId));
+      if (evidence.length > 0) s.accountEvidence = evidence;
       out.push(s);
     }
+    // An account-only id completed by the one full id with the same account seen anywhere (after the loop above,
+    // which noted every transcript's account lines).
+    const known = await this.knownAccounts(logins);
+    for (const s of out) if (s.accountEvidence) s.accountEvidence.push(...accountMatches(s.accountEvidence, known, { recordedOnly: !inferable(s.entrypoint) }));
     const titles: Record<string, number> = { custom: 0, ai: 0, "agent-name": 0, none: 0 };
     for (const s of out) titles[s.titleSource] = (titles[s.titleSource] ?? 0) + 1;
     this.titleStats = titles;
-    if (!app) return out;
+    if (!app) {
+      this.noteAccountStats(out);
+      return out;
+    }
     // A record with no activity since `since` matters only for a transcript session that is listed anyway; alone it
     // would fall outside the window (and its transcript, unread, would look missing).
     const records = app.records.filter((r) => appTime(r) >= since || (r.agentSessionId !== undefined && buckets.has(r.agentSessionId)));
@@ -422,28 +646,175 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
       skipped: app.skipped,
       errors: app.errors,
     };
+    this.noteAccountStats(merged);
     return merged;
+  }
+
+  /** How the history's sessions got their account, for the health row. */
+  private noteAccountStats(sessions: readonly HistorySession[]): void {
+    const st = { sessions: sessions.length, app: 0, transcript: 0, inferred: 0, conflicts: 0 };
+    for (const s of sessions) {
+      const { account, conflict } = resolveAccount(s.accountEvidence);
+      if (conflict) st.conflicts++;
+      if (!account) continue;
+      if (account.quality === "inferred") st.inferred++;
+      else if (account.source === "claude-app-folder") st.app++;
+      else st.transcript++;
+    }
+    this.accountStats = st;
+  }
+
+  private noteEvidence(ev: AccountEvidence): void {
+    if (ev.ref.quality === "recorded" && !this.seenEvidence.has(ev.ref.id)) this.seenEvidence.set(ev.ref.id, ev);
+  }
+
+  /**
+   * A session's own evidence: its transcript's account lines (recorded), then, for a session that doesn't run in the
+   * desktop app, the current login of the config dir it runs from and of the dir its tap spool names (inferred).
+   */
+  private transcriptEvidence(
+    meta: TranscriptMeta | undefined,
+    hint: { entrypoint?: string; configDir?: string },
+    logins: Map<string, LoginRead>,
+    spool: TapSpool | undefined,
+  ): AccountEvidence[] {
+    const out: AccountEvidence[] = [];
+    if (meta?.accountFull) out.push(meta.accountFull);
+    if (meta?.accountPartial) out.push(meta.accountPartial);
+    for (const e of out) this.noteEvidence(e);
+    if (inferable(hint.entrypoint ?? meta?.entrypoint)) {
+      const fromDir = this.loginInference(hint.configDir, logins, "config-login");
+      if (fromDir) out.push(fromDir);
+      const fromTap = this.loginInference(spool ? this.spoolRootDir(spool) : undefined, logins, "tap-config-dir");
+      if (fromTap) out.push(fromTap);
+    }
+    return out;
+  }
+
+  private loginInference(configDir: string | undefined, logins: Map<string, LoginRead>, source: string): AccountEvidence | undefined {
+    if (!configDir) return undefined;
+    const l = logins.get(configDir);
+    return l?.state === "ok" && l.evidence ? inferredFrom(l.evidence, source) : undefined;
+  }
+
+  /** The config dir a tap spool names ($CLAUDE_CONFIG_DIR, or ~/.claude when unset), if it is one of ours. */
+  private spoolRootDir(sp: TapSpool): string | undefined {
+    if (sp.configDir === undefined) return undefined;
+    const want = resolve(sp.configDir ?? this.claudeDefaultDir);
+    return this.roots.find((r) => resolve(r.configDir) === want)?.configDir;
+  }
+
+  /** Each config dir's login, re-read at most every LOGINS_TTL_MS (a file whose stamp didn't change isn't parsed again). */
+  private async readLogins(maxAgeMs = LOGINS_TTL_MS): Promise<Map<string, LoginRead>> {
+    const c = this.loginCache;
+    if (c && Date.now() - c.at < maxAgeMs) return c.reads;
+    const reads = new Map<string, LoginRead>();
+    for (const r of this.roots) reads.set(r.configDir, await this.logins.read(r.globalConfig));
+    this.loginCache = { at: Date.now(), reads };
+    return reads;
+  }
+
+  /** The Claude app's list, re-read when the last read is older than `maxAgeMs`; undefined when the reader is off. */
+  private async readApp(maxAgeMs: number): Promise<ClaudeAppRead | undefined> {
+    if (!this.claudeApp) return undefined;
+    const c = this.lastApp;
+    if (c && Date.now() - c.at < maxAgeMs) return c.read;
+    this.appInFlight ??= this.claudeApp.read().finally(() => {
+      this.appInFlight = undefined;
+    });
+    const read = await this.appInFlight;
+    this.lastApp = { at: Date.now(), read };
+    for (const r of read.records) if (r.accountEvidence) this.noteEvidence(r.accountEvidence);
+    return read;
+  }
+
+  /** The Claude app's account folders, hashed (names only; nothing is opened), at most every APP_FLEET_TTL_MS. */
+  private async readAppFolders(): Promise<AccountEvidence[]> {
+    if (!this.claudeApp) return [];
+    const c = this.appFolders;
+    if (c && Date.now() - c.at < APP_FLEET_TTL_MS) return c.evidence;
+    const evidence = await this.claudeApp.folderAccounts();
+    this.appFolders = { at: Date.now(), evidence };
+    return evidence;
+  }
+
+  /** Every full account id seen: each config dir's login, the app's folders, transcript account lines. */
+  private async knownAccounts(logins: Map<string, LoginRead>): Promise<AccountEvidence[]> {
+    const out: AccountEvidence[] = [];
+    for (const l of logins.values()) if (l.state === "ok" && l.evidence?.ref.orgKnown) out.push(l.evidence);
+    out.push(...(await this.readAppFolders()));
+    for (const ev of this.seenEvidence.values()) if (ev.ref.orgKnown) out.push(ev);
+    return out;
+  }
+
+  private async evidenceCtx(quick: boolean): Promise<EvidenceCtx> {
+    const [idx, logins, app, spoolRead] = await Promise.all([
+      this.indexAllMains(),
+      this.readLogins(quick && this.loginCache ? Infinity : LOGINS_TTL_MS),
+      quick ? Promise.resolve(this.lastApp?.read) : this.readApp(APP_FLEET_TTL_MS),
+      readSpoolDir(this.spoolDir, this.spoolCache),
+    ]);
+    const known = await this.knownAccounts(logins);
+    return { idx, logins, app: appEvidenceBySession(app), spools: spoolRead.spools, spoolBySession: newestSpools(spoolRead.spools), known };
+  }
+
+  /**
+   * A live session's account. Its main transcript's account lines come from the cached parse when there is one (even
+   * a slightly stale one: account lines are rare and don't move); `allowParse` reads a transcript never parsed yet.
+   */
+  private async accountFor(sessionId: string, ctx: EvidenceCtx, hint: { entrypoint?: string; configDir?: string }, allowParse: boolean): Promise<AccountRef | undefined> {
+    const main = ctx.idx.get(sessionId);
+    let meta: TranscriptMeta | undefined;
+    if (main) {
+      meta = this.transcripts.peek(main.path)?.meta;
+      if (!meta && allowParse) {
+        const stamp = await fileStamp(main.path);
+        if (stamp) meta = (await this.parse({ path: main.path, kind: "main", sessionId }, stamp))?.meta;
+      }
+    }
+    const evidence = this.transcriptEvidence(meta, { entrypoint: hint.entrypoint, configDir: hint.configDir ?? main?.configDir }, ctx.logins, ctx.spoolBySession.get(sessionId));
+    const app = ctx.app.get(sessionId);
+    if (app) evidence.push(app);
+    evidence.push(...accountMatches(evidence, ctx.known, { recordedOnly: !inferable(hint.entrypoint ?? meta?.entrypoint) }));
+    return resolveAccount(evidence).account;
+  }
+
+  async readAccounts(): Promise<AccountInfo[]> {
+    const [logins, folders] = await Promise.all([this.readLogins(), this.readAppFolders()]);
+    const found: Array<{ ev: AccountEvidence; sighting: AccountSighting }> = [];
+    for (const [dir, l] of logins) if (l.state === "ok" && l.evidence) found.push({ ev: l.evidence, sighting: { ref: l.evidence.ref, loginConfigDir: dir } });
+    for (const f of folders) found.push({ ev: f, sighting: { ref: f.ref, claudeAppFolder: true } });
+    for (const ev of this.seenEvidence.values()) found.push({ ev, sighting: { ref: ev.ref } });
+    // An account named without its organization (a transcript's artifact line) is completed by the one full id with
+    // that account half (accountMatches), so it isn't listed apart; with no such id, several, or one known only as a
+    // login (which never completes a desktop session's id), it is.
+    const fullIds = new Map<string, Map<string, boolean>>();
+    for (const x of found) {
+      if (!x.ev.ref.orgKnown) continue;
+      const ids = fullIds.get(x.ev.accountKey) ?? new Map<string, boolean>();
+      ids.set(x.ev.ref.id, (ids.get(x.ev.ref.id) ?? false) || x.ev.ref.quality === "recorded");
+      fullIds.set(x.ev.accountKey, ids);
+    }
+    const completes = (key: string) => {
+      const ids = fullIds.get(key);
+      return ids?.size === 1 && [...ids.values()][0] === true;
+    };
+    return accountDirectory(found.filter((x) => x.ev.ref.orgKnown || !completes(x.ev.accountKey)).map((x) => x.sighting));
   }
 
   private claudeBin(): string | undefined {
     return this.opts.claudeBin ?? (process.env.SIGNALBOX_CLAUDE_BIN || undefined) ?? Bun.which("claude") ?? undefined;
   }
 
-  /** Claude Code's global config file: in the config dir when one is set, else ~/.claude.json. */
-  private globalConfigPath(): string {
-    const explicit = this.opts.configDir ?? (process.env.CLAUDE_CONFIG_DIR || undefined);
-    return explicit ? join(explicit, ".claude.json") : join(homedir(), ".claude.json");
-  }
-
-  private async agents(): Promise<AgentsRun> {
-    const c = this.agentsCache;
+  private async agents(root: Root): Promise<AgentsRun> {
+    const c = root.agentsCache;
     if (c && Date.now() - c.at < (c.run.ok ? AGENTS_TTL_MS : AGENTS_FAILED_TTL_MS)) return c.run;
     // Concurrent callers (fleet, health, context in one refresh) share one child process.
-    if (this.agentsInFlight) return this.agentsInFlight;
-    this.agentsInFlight = (async (): Promise<AgentsRun> => {
+    if (root.agentsInFlight) return root.agentsInFlight;
+    root.agentsInFlight = (async (): Promise<AgentsRun> => {
       // `claude agents --json` initialises a missing global config file (and a backup of it), which
       // would be a write to agent config. Without that file no session has run, so there is nothing to list.
-      const globalConfig = this.globalConfigPath();
+      const globalConfig = root.globalConfig;
       if (!(await exists(globalConfig))) {
         return {
           ok: false,
@@ -451,26 +822,30 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
           reason: `not run: ${globalConfig} does not exist, so no session has used this config dir (agents --json would create the file)`,
         };
       }
-      return runAgentsJson(this.claudeBin(), { timeoutMs: this.agentsTimeoutMs, env: this.agentsEnv });
+      return runAgentsJson(this.claudeBin(), { timeoutMs: this.agentsTimeoutMs, env: root.agentsEnv });
     })();
     try {
-      const run = await this.agentsInFlight;
-      this.agentsCache = { run, at: Date.now() };
+      const run = await root.agentsInFlight;
+      root.agentsCache = { run, at: Date.now() };
       return run;
     } finally {
-      this.agentsInFlight = undefined;
+      root.agentsInFlight = undefined;
     }
   }
 
   /** The last agents --json result whatever its age (or the first run, while it is in flight); never starts a run. */
-  private async lastAgents(): Promise<AgentsRun | undefined> {
-    return this.agentsCache?.run ?? this.agentsInFlight;
+  private async lastAgents(root: Root): Promise<AgentsRun | undefined> {
+    return root.agentsCache?.run ?? root.agentsInFlight;
   }
 
   watchSessions(onChange: () => void): () => void {
-    const w = watchDir(this.sessionsDir, onChange, { accept: isRegistryFileName, mode: this.opts.watchMode, pollMs: this.opts.watchPollMs });
-    this.lastWatch = w;
-    return () => w.close();
+    const watches = this.roots.map((r) =>
+      watchDir(r.sessionsDir, onChange, { accept: isRegistryFileName, mode: this.opts.watchMode, pollMs: this.opts.watchPollMs }),
+    );
+    this.lastWatch = watches[0];
+    return () => {
+      for (const w of watches) w.close();
+    };
   }
 
   sessionWatchMode(): DirWatchMode | undefined {
@@ -478,16 +853,31 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
   }
 
   async listSessions(opts: SessionListOptions = {}): Promise<SessionInfo[]> {
-    const [reg, run, idx] = await Promise.all([
-      readRegistry(this.sessionsDir),
-      opts.quick ? this.lastAgents() : this.agents(),
-      indexMainTranscripts(this.projectsDir),
+    const quick = opts.quick === true;
+    const [perRoot, ctx] = await Promise.all([
+      Promise.all(
+        this.roots.map(async (root) => {
+          const [reg, run] = await Promise.all([readRegistry(root.sessionsDir), quick ? this.lastAgents(root) : this.agents(root)]);
+          const ok = run?.ok ? run : undefined;
+          return mergeSessions(ok?.entries, reg.entries, isPidAlive, { agentsAt: ok?.at }).map((s): SessionInfo => ({ ...s, configDir: root.configDir }));
+        }),
+      ),
+      this.evidenceCtx(quick),
     ]);
-    const ok = run?.ok ? run : undefined;
-    const sessions = mergeSessions(ok?.entries, reg.entries, isPidAlive, { agentsAt: ok?.at });
+    // Registries are never shared between config dirs; should one session show up twice, the first dir wins.
+    const sessions: SessionInfo[] = [];
+    const listed = new Set<string>();
+    for (const list of perRoot) {
+      for (const s of list) {
+        if (listed.has(s.sessionId)) continue;
+        listed.add(s.sessionId);
+        sessions.push(s);
+      }
+    }
+    const idx = ctx.idx;
     await Promise.all(
       sessions.map(async (s) => {
-        const path = idx.get(s.sessionId);
+        const path = idx.get(s.sessionId)?.path;
         if (!path) return;
         const mt = await mtimeMs(path);
         if (mt !== undefined) {
@@ -502,12 +892,44 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
         if (!s.version && last.version) s.version = last.version;
       }),
     );
+    await Promise.all(
+      sessions.map(async (s) => {
+        const account = await this.accountFor(s.sessionId, ctx, { entrypoint: s.entrypoint, configDir: s.configDir }, !quick);
+        if (account) s.account = account;
+      }),
+    );
     return sessions;
   }
 
   async readLimits(): Promise<LimitSnapshot[]> {
-    const read = await readSpoolDir(this.spoolDir, this.spoolCache);
-    return limitsFromSpools(read.spools);
+    const nowMs = this.now().getTime();
+    const [firstCtx, regs] = await Promise.all([this.evidenceCtx(false), Promise.all(this.roots.map((r) => readRegistry(r.sessionsDir)))]);
+    let ctx = firstCtx;
+    // Each live session's registry row says where it runs (entrypoint, config dir), read here rather than taken from
+    // another call, so a reading's account doesn't depend on which call ran first.
+    const hints = new Map<string, { entrypoint?: string; configDir?: string }>();
+    regs.forEach((reg, i) => {
+      for (const e of reg.entries) if (e.sessionId && !hints.has(e.sessionId)) hints.set(e.sessionId, { entrypoint: e.entrypoint, configDir: this.roots[i]!.configDir });
+    });
+    // Only sessions with a reading still worth showing: old spools (never deleted) would otherwise cost a transcript read each.
+    const reporting = new Set(spoolsWithCurrentReadings(ctx.spools, nowMs).map((sp) => sp.sessionId));
+    // A desktop session just started isn't in the app's list as last read (up to a minute ago): re-read it sooner, so
+    // its readings don't sit on the "Account unknown" card and then move.
+    const entrypointOf = (sid: string) => {
+      const main = ctx.idx.get(sid)?.path;
+      return hints.get(sid)?.entrypoint ?? (main ? this.transcripts.peek(main)?.meta.entrypoint : undefined);
+    };
+    if (this.claudeApp && [...reporting].some((sid) => !ctx.app.has(sid) && entrypointOf(sid) === "claude-desktop")) {
+      ctx = { ...ctx, app: appEvidenceBySession(await this.readApp(APP_MISS_TTL_MS)) };
+    }
+    const accounts = new Map<string, AccountRef>();
+    await Promise.all(
+      [...reporting].map(async (sid) => {
+        const account = await this.accountFor(sid, ctx, hints.get(sid) ?? {}, true);
+        if (account) accounts.set(sid, account);
+      }),
+    );
+    return limitsFromSpools(ctx.spools, (sid) => accounts.get(sid), nowMs);
   }
 
   async readContext(): Promise<ContextSnapshot[]> {
@@ -515,7 +937,7 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
     const [sessions, spoolRead, idx] = await Promise.all([
       this.listSessions({ quick: true }),
       readSpoolDir(this.spoolDir, this.spoolCache),
-      indexMainTranscripts(this.projectsDir),
+      this.indexAllMains(),
     ]);
     const spoolBySession = new Map<string, TapSpool>();
     for (const sp of spoolRead.spools) {
@@ -537,7 +959,7 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
     for (const sessionId of [...live].sort()) {
       const sp = spoolBySession.get(sessionId);
       const official = sp && sp.event !== "session.end" ? contextFromSpool(sp) : undefined;
-      const path = idx.get(sessionId);
+      const path = idx.get(sessionId)?.path;
       if (official) {
         const last = official.window === undefined && path ? await lastMainResponse(path) : undefined;
         out.push(fillContextWindow(official, [sessionModel.get(sessionId), last?.model], this.modelTables));
@@ -594,13 +1016,19 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
   }
 
   async health(): Promise<AdapterHealth[]> {
-    const [files, reg, run, spool, app] = await Promise.all([
-      listTranscripts(this.projectsDir),
-      readRegistry(this.sessionsDir),
-      this.agents(),
+    const [trees, files, regs, runs, spool, app, logins] = await Promise.all([
+      this.trees(),
+      this.listAllTranscripts(),
+      Promise.all(this.roots.map((r) => readRegistry(r.sessionsDir))),
+      Promise.all(this.roots.map((r) => this.agents(r))),
       readSpoolDir(this.spoolDir, this.spoolCache),
       this.claudeAppHealth(),
+      this.readLogins(0),
     ]);
+    const many = this.roots.length > 1;
+    const where = trees
+      .map((t) => (t.roots.length > 1 ? `${t.projectsDir} (shared by ${t.roots.map((r) => r.configDir).join(", ")})` : t.projectsDir))
+      .join(", ");
     const byKind: Record<string, number> = {};
     for (const f of files) byKind[f.kind] = (byKind[f.kind] ?? 0) + 1;
     const kinds = Object.entries(byKind)
@@ -614,7 +1042,15 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
         `${s.readErrors} unreadable files, ${s.parseErrors} unparsable lines, ${s.invalidCounts} invalid token counts`
       : "";
     const mains = byKind.main ?? 0;
-    const alive = reg.entries.filter((e) => e.pid !== undefined && isPidAlive(e.pid, e.pidDomain) === true).length;
+    const registryText = (reg: (typeof regs)[number], root: Root) => {
+      const alive = reg.entries.filter((e) => e.pid !== undefined && isPidAlive(e.pid, e.pidDomain) === true).length;
+      return reg.dirExists ? `${reg.entries.length} registry files (${alive} live pids), ${reg.errors} unreadable` : `no registry dir at ${root.sessionsDir}`;
+    };
+    const agentsText = (run: AgentsRun) =>
+      run.ok ? `${run.entries.length} sessions from ${run.bin} agents --json (${run.ms} ms)` : `${run.reason}${run.bin ? ` [${run.bin}]` : ""}; sessions come from the registry only`;
+    const perRoot = (text: (i: number) => string) => (many ? this.roots.map((r, i) => `${r.configDir}: ${text(i)}`).join("; ") : text(0));
+    const st = this.accountStats;
+    const withAccount = st ? st.app + st.transcript + st.inferred : 0;
     const l = this.ledgerStats;
     const t = this.titleStats;
     const titled = t ? (t.custom ?? 0) + (t.ai ?? 0) + (t["agent-name"] ?? 0) : 0;
@@ -624,7 +1060,7 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
         stability: "internal",
         // Unreadable transcripts mean missing usage; unparsable lines are usually a live file's last line.
         ok: files.length > 0 && (s?.readErrors ?? 0) === 0,
-        detail: files.length > 0 ? `${files.length} transcripts in ${this.projectsDir} (${kinds})${scan}` : `no transcripts in ${this.projectsDir}`,
+        detail: files.length > 0 ? `${files.length} transcripts in ${where} (${kinds})${scan}` : `no transcripts in ${where}`,
       },
       {
         name: "claude-code:cost-state",
@@ -649,18 +1085,31 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
       {
         name: "claude-code:agents-json",
         stability: "preview",
-        ok: run.ok || run.skipped === true,
-        detail: run.ok
-          ? `${run.entries.length} sessions from ${run.bin} agents --json (${run.ms} ms)`
-          : `${run.reason}${run.bin ? ` [${run.bin}]` : ""}; sessions come from the registry only`,
+        ok: runs.every((run) => run.ok || run.skipped === true),
+        detail: perRoot((i) => agentsText(runs[i]!)),
       },
       {
         name: "claude-code:registry",
         stability: "internal",
-        ok: reg.dirExists,
-        detail: reg.dirExists
-          ? `${reg.entries.length} registry files (${alive} live pids), ${reg.errors} unreadable`
-          : `no registry dir at ${this.sessionsDir}`,
+        ok: regs.every((reg) => reg.dirExists),
+        detail: perRoot((i) => registryText(regs[i]!, this.roots[i]!)),
+      },
+      {
+        name: "claude-code:logins",
+        stability: "internal",
+        ok: [...logins.values()].every((l) => l.state === "ok" || l.state === "missing"),
+        detail: `${perRoot((i) => loginText(logins.get(this.roots[i]!.configDir)))} (Claude Code's global config: the two oauthAccount ids only, hashed; read-only)`,
+      },
+      {
+        name: "claude-code:accounts",
+        stability: "internal",
+        ok: true,
+        detail: st
+          ? `last history: ${withAccount} of ${st.sessions} sessions have an account (${st.app} from the Claude app's folder names, ` +
+            `${st.transcript} from transcript account lines, ${st.inferred} inferred from a config dir's current login)` +
+            (st.conflicts ? `, ${st.conflicts} with recorded sources that disagree` : "") +
+            `; ${this.seenEvidence.size} account ids recorded so far`
+          : "read with the history: the Claude app's folder names, transcript account lines, and each config dir's login for terminal sessions",
       },
       {
         name: "claude-code:spool",

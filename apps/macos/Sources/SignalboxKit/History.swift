@@ -98,6 +98,12 @@ public struct SessionHistoryEntry: Codable, Hashable, Sendable, Identifiable {
     /// False for a session that is only in the Claude app's list: its transcript isn't on this Mac (removed, or
     /// created on another machine), so it has no figures and no resume command.
     public var hasTranscript: Bool
+    /// The session's account; nil is unknown (never a default account).
+    public var account: AccountRef?
+    /// Its files named more than one account (e.g. resumed under the other one); `account` is the newest.
+    public var accountConflict: Bool?
+    /// Claude Code: the config dir whose projects/ holds the transcript.
+    public var configDir: String?
 
     /// The same id as the session's `FleetSession.id`, so a live entry can select it on Sessions.
     public var id: String { "\(agent.rawValue)/\(sessionId)" }
@@ -107,7 +113,8 @@ public struct SessionHistoryEntry: Codable, Hashable, Sendable, Identifiable {
                 durationMs: Double? = nil, live: Bool = false, models: [String] = [], effort: String? = nil, responses: Int? = nil, tokens: TokenCounts? = nil,
                 costUsd: Double? = nil, unpricedTokens: Double? = nil, placeholderShare: Double? = nil, ledgerUsd: Double? = nil,
                 compactions: Int? = nil, subagentFiles: Int? = nil, workflowRuns: Int? = nil, resume: HistoryResume? = nil,
-                transcriptPath: String? = nil, appSessionId: String? = nil, archived: Bool? = nil, hasTranscript: Bool = true) {
+                transcriptPath: String? = nil, appSessionId: String? = nil, archived: Bool? = nil, hasTranscript: Bool = true,
+                account: AccountRef? = nil, accountConflict: Bool? = nil, configDir: String? = nil) {
         self.agent = agent
         self.sessionId = sessionId
         self.title = title
@@ -137,12 +144,16 @@ public struct SessionHistoryEntry: Codable, Hashable, Sendable, Identifiable {
         self.appSessionId = appSessionId
         self.archived = archived
         self.hasTranscript = hasTranscript
+        self.account = account
+        self.accountConflict = accountConflict
+        self.configDir = configDir
     }
 
     enum CodingKeys: String, CodingKey {
         case agent, sessionId, title, titleSource, appTitleSource, project, gitBranch, entrypoint, version, startedAt, lastActivityAt
         case durationMs, live, models, effort, responses, tokens, costUsd, unpricedTokens, placeholderShare, ledgerUsd, compactions
         case subagentFiles, workflowRuns, resume, transcriptPath, appSessionId, archived, hasTranscript
+        case account, accountConflict, configDir
     }
 
     public init(from decoder: any Decoder) throws {
@@ -189,6 +200,9 @@ public struct SessionHistoryEntry: Codable, Hashable, Sendable, Identifiable {
         // app's list with no sign of a transcript (no path, no responses) counts as app-only.
         hasTranscript = (try? c.decodeIfPresent(Bool.self, forKey: .hasTranscript)).flatMap { $0 }
             ?? (appSessionId == nil || transcriptPath != nil || responses != nil)
+        account = (try? c.decodeIfPresent(AccountRef.self, forKey: .account)).flatMap { $0 }
+        accountConflict = (try? c.decodeIfPresent(Bool.self, forKey: .accountConflict)).flatMap { $0 }
+        configDir = (try? c.decodeIfPresent(String.self, forKey: .configDir)).flatMap { $0 }
     }
 
     /// The longest title shown (the CLI caps titles at 120 characters too).

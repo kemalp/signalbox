@@ -187,10 +187,14 @@ public struct FleetSession: Codable, Hashable, Sendable, Identifiable {
     public var context: ContextSnapshot?
     /// Tokens on models with no price row, left out of `costUsd`.
     public var unpricedTokens: Double?
+    /// The subscription it runs under; nil is unknown (never a default account).
+    public var account: AccountRef?
+    /// Claude Code: the config dir whose registry lists it.
+    public var configDir: String?
 
     public var id: String { "\(agent.rawValue)/\(sessionId)" }
 
-    public init(agent: AgentID, sessionId: String, pid: Int? = nil, cwd: String? = nil, name: String? = nil, status: SessionStatus, statusSince: Date? = nil, waitingFor: String? = nil, entrypoint: String? = nil, kind: String? = nil, version: String? = nil, model: String? = nil, effort: String? = nil, startedAt: Date? = nil, lastActivity: Date? = nil, source: String? = nil, costUsd: Double? = nil, context: ContextSnapshot? = nil, unpricedTokens: Double? = nil) {
+    public init(agent: AgentID, sessionId: String, pid: Int? = nil, cwd: String? = nil, name: String? = nil, status: SessionStatus, statusSince: Date? = nil, waitingFor: String? = nil, entrypoint: String? = nil, kind: String? = nil, version: String? = nil, model: String? = nil, effort: String? = nil, startedAt: Date? = nil, lastActivity: Date? = nil, source: String? = nil, costUsd: Double? = nil, context: ContextSnapshot? = nil, unpricedTokens: Double? = nil, account: AccountRef? = nil, configDir: String? = nil) {
         self.agent = agent
         self.sessionId = sessionId
         self.pid = pid
@@ -210,6 +214,8 @@ public struct FleetSession: Codable, Hashable, Sendable, Identifiable {
         self.costUsd = costUsd
         self.context = context
         self.unpricedTokens = unpricedTokens
+        self.account = account
+        self.configDir = configDir
     }
 
     /// The longest `waitingFor` label shown; the CLI drops anything longer (48 characters, adapter-claude `label`).
@@ -232,7 +238,7 @@ public struct FleetSession: Codable, Hashable, Sendable, Identifiable {
     }
 }
 
-/// A plan/rate-limit reading. The freshest reading per (agent, kind) wins.
+/// A plan/rate-limit reading: one per (agent, account, kind), the newest reading of a window not yet reset.
 public struct LimitSnapshot: Codable, Hashable, Sendable, Identifiable {
     public var agent: AgentID
     /// e.g. "five_hour", "seven_day", "codex.primary". Unknown kinds are kept verbatim.
@@ -245,10 +251,13 @@ public struct LimitSnapshot: Codable, Hashable, Sendable, Identifiable {
     public var plan: String?
     public var sessionId: String?
     public var source: String?
+    /// The account of the session that reported it; nil when that is unknown.
+    public var account: AccountRef?
 
-    public var id: String { "\(agent.rawValue)/\(kind)" }
+    /// Per account, so two subscriptions' windows never share a gauge or a notification.
+    public var id: String { account.map { "\(agent.rawValue)/\($0.id)/\(kind)" } ?? "\(agent.rawValue)/\(kind)" }
 
-    public init(agent: AgentID, kind: String, label: String? = nil, usedPercent: Double, resetsAt: Date? = nil, windowMinutes: Double? = nil, observedAt: Date, plan: String? = nil, sessionId: String? = nil, source: String? = nil) {
+    public init(agent: AgentID, kind: String, label: String? = nil, usedPercent: Double, resetsAt: Date? = nil, windowMinutes: Double? = nil, observedAt: Date, plan: String? = nil, sessionId: String? = nil, source: String? = nil, account: AccountRef? = nil) {
         self.agent = agent
         self.kind = kind
         self.label = label
@@ -259,6 +268,7 @@ public struct LimitSnapshot: Codable, Hashable, Sendable, Identifiable {
         self.plan = plan
         self.sessionId = sessionId
         self.source = source
+        self.account = account
     }
 }
 
@@ -305,16 +315,19 @@ public struct FleetSnapshot: Codable, Hashable, Sendable {
     public var limits: [LimitSnapshot]
     public var compactions: [CompactionEvent]
     public var health: [AdapterHealth]
+    /// Every account the CLI has seen, with your labels; nil from CLIs before accounts.
+    public var accounts: [AccountInfo]?
 
-    public init(generatedAt: Date, sessions: [FleetSession] = [], limits: [LimitSnapshot] = [], compactions: [CompactionEvent] = [], health: [AdapterHealth] = []) {
+    public init(generatedAt: Date, sessions: [FleetSession] = [], limits: [LimitSnapshot] = [], compactions: [CompactionEvent] = [], health: [AdapterHealth] = [], accounts: [AccountInfo]? = nil) {
         self.generatedAt = generatedAt
         self.sessions = sessions
         self.limits = limits
         self.compactions = compactions
         self.health = health
+        self.accounts = accounts
     }
 
-    enum CodingKeys: String, CodingKey { case generatedAt, sessions, limits, compactions, health }
+    enum CodingKeys: String, CodingKey { case generatedAt, sessions, limits, compactions, health, accounts }
 
     public init(from decoder: any Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -323,6 +336,7 @@ public struct FleetSnapshot: Codable, Hashable, Sendable {
         limits = c.lossyArray(LimitSnapshot.self, forKey: .limits)
         compactions = c.lossyArray(CompactionEvent.self, forKey: .compactions)
         health = c.lossyArray(AdapterHealth.self, forKey: .health)
+        accounts = c.contains(.accounts) ? c.lossyArray(AccountInfo.self, forKey: .accounts) : nil
     }
 }
 

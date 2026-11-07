@@ -16,6 +16,10 @@ export interface TranscriptFile {
   kind: RecordKind;
   /** The owning (main) session id, taken from the path. */
   sessionId: string;
+  /** The config dir whose projects/ holds the file, when only one config dir shares that tree. */
+  configDir?: string;
+  /** The config dir a resume of its session runs with: the primary when it shares the tree, else the tree's first. */
+  resumeDir?: string;
 }
 
 /**

@@ -8,13 +8,15 @@
 //   - a file must be a regular file (lstat, then fstat on a descriptor opened with O_NOFOLLOW) of at most 1 MiB;
 //   - the fields in KEPT are copied out right after JSON.parse and everything else is dropped: the app's
 //     conversation summaries (postTurnSummary), prompt suggestions and drafts, errors, plans, tool settings, …
+//   - the two folder names are the account and organization the app was signed in as (UUIDs, matched against
+//     transcript account lines, 2026-11). They are hashed into an account id (accountEvidence) and never kept raw.
 // Nothing is ever written there. SIGNALBOX_CLAUDE_APP_TRACE=1 logs every path the reader lists, stats or opens to
 // stderr, to audit a run against the allow-list.
 import { constants, type Dirent } from "node:fs";
 import { lstat, open, readdir } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
-import { sanitizeTitle, type AppSessionRecord, type ClaudeAppOffReason } from "../../core/src/index.ts";
+import { accountEvidence, sanitizeTitle, type AccountEvidence, type AppSessionRecord, type ClaudeAppOffReason } from "../../core/src/index.ts";
 import { FileCache } from "./file-cache.ts";
 import { isObj, label, toIso, type Obj } from "./util.ts";
 
@@ -33,14 +35,21 @@ export type ClaudeAppSetting = { dir: string } | { off: ClaudeAppOffReason; deta
  * The reader's setting for this run. `enabled` false is --no-claude-app. The app's records describe sessions of
  * its own Claude Code config (~/.claude): with CLAUDE_CONFIG_DIR pointing anywhere else, every record would look
  * like a session whose transcript is gone (and an experiment's temporary config would pull in the real app's
- * titles), so the reader is off then, unless SIGNALBOX_CLAUDE_APP_DIR names a list explicitly.
+ * titles), so the reader is off then, unless ~/.claude is also read as an extra config dir (`extraConfigDirs`) or
+ * SIGNALBOX_CLAUDE_APP_DIR names a list explicitly.
  */
-export function claudeAppSetting(enabled: boolean, env: Record<string, string | undefined> = process.env, home = homedir()): ClaudeAppSetting {
+export function claudeAppSetting(
+  enabled: boolean,
+  env: Record<string, string | undefined> = process.env,
+  home = homedir(),
+  extraConfigDirs: readonly string[] = [],
+): ClaudeAppSetting {
   if (!enabled) return { off: "flag", detail: "off (--no-claude-app): history lists sessions with a transcript only" };
   const explicit = env[CLAUDE_APP_DIR_ENV];
   if (explicit) return { dir: explicit };
   const configDir = env.CLAUDE_CONFIG_DIR;
-  if (configDir && resolve(configDir) !== resolve(home, ".claude")) {
+  const isDefault = (dir: string) => resolve(dir) === resolve(home, ".claude");
+  if (configDir && !isDefault(configDir) && !extraConfigDirs.some(isDefault)) {
     return {
       off: "claude-config-dir",
       detail:
@@ -84,7 +93,7 @@ export interface ClaudeAppFs {
 }
 
 /** Opens with O_NOFOLLOW | O_NONBLOCK, checks the open descriptor, and reads at most `maxBytes`. */
-async function readRegularFile(path: string, maxBytes: number): Promise<string | undefined> {
+export async function readRegularFile(path: string, maxBytes: number): Promise<string | undefined> {
   const fh = await open(path, constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK);
   try {
     const st = await fh.stat();
@@ -124,10 +133,24 @@ export function tracedClaudeAppFs(fs: ClaudeAppFs, log: (line: string) => void):
   };
 }
 
-/** The real calls, traced to stderr when $SIGNALBOX_CLAUDE_APP_TRACE is 1. */
-export function defaultClaudeAppFs(env: Record<string, string | undefined> = process.env): ClaudeAppFs {
+/**
+ * A path (or trace line) with the app's account and organization folders replaced by "<id>": the first two folders
+ * under `base`, whatever their shape, and any other UUID-shaped folder name.
+ */
+export function redactIdFolders(path: string, base?: string): string {
+  let out = path;
+  if (base) {
+    const trimmed = base.replace(/\/+$/, "");
+    const root = trimmed.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    out = out.replace(new RegExp(`${root}/[^/\\s]+(/[^/\\s]+)?`, "g"), (_m, second?: string) => `${trimmed}/<id>${second ? "/<id>" : ""}`);
+  }
+  return out.replace(/(^|\/)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?=\/|$|\s)/gi, "$1<id>");
+}
+
+/** The real calls, traced to stderr when $SIGNALBOX_CLAUDE_APP_TRACE is 1 (account folder names under `base` redacted). */
+export function defaultClaudeAppFs(env: Record<string, string | undefined> = process.env, base?: string): ClaudeAppFs {
   if (env[CLAUDE_APP_TRACE_ENV] !== "1") return nodeClaudeAppFs;
-  return tracedClaudeAppFs(nodeClaudeAppFs, (line) => process.stderr.write(`signalbox claude-app: ${line}\n`));
+  return tracedClaudeAppFs(nodeClaudeAppFs, (line) => process.stderr.write(`signalbox claude-app: ${redactIdFolders(line, base)}\n`));
 }
 
 export interface ClaudeAppRead {
@@ -221,7 +244,7 @@ async function dirs(fs: ClaudeAppFs, dir: string): Promise<Dirent[] | undefined>
 }
 
 /** The error code of a failed call ("EACCES", …), or "error" when it has none. */
-function errorCode(err: unknown): string {
+export function errorCode(err: unknown): string {
   const code = (err as { code?: unknown } | null)?.code;
   return typeof code === "string" && /^[A-Z0-9_]{1,32}$/.test(code) ? code : "error";
 }
@@ -241,7 +264,7 @@ export class ClaudeAppReader {
     readonly dir: string,
     opts: ClaudeAppReaderOptions = {},
   ) {
-    this.fs = opts.fs ?? defaultClaudeAppFs();
+    this.fs = opts.fs ?? defaultClaudeAppFs(process.env, dir);
     this.now = opts.now ?? Date.now;
   }
 
@@ -270,6 +293,17 @@ export class ClaudeAppReader {
     }
     paths.sort();
     return { dirExists: true, paths };
+  }
+
+  /** The (account, organization) folders that hold records, hashed; names only, nothing is opened. */
+  async folderAccounts(): Promise<AccountEvidence[]> {
+    const { paths } = await this.list();
+    const out = new Map<string, AccountEvidence>();
+    for (const rel of paths) {
+      const ev = folderEvidence(rel);
+      if (ev && !out.has(ev.ref.id)) out.set(ev.ref.id, ev);
+    }
+    return [...out.values()];
   }
 
   async read(): Promise<ClaudeAppRead> {
@@ -308,9 +342,17 @@ export class ClaudeAppReader {
         rec = parseAppSession(text, now) ?? null;
         this.cache.set(path, stamp, rec);
       }
-      if (rec) out.records.push(rec);
-      else out.errors++;
+      if (rec) {
+        const ev = folderEvidence(rel, Date.parse(rec.lastActivityAt ?? rec.createdAt ?? ""));
+        out.records.push(ev ? { ...rec, accountEvidence: ev } : rec);
+      } else out.errors++;
     }
     return out;
   }
+}
+
+/** The account the app filed a record under: its two folder names (account, organization), hashed. */
+function folderEvidence(rel: string, atMs?: number): AccountEvidence | undefined {
+  const [a, b] = rel.split("/");
+  return accountEvidence(a, b, "claude-app-folder", "recorded", Number.isNaN(atMs) ? undefined : atMs);
 }

@@ -381,6 +381,24 @@ code,
   border-color: color-mix(in srgb, var(--crit) 45%, transparent);
 }
 
+/* An account chip; an inferred one (from a config dir's current login) is dashed. */
+.badge.acct {
+  max-width: 14em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.badge.acct.inferred {
+  border-style: dashed;
+}
+
+.session-badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
 .pill {
   display: inline-flex;
   align-items: center;

@@ -100,6 +100,18 @@ struct SessionInspector: View {
                         row("Kind", s.kind)
                         row("Version", s.version.map { "v\($0)" })
                         row("PID", s.pid.map(String.init))
+                        if s.agent == .claudeCode {
+                            AccountDetail(account: s.account, entrypoint: s.entrypoint)
+                            if let dir = s.configDir {
+                                LabeledContent("Config folder") {
+                                    Text(Fmt.shortPath(dir))
+                                        .font(.callout)
+                                        .textSelection(.enabled)
+                                        .help(dir)
+                                        .privacySensitive()
+                                }
+                            }
+                        }
                     }
                     Section("Source") {
                         row("Agent", Fmt.agentName(s.agent))

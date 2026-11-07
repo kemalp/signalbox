@@ -18,7 +18,7 @@
 >    - `~/Desktop/ac19dc5b-…-diagnostics.json`
 >    - a 24 MB `.heapsnapshot` in the session scratchpad (`…/scratchpad/verify-control/out/`)
 >    - two earlier files a research probe moved to your **Trash** (empty it)
-> 3. ✅ *Done:* the research scripts and probe mods were copied into [`research/`](research/). No `*.jsonl` outputs were copied, because they contain your email, account UUID and prompt text. Generated types were not copied either.
+> 3. ✅ *Done:* the research scripts and probe mods were copied into [`research/`](research/). No `*.jsonl` outputs were copied, because they contain your email, account UUID and prompt text. Generated types were not copied either. *(2026-11 note: these were the research outputs, OTel and SDK probes. Claude Code transcripts themselves carry an account id only on two desktop-only line types, `bridge-session` and `artifact-autoreact-ledger`, and never an email.)*
 > 4. Probe sessions left folders under `~/.claude/projects` with names containing `scratchpad`. Exclude them from your own numbers.
 > 5. Your **terminal** `claude` login has expired. The desktop app uses its own login and is fine. Week 1 does not need the terminal login.
 > 6. Throwaway `/insights` runs created `~/.claude/usage-data/` (a local HTML report). It is harmless, and you can keep or delete it.

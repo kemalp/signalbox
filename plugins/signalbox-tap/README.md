@@ -6,11 +6,11 @@ A read-only Claude Code mod (function hooks, Claude Code 2.1.293+). On `session.
 ~/Library/Application Support/signalbox/spool/<sessionId>.json
 ```
 
-as a `TapSpool` v1 record (`packages/core/src/types.ts`): context fill, rate-limit windows and cost, plus `seq`, `event` and `writtenAt`. Figures the engine doesn't have are left out, never written as 0.
+as a `TapSpool` v1 record (`packages/core/src/types.ts`): context fill, rate-limit windows and cost, plus `seq`, `event`, `writtenAt` and `configDir` (the session's `CLAUDE_CONFIG_DIR`, or `null` when it is unset). Figures the engine doesn't have are left out, never written as 0. `configDir` lets Signalbox tell which account a limit reading belongs to when several config dirs share one transcript folder.
 
 That is all it does. It makes no network calls, runs no commands, submits no prompts, changes no settings and draws no UI. On failure it writes one line to the debug log (`claude --debug`), and its hooks never throw.
 
-`claude plugin validate plugins/signalbox-tap` lists exactly what it touches: `$.env.get(HOME)`, `$.session.id`, `$.session.usage`, `$.fs.read` (its own spool file, to carry `seq` across a hot reload), `$.fs.write`, `$.clock.now` and `$.ui.log` to the debug log.
+`claude plugin validate plugins/signalbox-tap` lists exactly what it touches: `$.env.get(HOME)`, `$.env.get(CLAUDE_CONFIG_DIR)`, `$.session.id`, `$.session.usage`, `$.fs.read` (its own spool file, to carry `seq` across a hot reload), `$.fs.write`, `$.clock.now` and `$.ui.log` to the debug log.
 
 ## Notes for readers of the spool
 

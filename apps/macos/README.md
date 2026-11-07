@@ -22,7 +22,9 @@ SwiftUI views ──▶ SignalboxStore (@MainActor, @Observable) ──▶ CLIPr
   line, Claude app fields included) and the History screen's logic (`HistoryBrowser`: filters, search, day groups,
   the archived and empty-session switches, what a row without a transcript shows, Live pill routing and the
   shell-quoted resume line).
-- `Sources/Signalbox`: the app: a `NavigationSplitView` window (Sessions, History, Commands, Usage, Limits, Health; ⌘1…⌘6),
+- And accounts: `Accounts.swift` (the CLI's `account` and `accounts` fields, names and labels, the per-account limit groups and
+  Signalbox's own accounts.json for the labels you set).
+- `Sources/Signalbox`: the app: a `NavigationSplitView` window (Sessions, History, Commands, Usage, Limits, Accounts, Health; ⌘1…⌘7),
   a `MenuBarExtra`, the Settings window (⌘,), the About window, the Diagnostics sheet (CLI stderr and events), the macOS bridges in
   `App/SystemServices.swift` (UNUserNotificationCenter, SMAppService), and the offscreen snapshot renderer.
 - `Resources/AppIcon.icns` and `Resources/AppIcon.icon`: the app icon, drawn by `scripts/make-icon.swift` (see below).
@@ -84,7 +86,9 @@ Also reachable from the gear button in the menu bar popover (the only way in whe
 - **Display**: currency (USD, or GBP/EUR at a rate you enter, with an "as of" date you set) and an optional
   monthly plan price for the plan value tile.
 - **Advanced**: a CLI path override (`SIGNALBOX_CLI` in the environment still wins; Apply restarts the CLI),
-  **Include the Claude app's session list** (on by default; see History below), Diagnostics, and Reset All Settings
+  **Include the Claude app's session list** (on by default; see History below), **Claude Code folders** (more config
+  folders to read, a `CLAUDE_CONFIG_DIR` per account say: the CLI restarts with a `--claude-config-dir` per folder),
+  Diagnostics, and Reset All Settings
   (launch at login is left alone). Turning the session list off restarts the CLI with `--no-claude-app` (the flag is
   added only when it's off, so a CLI from before it still starts), and History says it's reading until the new list
   arrives.
@@ -243,6 +247,16 @@ needs the 30-day range, with a "Switch to 30 days" link, instead of prorating (t
   auto-compaction (whichever comes first), with a tick where auto-compaction starts ("auto-compact at 97%") and
   "319K of 1M (32%)". No known window means an empty track, never 0%. `windowSource` (newer CLIs) says whether
   the window came from the agent or from the model's documented size; the inspector shows it.
+- **Accounts** lists every account the CLI has seen: its name (Rename… saves a label to
+  `~/Library/Application Support/signalbox/accounts.json`, 0600, which the CLI and the web page read too; nothing
+  agent-side is written), where its id came from, which config folder's terminal login it is, its live and past
+  sessions with their recorded cost, and its plan windows. "Current logins" maps each config folder and the Claude
+  app to an account. Sessions with no account are counted, never given one. Sessions and History rows carry an account
+  chip (dashed when inferred: from a folder's login, or an id found without its organization completed by the one full
+  id with the same account), the inspectors say where it came from (or why it is unknown) and the config folder, and
+  History filters by account, "Unknown" (Claude Code sessions) included. Limits and the menu bar show one card or row
+  of rings per account; with more than one, the menu bar label names the account ("Team 72%") and limit alerts name
+  it too.
 - **Limits** fill only when the reading is current. A reading older than 15 minutes, or one whose window has
   reset since, shows an empty grey bar or ring labelled "stale · as of 8d ago" or "reset passed", with the last
   value as "was 88%". The menu bar's percentage uses fresh 5-hour readings only.

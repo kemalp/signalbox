@@ -110,6 +110,10 @@ public final class SignalboxStore {
     /// Chart colours per model, kept for the life of the app so a model never changes colour between reports.
     public private(set) var modelSlots = SeriesSlots()
 
+    /// Your account labels as this app last saved them (they reach the CLI's `accounts` on its next fleet).
+    public private(set) var accountLabels: [String: String] = [:]
+    @ObservationIgnored private var labelStore: any AccountLabelStore = InMemoryAccountLabels()
+
     /// Sees every transport event right after the store applied it, so it can also read the resulting
     /// state (the app's SIGNALBOX_DEBUG log).
     @ObservationIgnored public var eventObserver: ((TransportEvent) -> Void)?
@@ -329,6 +333,7 @@ public final class SignalboxStore {
 
         case let .fleet(at, data):
             fleet = data
+            refreshLabelsIfChanged(data.accounts)
             fleetUpdatedAt = at ?? now
             streamErrors[.fleet] = nil
             if health == nil, !data.health.isEmpty { health = data.health }
@@ -448,6 +453,57 @@ public final class SignalboxStore {
 
     public var limits: [LimitSnapshot] { fleet?.limits ?? [] }
 
+    // MARK: Accounts
+
+    /// Every account the CLI has seen (empty from CLIs before accounts).
+    public var accounts: [AccountInfo] { fleet?.accounts ?? [] }
+
+    /// Reads (and later saves) labels through `store`: the app's accounts.json, or memory in tests and fixtures.
+    public func useAccountLabels(_ store: any AccountLabelStore) {
+        labelStore = store
+        accountLabels = store.load()
+    }
+
+    /// Your label for the account, else its short id. With the shared labels file, only its labels count: the CLI's
+    /// copy can be a fleet behind (a label you just cleared).
+    public func accountName(_ id: String) -> String {
+        AccountNaming.name(id, accounts: labelStore.isShared ? [] : accounts, local: accountLabels)
+    }
+
+    /// Sets (or, with an empty or nil label, clears) your name for an account and saves it. The file is read again
+    /// first, so a label another copy of the app saved is kept.
+    public func renameAccount(_ id: String, to label: String?) throws {
+        var next = labelStore.load()
+        if let label, let clean = AccountNaming.sanitize(label) { next[id] = clean } else { next[id] = nil }
+        try labelStore.save(next)
+        accountLabels = next
+    }
+
+    /// The CLI reads the same labels file: when its labels differ from ours, the file changed (another copy of the
+    /// app saved it), so read it again.
+    private func refreshLabelsIfChanged(_ infos: [AccountInfo]?) {
+        guard labelStore.isShared, let infos else { return }
+        if infos.contains(where: { $0.label != accountLabels[$0.id] }) { accountLabels = labelStore.load() }
+    }
+
+    /// Claude Code sessions with no account: live ones from the fleet, past ones from History (whose live entries are
+    /// the same sessions, so they aren't counted twice).
+    public var unknownAccountCounts: (live: Int, past: Int) {
+        let live = sessions.filter { $0.agent == .claudeCode && $0.account == nil && $0.status != .ended }.count
+        let past = (history?.entries ?? []).filter { $0.agent == .claudeCode && $0.account == nil && !$0.live }.count
+        return (live, past)
+    }
+
+    /// One group of plan windows per (agent, account), for `agent`; the unknown-account group last.
+    public func limitGroups(for agent: AgentID) -> [LimitGroup] {
+        LimitGroup.groups(limits.filter { $0.agent == agent }, name: accountName)
+    }
+
+    /// True when `agent`'s readings come from more than one account (or from a known and an unknown one).
+    public func hasSeveralAccounts(_ agent: AgentID) -> Bool {
+        Set(limits.filter { $0.agent == agent }.map { $0.account?.id ?? "" }).count > 1
+    }
+
     /// Agents to show limit cards for: Claude Code always, plus any agent with limits or sessions.
     public var limitAgents: [AgentID] {
         var set: Set<AgentID> = [.claudeCode]
@@ -465,11 +521,11 @@ public final class SignalboxStore {
         }
     }
 
-    /// The limits that fit in the menu bar for `agent`: all of them when there are at most `max`;
+    /// The windows of one (agent, account) row that fit in the menu bar: all of them when there are at most `max`;
     /// otherwise the `max - 1` most pressing (fresh before stale before reset-passed, then highest use),
     /// in window order, plus how many were left out (the popover shows "+N" for those).
-    public func menuBarLimits(for agent: AgentID, now: Date, max: Int = 4) -> (shown: [LimitSnapshot], hidden: Int) {
-        let all = limits(for: agent)
+    public func menuBarLimits(for group: LimitGroup, now: Date, max: Int = 4) -> (shown: [LimitSnapshot], hidden: Int) {
+        let all = group.limits
         guard all.count > max, max > 1 else { return (all, 0) }
         func rank(_ l: LimitSnapshot) -> Int {
             switch limitState(l, now: now) {
@@ -494,20 +550,33 @@ public final class SignalboxStore {
 
     /// The highest fresh 5-hour-window reading, for the menu bar label.
     public func highestFiveHourPercent(now: Date) -> Double? {
-        limits
-            .filter { $0.kind == "five_hour" || $0.windowMinutes == 300 }
-            .filter { limitState($0, now: now) == .fresh }
-            .map(\.usedPercent)
-            .max()
+        highestFiveHour(now: now)?.percent
     }
 
     /// The highest fresh weekly reading (a 7-day window), for the menu bar label.
     public func highestWeeklyPercent(now: Date) -> Double? {
-        limits
-            .filter { $0.kind == "seven_day" || $0.windowMinutes == 10080 }
-            .filter { limitState($0, now: now) == .fresh }
-            .map(\.usedPercent)
-            .max()
+        highestWeekly(now: now)?.percent
+    }
+
+    /// The highest fresh 5-hour reading across agents and accounts, and the reading it came from.
+    public func highestFiveHour(now: Date) -> (percent: Double, limit: LimitSnapshot)? {
+        highest(now: now) { $0.kind == "five_hour" || $0.windowMinutes == 300 }
+    }
+
+    public func highestWeekly(now: Date) -> (percent: Double, limit: LimitSnapshot)? {
+        highest(now: now) { $0.kind == "seven_day" || $0.windowMinutes == 10080 }
+    }
+
+    private func highest(now: Date, _ window: (LimitSnapshot) -> Bool) -> (percent: Double, limit: LimitSnapshot)? {
+        let best = limits.filter(window).filter { limitState($0, now: now) == .fresh }.max { $0.usedPercent < $1.usedPercent }
+        return best.map { ($0.usedPercent, $0) }
+    }
+
+    /// The menu bar's prefix for a reading: the account's compact name when that agent reports more than one
+    /// account, else nil (one account needs no name).
+    public func menuBarAccountPrefix(_ limit: LimitSnapshot) -> String? {
+        guard hasSeveralAccounts(limit.agent) else { return nil }
+        return limit.account.map { AccountNaming.compact(accountName($0.id)) } ?? "?"
     }
 
     /// Today's recorded spend in USD from the current report: its row for today, 0 when the report covers today

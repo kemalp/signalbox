@@ -136,6 +136,7 @@ describe("listSessions", () => {
       startedAt: "2026-01-10T10:00:00.000Z",
       lastActivity: A_MTIME.toISOString(),
       source: "agents --json+registry",
+      configDir: sb.configDir,
     });
     expect(sessions.find((s) => s.sessionId === SID_E)).toMatchObject({ status: "ended", source: "agents --json", name: "bg job" });
     // Registry-only, dead pid.
