@@ -94,6 +94,17 @@ enum ClickProbe {
         return app == "off" ? "ok" : "fail (history claudeApp=\(app))"
     }
 
+    /// Account switching is off by default and has written nothing (the script points SIGNALBOX_SWITCH_ROOT at its
+    /// own folder, so a real switch folder is never looked at).
+    private static func switchOff(_ controller: AppController) -> String {
+        let s = controller.switcher
+        if s.isOn() { return "fail (on by default)" }
+        let root = s.paths.root
+        let written = (try? FileManager.default.contentsOfDirectory(atPath: root)) ?? []
+        log("switch: on=\(s.isOn()) root has \(written.count) entries")
+        return written.isEmpty ? "ok" : "fail (wrote \(written.joined(separator: ", ")))"
+    }
+
     private static func run(_ controller: AppController) async {
         guard let window = NSApp.windows.first(where: { $0.identifier?.rawValue.hasPrefix(WindowID.main) == true }),
               let root = window.contentView?.superview ?? window.contentView else {
@@ -211,6 +222,7 @@ enum ClickProbe {
             shown?.close()
         }
         let restart = await restarts(controller)
-        log("RESULT sidebar=\(sidebarOK ? "ok" : "fail") sessions=\(sessions) history=\(history) commands=\(commands) about=\(about) restart=\(restart)")
+        let switching = switchOff(controller)
+        log("RESULT sidebar=\(sidebarOK ? "ok" : "fail") sessions=\(sessions) history=\(history) commands=\(commands) about=\(about) restart=\(restart) switch=\(switching)")
     }
 }

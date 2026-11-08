@@ -37,7 +37,7 @@ struct SettingsView: View {
 }
 
 /// A caption under a settings row.
-private struct SettingsNote: View {
+struct SettingsNote: View {
     let text: String
     var systemImage: String?
     var color: Color = .secondary
@@ -408,6 +408,7 @@ private struct AdvancedSettingsPane: View {
                     SettingsNote("Claude Code deletes transcripts older than its cleanupPeriodDays setting (30 days when it isn't set), and History and the cost figures lose them too. The menu bar says when a folder keeps them for less than this, or when the setting is invalid; Never warn turns that line off, and Health still shows every folder. Signalbox only reads that one setting; it never edits Claude Code's settings.")
                 }
             }
+            SwitchSettingsSection()
             Section("Troubleshooting") {
                 HStack {
                     Button("Show Diagnostics") { controller.showDiagnostics() }
@@ -424,7 +425,7 @@ private struct AdvancedSettingsPane: View {
                 cliDraft = settings.cliPathOverride
             }
         } message: {
-            Text("Notification, display, menu bar, CLI and history settings go back to their defaults and muted sessions are unmuted. Launch at login stays as it is.")
+            Text("Notification, display, menu bar, CLI and history settings go back to their defaults, muted sessions are unmuted, and account switching turns off. Launch at login and the Terminal account stay as they are.")
         }
     }
 

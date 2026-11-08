@@ -142,6 +142,18 @@ struct MenuBarContent: View {
                     .help("History and the cost figures lose deleted transcripts too. Open Health for details and how to keep them longer.")
                     .privacySensitive()
                 }
+                if let terminal = controller.terminalAccountText {
+                    // signalbox-switch's pointer: the account a plain `claude` uses in Terminal (through the shim).
+                    Button { openMain(section: .accounts) } label: {
+                        Label("Terminal: \(terminal)", systemImage: "terminal")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+                    .buttonStyle(.plain)
+                    .help("The account claude uses in Terminal once you hook in the shim. Change it on the Accounts screen.")
+                    .privacySensitive()
+                }
                 Divider()
                 limitRings(now: now)
                 Divider()

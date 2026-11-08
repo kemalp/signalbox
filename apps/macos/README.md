@@ -26,11 +26,19 @@ SwiftUI views ──▶ SignalboxStore (@MainActor, @Observable) ──▶ CLIPr
   Signalbox's own accounts.json for the labels you set).
 - And transcript retention: `Retention.swift` (the CLI's `retention` field: each config folder's `cleanupPeriodDays` as
   read, judged against your threshold here, so changing it needs no CLI restart; the popover line and Health's texts).
+- `Sources/SignalboxSwitch`: opt-in account switching ([docs/SWITCH.md](../../docs/SWITCH.md)), the only code that writes
+  outside Signalbox's own settings and labels. Pure parts (`SwitchModel`, `Scripts`: the shim, resume and undo scripts,
+  `SetupPlan`, `ResumePlanner`, `Audit`) and a small executor (`SwitchFileSystem`, `SwitchController`: four
+  allow-listed verbs, each checking the window, acting, then logging). Only the app target links it; `SignalboxKit`
+  never imports it.
 - `Sources/Signalbox`: the app: a `NavigationSplitView` window (Sessions, History, Commands, Usage, Limits, Accounts, Health; ⌘1…⌘7),
   a `MenuBarExtra`, the Settings window (⌘,), the About window, the Diagnostics sheet (CLI stderr and events), the macOS bridges in
   `App/SystemServices.swift` (UNUserNotificationCenter, SMAppService), and the offscreen snapshot renderer.
 - `Resources/AppIcon.icns` and `Resources/AppIcon.icon`: the app icon, drawn by `scripts/make-icon.swift` (see below).
 - `Tests/SignalboxKitTests`: Swift Testing. The transport tests drive `Tests/SignalboxKitTests/Fixtures/fake-cli.sh`.
+- `Tests/SignalboxSwitchTests`: the switch against temporary folders: the shim and resume scripts run under `/bin/sh`,
+  `dash`, zsh and bash with a fake `claude` and an empty environment; every setup step run on a synthetic layout,
+  then undone with the generated script.
 - `Fixtures/`: **synthetic** data only, never anything from a real machine.
   - `snapshot.json`: the `signalbox snapshot --json` shape, generated from `apps/web/src/mock.ts`.
   - `stress-snapshot.json`: the same plus 28 extra sessions, very long names and paths, unknown agents, odd
@@ -92,7 +100,8 @@ Also reachable from the gear button in the menu bar popover (the only way in whe
   folders to read, a `CLAUDE_CONFIG_DIR` per account say: the CLI restarts with a `--claude-config-dir` per folder),
   **Transcript retention** (warn when a folder keeps transcripts for less than 60, 90 (default), 180 or 365 days, or
   never: the menu bar popover gets a line that opens Health, whose Transcript retention section lists every folder),
-  Diagnostics, and Reset All Settings
+  **Account switching** (off by default; on for 1, 8 or 24 hours after a sheet that lists what it writes; see
+  Accounts and History below), Diagnostics, and Reset All Settings (which also turns account switching off)
   (launch at login is left alone). Turning the session list off restarts the CLI with `--no-claude-app` (the flag is
   added only when it's off, so a CLI from before it still starts), and History says it's reading until the new list
   arrives.
@@ -251,6 +260,13 @@ needs the 30-day range, with a "Switch to 30 days" link, instead of prorating (t
   auto-compaction (whichever comes first), with a tick where auto-compaction starts ("auto-compact at 97%") and
   "319K of 1M (32%)". No known window means an empty track, never 0%. `windowSource` (newer CLIs) says whether
   the window came from the agent or from the model's documented size; the inspector shows it.
+- **Account switching** (only while it is on, Settings ▸ Advanced): Accounts gets a **Terminal account** box with
+  the **Active in Terminal** picker (writes the pointer the shim reads), the shell lines to hook the shim in, **Set Up
+  Shared Sessions…** (a sheet that runs the checks, lists every move per step and asks before each) and **Log…**;
+  History rows and the inspector get **Resume With ▸** (one entry per config folder, disabled with the reason when a
+  session is running, has no transcript, or the folder can't see it) and a confirm sheet with the exact command. While
+  it is off, nothing of this shows, except the Terminal account line (and the popover's "Terminal: …") when a pointer
+  is already there.
 - **Accounts** lists every account the CLI has seen: its name (Rename… saves a label to
   `~/Library/Application Support/signalbox/accounts.json`, 0600, which the CLI and the web page read too; nothing
   agent-side is written), where its id came from, which config folder's terminal login it is, its live and past

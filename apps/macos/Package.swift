@@ -11,11 +11,15 @@ let package = Package(
     ],
     targets: [
         .target(name: "SignalboxKit"),
-        .executableTarget(name: "Signalbox", dependencies: ["SignalboxKit"]),
+        // signalbox-switch (docs/SWITCH.md): the only code that writes outside Signalbox's own settings and labels.
+        // Only the app links it; SignalboxKit never imports it.
+        .target(name: "SignalboxSwitch", dependencies: ["SignalboxKit"]),
+        .executableTarget(name: "Signalbox", dependencies: ["SignalboxKit", "SignalboxSwitch"]),
         .testTarget(
             name: "SignalboxKitTests",
             dependencies: ["SignalboxKit"],
             exclude: ["Fixtures"]
         ),
+        .testTarget(name: "SignalboxSwitchTests", dependencies: ["SignalboxSwitch", "SignalboxKit"]),
     ]
 )
