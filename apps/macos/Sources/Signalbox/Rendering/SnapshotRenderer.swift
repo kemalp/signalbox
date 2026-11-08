@@ -1,5 +1,6 @@
 import AppKit
 import SignalboxKit
+import SignalboxSwitch
 import SwiftUI
 
 /// `Signalbox --render-snapshots <outDir> --fixture <snapshot.json>`: renders every screen into PNGs
@@ -408,8 +409,67 @@ enum SnapshotRenderer {
                       pinnedNow: store.pinnedNow ?? snapshot.generatedAt, preview: { configure in preview(configure: configure) },
                       written: &written)
 
+        renderSwitch(outDir: outDir, snapshot: snapshot, history: history, fixtureName: fixture.lastPathComponent,
+                     pinnedNow: store.pinnedNow ?? snapshot.generatedAt, written: &written)
+
         for url in written { print(url.path) }
         return written.isEmpty ? 1 : 0
+    }
+
+    /// signalbox-switch's screens with synthetic folders under /Users/you: switching on with a Terminal account, off
+    /// with one, the Settings section, the popover line, and the resume and setup sheets. The switch is a preview that
+    /// reads and writes nothing.
+    private static func renderSwitch(outDir: URL, snapshot: Snapshot, history: HistorySnapshot?, fixtureName: String, pinnedNow: Date,
+                                     written: inout [URL]) {
+        let team = "/Users/you/.claude-team"
+        func controller(on: Bool, pointer: PointerValue?) -> AppController {
+            let settings = SettingsStore(defaults: InMemorySettings())
+            settings.claudeConfigDirs = [team]
+            let sw = SwitchController.preview(enabledUntil: on ? pinnedNow.addingTimeInterval(8 * 3600) : nil, pointer: pointer, clock: { pinnedNow })
+            let c = AppController.preview(clock: { pinnedNow }, settings: settings, switcher: sw)
+            c.switchHome = "/Users/you"
+            c.claudePathOverride = "/Users/you/.local/bin/claude"
+            c.store.load(snapshot: snapshot, name: fixtureName)
+            if let history { c.store.load(history: history) }
+            c.store.pinnedNow = pinnedNow
+            return c
+        }
+        func shot(_ name: String, _ c: AppController, dark: Bool = false, size: CGSize = windowSize, titled: Bool = true, _ view: some View) {
+            let v = view.environment(c.store).environment(c.navigation).environment(c).environment(c.settings)
+                .environment(\.pinnedColorScheme, dark ? .dark : .light)
+                .environment(\.directoryExists, { _ in true })
+            let url = outDir.appendingPathComponent("\(name)-\(dark ? "dark" : "light").png")
+            if render(v, size: size, appearance: dark ? .darkAqua : .aqua, titled: titled, to: url) { written.append(url) }
+        }
+        for dark in [false, true] {
+            let on = controller(on: true, pointer: .folder(team))
+            on.navigation.section = .accounts
+            shot("switch-accounts-on", on, dark: dark, ContentView())
+        }
+        let off = controller(on: false, pointer: .folder(team))
+        off.navigation.section = .accounts
+        shot("switch-accounts-off", off, ContentView())
+        // Settings ▸ Advanced ▸ Account switching on its own (the pane scrolls), off and on.
+        for (name, isOn) in [("switch-settings-off", false), ("switch-settings-on", true)] {
+            shot(name, controller(on: isOn, pointer: nil), size: CGSize(width: SettingsView.width, height: 230), titled: false,
+                 Form { SwitchSettingsSection() }.formStyle(.grouped))
+        }
+        let menu = controller(on: false, pointer: .folder(team))
+        let content = MenuBarContent()
+        let height = min(popoverSize.height * 2, max(200, naturalHeight(content.environment(menu.store).environment(menu.navigation)
+            .environment(menu).environment(menu.settings), width: popoverSize.width)))
+        shot("switch-menubar", menu, size: CGSize(width: popoverSize.width, height: height), titled: false,
+             content.frame(width: popoverSize.width, height: height, alignment: .top).background(.regularMaterial))
+        let resume = controller(on: true, pointer: nil)
+        if let entry = history?.entries.first(where: { $0.agent == .claudeCode && !$0.live && $0.hasTranscript && $0.transcriptPath != nil }) {
+            for (name, folder, copy) in [("switch-resume-sheet", SwitchFolder(path: team, isDefault: false), false),
+                                         ("switch-resume-sheet-desktop", SwitchFolder(path: "/Users/you/.claude", isDefault: true), true)] {
+                let sheet = ResumeSheet(pending: PendingResume(entry: entry, folder: folder, copyOnly: copy))
+                shot(name, resume, size: CGSize(width: 540, height: max(320, naturalHeight(sheet.environment(resume.store).environment(resume)
+                    .environment(resume.settings).environment(\.directoryExists, { _ in true }), width: 540))), titled: false, sheet)
+            }
+        }
+        shot("switch-setup-sheet", resume, size: CGSize(width: 640, height: 600), titled: false, SetupSheet())
     }
 
     /// Session history (every session is the main loop's `history-*`): one agent, a search, a project over 30 days,

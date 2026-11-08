@@ -136,3 +136,27 @@ describe("doctor agentVersion", () => {
     expect(info.error).toContain("not found on PATH or in the usual install dirs");
   });
 });
+
+describe("the signalbox-switch shim", () => {
+  const shimBody = "#!/bin/sh\n# signalbox-switch shim (written by Signalbox; your edits are overwritten). Unofficial.\nexec false\n";
+
+  test("is skipped on PATH and in the fallback dirs, and reported", () => {
+    const shimDir = join(root, "switch-bin");
+    const shim = exe(shimDir, "claude", shimBody);
+    const real = exe(join(root, "real-bin"), "claude");
+    const found = findBinary("claude", opts({ PATH: `${shimDir}:${join(root, "real-bin")}:${FINDER_PATH}` }));
+    expect(found).toEqual({ path: real, via: "PATH", skippedShims: [shim] });
+    // Only the shim on PATH: the fallback dirs still find the real one.
+    const fallback = exe(sys[0]!, "claude");
+    expect(findBinary("claude", opts({ PATH: `${shimDir}:${FINDER_PATH}`, [BIN_DIRS_ENV]: `${shimDir}:${sys[0]}` }))).toEqual({
+      path: fallback,
+      via: sys[0]!,
+      skippedShims: [shim],
+    });
+    rmSync(fallback);
+    // Nothing but the shim: not found, rather than the shim.
+    expect(findBinary("claude", opts({ PATH: `${shimDir}:${FINDER_PATH}`, [BIN_DIRS_ENV]: shimDir }))).toBeUndefined();
+    // An ordinary script is never mistaken for it, and relative PATH entries are ignored.
+    expect(findBinary("claude", opts({ PATH: `relative:${join(root, "real-bin")}` }))).toEqual({ path: real, via: "PATH" });
+  });
+});

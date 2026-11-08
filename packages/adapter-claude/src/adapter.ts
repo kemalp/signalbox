@@ -40,6 +40,7 @@ import {
 import { ClaudeAppReader, type ClaudeAppFs, type ClaudeAppRead } from "./claude-app.ts";
 import { ConfigLoginReader, defaultLoginFs, type LoginFs, type LoginRead } from "./config-account.ts";
 import { RetentionReader } from "./retention.ts";
+import { isSwitchShim } from "./switch-shim.ts";
 import { lastMainResponse } from "./context.ts";
 import { FileCache, type FileStamp } from "./file-cache.ts";
 import { forEachLine } from "./lines.ts";
@@ -830,7 +831,10 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
   }
 
   private claudeBin(): string | undefined {
-    return this.opts.claudeBin ?? (process.env.SIGNALBOX_CLAUDE_BIN || undefined) ?? Bun.which("claude") ?? undefined;
+    if (this.opts.claudeBin) return this.opts.claudeBin;
+    if (process.env.SIGNALBOX_CLAUDE_BIN) return process.env.SIGNALBOX_CLAUDE_BIN;
+    const onPath = Bun.which("claude");
+    return onPath && !isSwitchShim(onPath) ? onPath : undefined;
   }
 
   private async agents(root: Root): Promise<AgentsRun> {

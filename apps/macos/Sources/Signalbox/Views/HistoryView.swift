@@ -10,10 +10,12 @@ import SwiftUI
 struct HistoryView: View {
     @Environment(SignalboxStore.self) private var store
     @Environment(NavigationModel.self) private var nav
+    @Environment(AppController.self) private var controller
     @Environment(\.money) private var money
 
     var body: some View {
         @Bindable var nav = nav
+        @Bindable var controller = controller
         Group {
             if let history = store.history {
                 if history.entries.isEmpty {
@@ -34,6 +36,8 @@ struct HistoryView: View {
         }
         .navigationTitle("History")
         .navigationSubtitle(subtitle)
+        // Resume with another account (signalbox-switch): the confirm sheet, from the row menu or the inspector.
+        .sheet(item: $controller.pendingResume) { ResumeSheet(pending: $0) }
         .searchable(text: $nav.historyFilter.query, placement: .toolbar, prompt: "Search titles and projects")
         .inspector(isPresented: Binding(get: { nav.showHistoryInspector && hasEntries }, set: { nav.showHistoryInspector = $0 })) {
             HistoryInspector(entry: store.historyEntry(id: nav.selectedHistoryID))
@@ -644,6 +648,7 @@ struct HistoryActions: View {
                 Label("Copy Resume Command", systemImage: "doc.on.doc")
             }
         }
+        ResumeWithMenu(entry: entry)
         if let live {
             Button {
                 nav.open(live)

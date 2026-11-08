@@ -1,5 +1,6 @@
 import AppKit
 import SignalboxKit
+import SignalboxSwitch
 import SwiftUI
 
 /// macOS 14. The main window opens at every launch (`defaultLaunchBehavior` needs macOS 15).
@@ -125,6 +126,15 @@ final class AppController {
     let settings: SettingsStore
     let notifier: any Notifier
     let launchAtLogin: LaunchAtLoginModel
+    /// signalbox-switch (docs/SWITCH.md): off by default; the only part of the app that writes outside its own
+    /// settings and labels. A fixture run or a snapshot render gets a preview that never writes.
+    let switcher: SwitchController
+    /// A "Resume with" request waiting for its confirm sheet (History shows it).
+    var pendingResume: PendingResume?
+    /// The home folder the switch's ~/.claude is in; the snapshot renderer sets a synthetic one.
+    var switchHome = SwitchPaths.home()
+    /// The snapshot renderer's stand-in for the real claude, so no path of this Mac shows in a render.
+    var claudePathOverride: String?
     private(set) var cliLocation: CLILocation?
     private(set) var childPATH: String?
     private(set) var loginPATHResolved = false
@@ -152,11 +162,12 @@ final class AppController {
 
     /// `clock` is for the snapshot renderer, which pins time; the app uses the wall clock.
     init(options: LaunchOptions, clock: @escaping @Sendable () -> Date = { Date() }, settings: SettingsStore,
-         notifier: any Notifier, loginItems: any LoginItemService, location: AppLocation) {
+         notifier: any Notifier, loginItems: any LoginItemService, location: AppLocation, switcher: SwitchController? = nil) {
         self.options = options
         self.clock = clock
         self.settings = settings
         self.notifier = notifier
+        self.switcher = switcher ?? .preview(enabledUntil: nil, pointer: nil, clock: clock)
         store = SignalboxStore(clock: clock)
         launchAtLogin = LaunchAtLoginModel(service: loginItems, location: location)
         let navigation = navigation
@@ -180,8 +191,12 @@ final class AppController {
             notifier = UnavailableNotifier(reason: "Notifications need the Signalbox app bundle; this copy runs outside one (swift run). Build it with apps/macos/scripts/build-app.sh.")
         }
         let loginItems: any LoginItemService = bundled ? MainAppLoginItem() : StaticLoginItem()
+        let switcher: SwitchController? = options.fixture == nil
+            ? SwitchController(paths: .standard(environment: env), fs: PosixFileSystem(), defaults: defaults,
+                               appVersion: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "dev")
+            : nil
         let controller = AppController(options: options, settings: SettingsStore(defaults: defaults), notifier: notifier,
-                                       loginItems: loginItems, location: location)
+                                       loginItems: loginItems, location: location, switcher: switcher)
         // Account labels live in Signalbox's own accounts.json (the CLI reads it too); a fixture run keeps them in memory.
         if options.fixture == nil { controller.store.useAccountLabels(FileAccountLabels(url: FileAccountLabels.defaultURL(environment: env))) }
         return controller
@@ -190,9 +205,10 @@ final class AppController {
     /// For the snapshot renderer: in-memory settings, no system services.
     static func preview(options: LaunchOptions = LaunchOptions(arguments: []), clock: @escaping @Sendable () -> Date = { Date() },
                         settings: SettingsStore, notifications: NotificationAuthorization = .authorized,
-                        loginItem: LoginItemStatus = .notRegistered, location: AppLocation = .applications) -> AppController {
+                        loginItem: LoginItemStatus = .notRegistered, location: AppLocation = .applications,
+                        switcher: SwitchController? = nil) -> AppController {
         AppController(options: options, clock: clock, settings: settings, notifier: StaticNotifier(notifications),
-                      loginItems: StaticLoginItem(loginItem), location: location)
+                      loginItems: StaticLoginItem(loginItem), location: location, switcher: switcher)
     }
 
     func activateNotifications() {
@@ -235,10 +251,15 @@ final class AppController {
             }
         }
         notifications?.start()
+        // An expiry is logged even if the app was closed at the deadline; scripts Terminal never ran are removed.
+        switcher.expireIfDue()
+        switcher.sweepResumeScripts()
         tickTask = Task { [weak self] in
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(60))
                 self?.minuteTick = Date()
+                self?.switcher.expireIfDue()
+                self?.switcher.refreshPointer()
             }
         }
         let debug = DebugLog.isEnabled()
@@ -347,6 +368,91 @@ final class AppController {
 
     var isFixture: Bool { options.fixture != nil }
 
+    // MARK: Account switching
+
+    /// ~/.claude (CLAUDE_CONFIG_DIR unset) and every other Claude Code folder Signalbox reads.
+    var switchFolders: [SwitchFolder] {
+        let env = ProcessInfo.processInfo.environment
+        let fs = PosixFileSystem()
+        return SwitchFolder.list(home: switchHome, extra: [env["CLAUDE_CONFIG_DIR"]].compactMap { $0 } + settings.claudeConfigDirs,
+                                 realpath: { fs.realpath($0) })
+    }
+
+    /// "Team · ~/.claude-team", or "~/.claude-team · account unknown" when the folder's login can't be read.
+    func switchLabel(_ folder: SwitchFolder) -> String {
+        if let a = folder.account(in: store.accounts) { return "\(store.accountName(a.id)) · \(Fmt.shortPath(folder.path))" }
+        return "\(Fmt.shortPath(folder.path)) · account unknown"
+    }
+
+    /// The account to name in the audit log: Step 1's hashed id and your label, nil when unknown.
+    func auditAccount(_ folder: SwitchFolder) -> AuditAccount? {
+        folder.account(in: store.accounts).map { AuditAccount(id: $0.id, label: store.accountLabels[$0.id] ?? $0.label) }
+    }
+
+    /// The folder the pointer names (one not in the list still shows, by its path).
+    var terminalFolder: SwitchFolder? {
+        guard let p = switcher.pointer else { return nil }
+        if let f = SwitchFolder.folder(for: p, in: switchFolders) { return f }
+        switch p {
+        case .defaultFolder: return switchFolders.first
+        case let .folder(path): return SwitchFolder(path: path, isDefault: false)
+        }
+    }
+
+    /// The popover's "Terminal: …" text: the account's name, else the folder; nil without a pointer.
+    var terminalAccountText: String? {
+        if switcher.pointerUnreadable { return "unreadable pointer file" }
+        guard let f = terminalFolder else { return nil }
+        if let a = f.account(in: store.accounts) { return store.accountName(a.id) }
+        return Fmt.shortPath(f.path)
+    }
+
+    /// The real claude for resume scripts (the shim skipped).
+    var realClaudePath: String? {
+        if let claudePathOverride { return claudePathOverride }
+        return switcher.claudePath(searchPATH: childPATH ?? ProcessInfo.processInfo.environment["PATH"] ?? "", environment: ProcessInfo.processInfo.environment)
+    }
+
+    /// The Claude Code sessions running in `folders` now, for the setup's check.
+    func runningSessions(in folders: [SwitchFolder]) -> [String] {
+        let paths = Set(folders.map(\.path))
+        return (store.fleet?.sessions ?? []).filter { s in
+            s.agent == .claudeCode && s.status != .ended && s.configDir.map(SwitchFolder.normalize).map(paths.contains) == true
+        }.map { "session \(String($0.sessionId.prefix(8)))" }
+    }
+
+    /// Folders other than the default and `second` whose projects/ already shares a tree with either (the CLI's
+    /// retention rows say which): after the link they all share one tree, so they count in the checks too.
+    func setupJoining(second: SwitchFolder) -> [SwitchFolder] {
+        let rows = (store.fleet?.retention ?? []).filter { $0.agent == .claudeCode }
+        let def = switchFolders[0]
+        var out: [SwitchFolder] = []
+        for r in rows {
+            let p = SwitchFolder.normalize(r.configDir)
+            let shares = (r.sharesTranscriptsWith ?? []).map(SwitchFolder.normalize)
+            guard p != def.path, p != second.path, shares.contains(def.path) || shares.contains(second.path),
+                  !out.contains(where: { $0.path == p }) else { continue }
+            out.append(SwitchFolder(path: p, isDefault: false))
+        }
+        return out
+    }
+
+    /// Every folder that will share the default tree, the default first, with the days Claude Code keeps there.
+    func setupRetention(second: SwitchFolder) -> [RetentionInput] {
+        let rows = (store.fleet?.retention ?? []).filter { $0.agent == .claudeCode }
+        let folders = [switchFolders[0].path, second.path] + setupJoining(second: second).map(\.path)
+        return folders.map { path in
+            let row = rows.first { SwitchFolder.normalize($0.configDir) == path }
+            let days: Int? = row.flatMap { r in
+                switch RetentionStatus.of(r, warnBelowDays: 0) {
+                case .invalid, .unknown: nil
+                default: r.effectiveDays
+                }
+            }
+            return RetentionInput(folder: path, days: days)
+        }
+    }
+
     // MARK: Settings side effects
 
     /// Shows or hides the Dock icon. The menu bar item keeps the window reachable either way.
@@ -364,6 +470,7 @@ final class AppController {
     }
 
     func resetSettings() {
+        switcher.disable()
         let cliPath = settings.cliPathOverride
         let options = settings.watchOptions
         settings.resetAll()

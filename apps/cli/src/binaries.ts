@@ -1,9 +1,12 @@
 // Finds agent CLIs (claude, codex, gemini). A Finder-launched app hands its children
 // PATH=/usr/bin:/bin:/usr/sbin:/sbin, so a PATH lookup alone misses every usual install location.
-// Order: the override variable, PATH, then the fallback directories below. Only stat() is used.
+// Order: the override variable, PATH, then the fallback directories below. Only stat() is used, plus the first
+// bytes of a candidate, to skip signalbox-switch's `claude` shim (docs/SWITCH.md §3): Signalbox's own `claude
+// agents --json` must run the real binary, never the account the shim's pointer picks.
 import { accessSync, constants, readdirSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { delimiter, dirname, isAbsolute, join } from "node:path";
+import { isSwitchShim } from "@signalbox/adapter-claude";
 
 /** Replaces the built-in fallback directories (colon-separated; empty disables them). For tests and odd setups. */
 export const BIN_DIRS_ENV = "SIGNALBOX_BIN_DIRS";
@@ -14,6 +17,8 @@ export interface FoundBinary {
   path: string;
   /** Where it came from: the override variable's name, "PATH", or the fallback directory. */
   via: string;
+  /** signalbox-switch shims passed over on the way (their paths). */
+  skippedShims?: string[];
 }
 
 export interface DiscoveryOptions {
@@ -81,11 +86,22 @@ export function findBinary(name: string, opts: DiscoveryOptions = {}): FoundBina
   const env = opts.env ?? process.env;
   const override = opts.envVar ? env[opts.envVar] : undefined;
   if (override) return { path: override, via: opts.envVar! };
-  const onPath = env.PATH ? Bun.which(name, { PATH: env.PATH }) : null;
-  if (onPath) return { path: onPath, via: "PATH" };
+  const skipped: string[] = [];
+  const pick = (p: string): boolean => {
+    if (!isExecutableFile(p)) return false;
+    if (!isSwitchShim(p)) return true;
+    if (!skipped.includes(p)) skipped.push(p);
+    return false;
+  };
+  const found = (path: string, via: string): FoundBinary => (skipped.length ? { path, via, skippedShims: skipped } : { path, via });
+  for (const dir of (env.PATH ?? "").split(delimiter)) {
+    if (!isAbsolute(dir)) continue;
+    const p = join(dir, name);
+    if (pick(p)) return found(p, "PATH");
+  }
   for (const dir of fallbackDirs(opts)) {
     const p = join(dir, name);
-    if (isExecutableFile(p)) return { path: p, via: dir };
+    if (pick(p)) return found(p, dir);
   }
   return undefined;
 }
