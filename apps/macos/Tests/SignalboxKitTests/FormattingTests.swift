@@ -90,8 +90,12 @@ struct FormattingTests {
     @Test func labels() {
         #expect(Fmt.agentName(.claudeCode) == "Claude Code")
         #expect(Fmt.agentName(.codex) == "Codex")
+        #expect(Fmt.agentName(.deepseekHarness) == "DeepSeek Harness")
         #expect(Fmt.agentName(.geminiCLI) == "Gemini")
         #expect(Fmt.agentName("cursor-agent") == "cursor-agent")
+        // Known agents in their fixed order, then the rest by id.
+        #expect([AgentID.geminiCLI, "zed-agent", .deepseekHarness, .codex, "cursor-agent", .claudeCode].sorted()
+            == [.claudeCode, .codex, .deepseekHarness, .geminiCLI, "cursor-agent", "zed-agent"])
         #expect(Fmt.windowLabel(300) == "5h")
         #expect(Fmt.windowLabel(10080) == "7d")
         #expect(Fmt.windowLabel(45) == "45m")
@@ -115,6 +119,8 @@ struct FormattingTests {
         #expect(Fmt.limitShortLabel(weekly) == "7d")
         #expect(Fmt.providerName("openai") == "OpenAI")
         #expect(Fmt.providerName("anthropic") == "Anthropic")
+        #expect(Fmt.providerName("deepseek") == "DeepSeek")
+        #expect(Fmt.providerName("moonshot") == "Moonshot AI")
         #expect(Fmt.providerName("mistral") == "Mistral")
         #expect(Fmt.basename("/a/b/c") == "c")
         #expect(Fmt.basename(nil) == nil)

@@ -7,7 +7,7 @@
 # It copies the app (with the bundled CLI) to a temporary folder under its own bundle id, writes a fake
 # Claude Code config dir (two registry rows whose pids are `sleep` stand-ins, and a fake `claude` that answers
 # `agents --json` from them), and runs the copy in dry-run mode (SIGNALBOX_NOTIFY_DRYRUN=1: one stderr line per
-# notification, UNUserNotificationCenter is never touched) with an empty HOME, CODEX_HOME and settings suite.
+# notification, UNUserNotificationCenter is never touched) with an empty HOME, CODEX_HOME, DSH_HOME and settings suite.
 # Then it flips registry rows and checks the stderr lines:
 #   busy → waiting                      one "notify kind=waiting" within 1.5 s
 #   waiting → busy → waiting (< 30 s)   no second one (same episode)
@@ -117,7 +117,7 @@ row "$pid_b" dryrun-beta "dry run beta" busy "" 600
 
 echo "==> Starting the copy (dry run, synthetic homes)"
 env -i HOME="$work/home" PATH=/usr/bin:/bin:/usr/sbin:/sbin TMPDIR="$work/tmp/" \
-  CLAUDE_CONFIG_DIR="$cfg" SIGNALBOX_CLAUDE_BIN="$work/bin/claude" CODEX_HOME="$work/codex" SIGNALBOX_BIN_DIRS= \
+  CLAUDE_CONFIG_DIR="$cfg" SIGNALBOX_CLAUDE_BIN="$work/bin/claude" CODEX_HOME="$work/codex" DSH_HOME="$work/dsh" SIGNALBOX_BIN_DIRS= \
   SIGNALBOX_NOTIFY_DRYRUN=1 SIGNALBOX_DEBUG=1 SIGNALBOX_DEFAULTS_SUITE="$id.settings" SIGNALBOX_ACCOUNTS_FILE="$work/accounts.json" \
   "$app/Contents/MacOS/Signalbox" > "$log" 2>&1 &
 app_pid=$!

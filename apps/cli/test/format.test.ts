@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { buildHistory, buildReport, loadPriceTables, type HistorySession, type TokenCounts, type UsageRecord } from "@signalbox/core";
-import { clipPath, fmtDuration, fmtTokens, fmtUsd, formatHistory, formatReport, median, tildify, wrap } from "../src/format.ts";
+import { clipPath, fmtDuration, fmtTokens, fmtUsd, formatHistory, formatReport, median, tildify, wrap, wrapItems } from "../src/format.ts";
 
 const tables = loadPriceTables();
 const tok = (t: Partial<TokenCounts>): TokenCounts => ({ input: 0, output: 0, cacheRead: 0, cacheWrite5m: 0, cacheWrite1h: 0, ...t });
@@ -42,6 +42,16 @@ describe("formatters", () => {
     expect(out[0]!.startsWith("  - one")).toBe(true);
     expect(out[1]!.startsWith("    ")).toBe(true);
     expect(wrap("x: ", "", 20)).toBe("x: ");
+  });
+
+  test("wrapItems breaks a list between items only", () => {
+    const items = ["anthropic as of 2026-10-09", "deepseek as of 2026-11-10", "moonshot as of 2026-11-10", "openai as of 2026-10-09"];
+    expect(wrapItems("Prices: ", items, 200)).toBe(`Prices: ${items.join(", ")}`);
+    expect(wrapItems("Prices: ", items, 70).split("\n")).toEqual([
+      "Prices: anthropic as of 2026-10-09, deepseek as of 2026-11-10,",
+      "        moonshot as of 2026-11-10, openai as of 2026-10-09",
+    ]);
+    expect(wrapItems("Prices: ", [], 70)).toBe("Prices: ");
   });
 });
 

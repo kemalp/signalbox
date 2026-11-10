@@ -72,6 +72,7 @@ export function makeAppHome(): AppHome {
     HOME: home,
     CLAUDE_CONFIG_DIR: claude,
     CODEX_HOME: join(home, ".codex"),
+    DSH_HOME: join(home, ".dsh"),
     SIGNALBOX_CLAUDE_APP_DIR: tree.base,
     SIGNALBOX_CLAUDE_BIN: "/nonexistent",
     SIGNALBOX_BIN_DIRS: "",

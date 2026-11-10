@@ -220,6 +220,7 @@ public enum Fmt {
         switch agent {
         case .claudeCode: "Claude Code"
         case .codex: "Codex"
+        case .deepseekHarness: "DeepSeek Harness"
         case .geminiCLI: "Gemini"
         // Not an agent: the owner of a Health row ("claude-app:sessions", the Claude app's session list).
         case "claude-app": "Claude app"
@@ -267,6 +268,8 @@ public enum Fmt {
         switch provider.lowercased() {
         case "anthropic": "Anthropic"
         case "openai": "OpenAI"
+        case "deepseek": "DeepSeek"
+        case "moonshot": "Moonshot AI"
         case "google", "gemini": "Google"
         case "xai": "xAI"
         default: provider.prefix(1).uppercased() + provider.dropFirst()

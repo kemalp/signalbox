@@ -13,3 +13,6 @@ __pycache__/
 otlp_*.json*
 .env
 .env.*
+
+# Left behind by `bun build --compile` on some Bun versions.
+*.bun-build

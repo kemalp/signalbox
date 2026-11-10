@@ -522,11 +522,12 @@ public final class SignalboxStore {
         Set(limits.filter { $0.agent == agent }.map { $0.account?.id ?? "" }).count > 1
     }
 
-    /// Agents to show limit cards for: Claude Code always, plus any agent with limits or sessions.
+    /// Agents to show limit cards for: Claude Code always, plus any agent with limits, or with sessions when it
+    /// is one that records plan limits (an agent that never does gets no "unknown" card).
     public var limitAgents: [AgentID] {
         var set: Set<AgentID> = [.claudeCode]
         for l in limits { set.insert(l.agent) }
-        for s in sessions { set.insert(s.agent) }
+        for s in sessions where s.agent.recordsPlanLimits { set.insert(s.agent) }
         return set.sorted()
     }
 

@@ -45,7 +45,7 @@ struct AboutView: View {
             .frame(maxWidth: .infinity)
             .background(.quaternary.opacity(0.45), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
 
-            Text("Unofficial — not affiliated with Anthropic, OpenAI or Google.")
+            Text("Unofficial — not affiliated with Anthropic, OpenAI, Google or DeepSeek.")
                 .font(.callout.weight(.medium))
                 .multilineTextAlignment(.center)
 

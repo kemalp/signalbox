@@ -55,6 +55,13 @@ export function wrap(prefix: string, text: string, width: number): string {
   return lines.join("\n");
 }
 
+/** Like `wrap`, for a comma-separated list: a line breaks only between items, never inside one. */
+export function wrapItems(prefix: string, items: readonly string[], width: number): string {
+  const glue = "\u0001";
+  const words = items.map((item, i) => (i < items.length - 1 ? `${item},` : item).replace(/\s+/g, glue));
+  return wrap(prefix, words.join(" "), width).replaceAll(glue, " ");
+}
+
 function processed(g: GroupTotals): number {
   const t = g.tokens;
   return t.input + t.output + t.cacheRead + t.cacheWrite5m + t.cacheWrite1h;
@@ -201,10 +208,14 @@ export function formatReport(r: Report, opts: ReportTextOptions = {}): string {
     }
     out.push("", wrap("Estimate method: ", e.method, width));
   }
-  out.push(
-    "",
-    `Prices: ${r.priceTables.map((p) => `${p.provider} as of ${p.asOf}`).join(", ")}${opts.elapsedMs !== undefined ? `   (${(opts.elapsedMs / 1000).toFixed(2)} s)` : ""}`,
+  const prices = wrapItems(
+    "Prices: ",
+    r.priceTables.map((p) => `${p.provider} as of ${p.asOf}`),
+    width,
   );
+  const elapsed = opts.elapsedMs !== undefined ? `(${(opts.elapsedMs / 1000).toFixed(2)} s)` : "";
+  const lastLine = prices.slice(prices.lastIndexOf("\n") + 1);
+  out.push("", !elapsed ? prices : lastLine.length + 3 + elapsed.length <= width ? `${prices}   ${elapsed}` : `${prices}\n        ${elapsed}`);
   if (!opts.verbose) {
     const notes = r.notes.length === 1 ? "1 note" : `${r.notes.length} notes`;
     out.push(`More: --verbose shows ${r.notes.length ? `${notes} and ` : ""}how the estimate is calculated.`);

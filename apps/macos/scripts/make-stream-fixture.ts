@@ -201,6 +201,7 @@ export async function captureSyntheticStream(): Promise<string> {
       HOME: home,
       CLAUDE_CONFIG_DIR: claude,
       CODEX_HOME: join(home, ".codex"),
+      DSH_HOME: join(home, ".dsh"),
       SIGNALBOX_CLAUDE_APP_DIR: appSessions,
       // No managed settings folder: the fixture must not depend on the machine it is made on.
       SIGNALBOX_CLAUDE_MANAGED_SETTINGS_DIR: "",

@@ -19,11 +19,16 @@ public struct AgentID: RawRepresentable, Codable, Hashable, Sendable, Comparable
 
     public static let claudeCode: AgentID = "claude-code"
     public static let codex: AgentID = "codex"
+    public static let deepseekHarness: AgentID = "deepseek-harness"
     public static let geminiCLI: AgentID = "gemini-cli"
+
+    /// False for an agent whose files hold no plan-limit readings at all, so Limits shows no "unknown" card for
+    /// it. DeepSeek Harness runs on whichever provider a session picks and logs no limits of any of them.
+    public var recordsPlanLimits: Bool { self != .deepseekHarness }
 
     /// Known agents first in a fixed order, then the rest alphabetically.
     public static func < (a: AgentID, b: AgentID) -> Bool {
-        let known: [AgentID] = [.claudeCode, .codex, .geminiCLI]
+        let known: [AgentID] = [.claudeCode, .codex, .deepseekHarness, .geminiCLI]
         let ia = known.firstIndex(of: a) ?? 99
         let ib = known.firstIndex(of: b) ?? 99
         return ia != ib ? ia < ib : a.rawValue < b.rawValue

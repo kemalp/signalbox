@@ -307,9 +307,10 @@ struct HistoryInspector: View {
             .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
             .accessibilityElement(children: .contain)
         } else {
-            Text("The CLI didn't send a resume command for this session.")
+            Text(HistoryBrowser.noResumeExplanation(e))
                 .font(.callout)
                 .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 

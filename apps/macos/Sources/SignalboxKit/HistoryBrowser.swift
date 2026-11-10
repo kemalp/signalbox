@@ -354,6 +354,14 @@ public enum HistoryBrowser {
         return "cd \(shellQuote(dir)) && \(command)"
     }
 
+    /// Why a session with a transcript has no resume line.
+    public static func noResumeExplanation(_ entry: SessionHistoryEntry) -> String {
+        if entry.agent == .deepseekHarness {
+            return "DeepSeek Harness has no one command that reopens a session. Open it in the app it ran in."
+        }
+        return "The CLI didn't send a resume command for this session."
+    }
+
     /// The directory a resume runs in: the resume's own, else the project's; nil without either.
     public static func resumeDirectory(_ entry: SessionHistoryEntry) -> String? {
         [entry.resume?.cwd, entry.project].compactMap { $0 }.first { !$0.isEmpty }

@@ -1,0 +1,47 @@
+{
+  "provider": "deepseek",
+  "asOf": "2026-11-10",
+  "sourceUrl": "https://api-docs.deepseek.com/quick_start/pricing",
+  "currency": "USD",
+  "peakHours": [
+    { "days": [1, 2, 3, 4, 5], "from": "01:00", "to": "04:00" },
+    { "days": [1, 2, 3, 4, 5], "from": "06:00", "to": "10:00" }
+  ],
+  "models": {
+    "deepseek-flash": {
+      "input": 0.3, "output": 1.2, "cacheRead": 0.006, "cacheWrite5m": 0.3, "cacheWrite1h": 0.3,
+      "offPeak": { "input": 0.15, "output": 0.6, "cacheRead": 0.003, "cacheWrite5m": 0.15, "cacheWrite1h": 0.15 }
+    },
+    "deepseek-v4-flash": {
+      "input": 0.3, "output": 1.2, "cacheRead": 0.006, "cacheWrite5m": 0.3, "cacheWrite1h": 0.3,
+      "offPeak": { "input": 0.15, "output": 0.6, "cacheRead": 0.003, "cacheWrite5m": 0.15, "cacheWrite1h": 0.15 }
+    },
+    "deepseek-v4-flash-vision-exp": {
+      "input": 0.3, "output": 1.2, "cacheRead": 0.006, "cacheWrite5m": 0.3, "cacheWrite1h": 0.3,
+      "offPeak": { "input": 0.15, "output": 0.6, "cacheRead": 0.003, "cacheWrite5m": 0.15, "cacheWrite1h": 0.15 }
+    },
+    "deepseek-v4.1-flash": {
+      "input": 0.3, "output": 1.2, "cacheRead": 0.006, "cacheWrite5m": 0.3, "cacheWrite1h": 0.3,
+      "offPeak": { "input": 0.15, "output": 0.6, "cacheRead": 0.003, "cacheWrite5m": 0.15, "cacheWrite1h": 0.15 }
+    },
+    "deepseek-v4.1-flash:cloud": {
+      "input": 0.3, "output": 1.2, "cacheRead": 0.006, "cacheWrite5m": 0.3, "cacheWrite1h": 0.3,
+      "offPeak": { "input": 0.15, "output": 0.6, "cacheRead": 0.003, "cacheWrite5m": 0.15, "cacheWrite1h": 0.15 }
+    },
+    "deepseek-v4-pro": {
+      "input": 1.32, "output": 3.96, "cacheRead": 0.044, "cacheWrite5m": 1.32, "cacheWrite1h": 1.32,
+      "offPeak": { "input": 0.66, "output": 1.98, "cacheRead": 0.022, "cacheWrite5m": 0.66, "cacheWrite1h": 0.66 }
+    }
+  },
+  "notes": [
+    "DeepSeek API list prices, USD per 1M tokens, read from api-docs.deepseek.com/quick_start/pricing on 2026-11-10 (read twice, rows matched). The page has two models: deepseek-flash (DeepSeek-V4.1-Flash-1017) and deepseek-v4-pro (DeepSeek-V4-Pro-0813).",
+    "Each row's own rates are the page's peak rates; offPeak holds its off-peak rates, which are half. peakHours is the page's rule: 'Peak hours are 01:00 - 04:00 and 06:00 - 10:00 UTC, Monday through Friday'. A response is priced by its own timestamp; a sum with no timestamp is priced at peak.",
+    "The page excludes Chinese public holidays from the peak hours. They are not modelled, so a response in those hours on a weekday holiday is priced at peak, which is twice what the API would charge.",
+    "input is the page's cache-miss price and cacheRead its cache-hit price. The page lists no cache-write price: caching is automatic, and tokens that miss the cache are billed as ordinary input. Cache-write tokens, where an agent reports them, are therefore priced at the input rate in both write columns.",
+    "deepseek-v4-flash and deepseek-v4-flash-vision-exp are the retired names the page says are 'still accepted' and 'billed at the Flash price'.",
+    "deepseek-v4.1-flash and deepseek-v4.1-flash:cloud are not DeepSeek API ids. They are how OpenCode Go and Ollama Cloud name DeepSeek-V4.1-Flash in DeepSeek Harness session logs. Neither host has a per-token price list, so that usage is priced at DeepSeek's own Flash rates: what the same tokens would cost at the model maker's API. Remove the two rows to leave it unpriced instead.",
+    "deepseek-v4-pro reached through another host (OpenCode Go uses the same id) is priced by its row here, for the same reason.",
+    "Search and Fetch ($0.75 per 1,000 successful requests each) are separate APIs. No adapter counts them, so they are not modelled.",
+    "Only exact model ids are listed, no prefix keys."
+  ]
+}

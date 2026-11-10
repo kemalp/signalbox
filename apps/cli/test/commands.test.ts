@@ -55,7 +55,8 @@ describe("args", () => {
 
   test("every agent with a catalog has a binary to ask for its version", () => {
     expect([...CATALOG_AGENTS]).toEqual(["claude-code", "codex", "gemini-cli"]);
-    expect(agentBinaries().map((b) => b.agent).sort()).toEqual([...CATALOG_AGENTS]);
+    // DeepSeek Harness has an adapter and a binary (dsh), and no command catalog yet.
+    expect(agentBinaries().map((b) => b.agent).sort()).toEqual([...CATALOG_AGENTS, "deepseek-harness"].sort());
   });
 });
 
@@ -194,6 +195,7 @@ describe("signalbox commands (spawned)", () => {
       HOME: home,
       CLAUDE_CONFIG_DIR: claude,
       CODEX_HOME: join(home, ".codex"),
+      DSH_HOME: join(home, ".dsh"),
       SIGNALBOX_CLAUDE_BIN: join(sandbox, "fake-claude"),
       SIGNALBOX_BIN_DIRS: "",
       SIGNALBOX_CLAUDE_MANAGED_SETTINGS_DIR: "",

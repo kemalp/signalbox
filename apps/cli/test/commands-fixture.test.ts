@@ -92,6 +92,7 @@ beforeAll(async () => {
       HOME: home,
       CLAUDE_CONFIG_DIR: claude,
       CODEX_HOME: codex,
+      DSH_HOME: join(home, ".dsh"),
       GEMINI_CLI_HOME: home,
       SIGNALBOX_CLAUDE_BIN: join(bin, "claude"),
       SIGNALBOX_BIN_DIRS: "",

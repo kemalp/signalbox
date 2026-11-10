@@ -21,6 +21,7 @@ Signalbox watches the coding agents on your Mac and puts them in one place. It s
 
 - **Claude Code first:** terminal, desktop Code tab and background sessions.
 - **Codex:** sessions, usage, plan limits and session names.
+- **DeepSeek Harness:** sessions, usage, context and session titles, whichever provider and model a session runs on.
 - **Gemini CLI:** the command guide. Usage tracking is on the [roadmap](#roadmap).
 
 ### What makes it different
@@ -34,7 +35,7 @@ Signalbox watches the coding agents on your Mac and puts them in one place. It s
 ## Features
 
 - **Sessions.** Every live session, plus the ones that ended recently. Each shows its status (busy, waiting or idle) and how long it has been that way, plus its model, a context bar marking where auto-compaction starts, and its cost. The inspector shows where the session runs, its compactions, and copyable suggestions, such as `/compact` once context passes 75%.
-- **History.** Past and live sessions grouped by day, like the Claude app's list. Each row has the title, project, start time, model, duration and cost. Search them, or filter by agent, project and date range. Each session has a resume command (`claude --resume <id>` or `codex resume <id>`) that you can copy. Signalbox never resumes a session itself, unless you turn on account switching (below) and choose Resume With.
+- **History.** Past and live sessions grouped by day, like the Claude app's list. Each row has the title, project, start time, model, duration and cost. Search them, or filter by agent, project and date range. Each Claude Code and Codex session has a resume command (`claude --resume <id>` or `codex resume <id>`) that you can copy; DeepSeek Harness has no such command. Signalbox never resumes a session itself, unless you turn on account switching (below) and choose Resume With.
 - **Usage.** Spend per day, stacked by model, by kind (main, subagent, workflow) or by token type. It shows totals by model and project, recorded and estimated dollars, and fresh and total tokens. Today, 7 days and 30 days are calendar days.
 - **Limits.** Plan windows (5-hour, weekly) with their reset times, one card per account. A bar fills only while its reading is current. A reading older than 15 minutes, or from before its window reset, shows as "stale" or "reset passed" with the last value. A reading whose window reset more than a day ago, or that is over 8 days old, is no longer shown.
 - **Accounts.** If you use more than one subscription (say a Max and a Team account), each session and limit reading carries its account. The account comes from the Claude app's session list (desktop sessions), from the session's transcript, or, marked as inferred, from the current login of the Claude Code config folder a terminal session runs from (never for desktop sessions or SDK runs). An id found without its organization is completed by the one full id with the same account, if there is exactly one, also marked inferred (for a desktop session, that id must come from the app's folders or a transcript, never only from a login). You give each account a name; until then it shows a short id. Signalbox tells accounts apart by a hash of the vendor's ids and never reads or shows an email. A session whose account it can't determine says "Account unknown" and is never assigned a default. Settings ▸ Advanced ▸ Claude Code folders adds a second config folder (a `CLAUDE_CONFIG_DIR` you use for another account), and the resume command for that folder's sessions sets `CLAUDE_CONFIG_DIR` for you. When two config folders share one `projects/` folder (a symlink), Signalbox can't tell which one an ended session ran under, so the resume command uses the folder a plain `claude` uses, or else the first of them.
@@ -138,7 +139,7 @@ signalbox history --days 30 --agent codex --json # the last 30 days of Codex ses
 
 | Environment variable | Effect |
 | --- | --- |
-| `CLAUDE_CONFIG_DIR`, `CODEX_HOME`, `GEMINI_CLI_HOME` | Where each agent keeps its files |
+| `CLAUDE_CONFIG_DIR`, `CODEX_HOME`, `DSH_HOME`, `GEMINI_CLI_HOME` | Where each agent keeps its files |
 | `SIGNALBOX_CLAUDE_BIN` | The `claude` binary. Without it, Signalbox searches `PATH`, then common install folders (`~/.local/bin`, `~/.claude/local`, `~/.bun/bin`, Homebrew, nvm, Volta, asdf), so a Finder-launched app still finds it |
 | `SIGNALBOX_PRICING_DIR` | A folder of price tables to use instead of the built-in ones |
 | `SIGNALBOX_CLAUDE_APP_DIR` | Where to read the Claude app's session list (read-only) |
@@ -156,6 +157,7 @@ signalbox history --days 30 --agent codex --json # the last 30 days of Codex ses
                · command, skill and plugin folders
  Claude app    session list (titles and metadata, allow-listed)
  Codex         rollouts · session index · skill, prompt and plugin folders
+ DeepSeek      session logs (DeepSeek Harness)
  Gemini CLI    command and skill folders
                (command guide folders: names and descriptions only)
        │
@@ -188,18 +190,21 @@ Each source declares how much to trust its format: **documented** (published by 
 | Claude app | `~/Library/Application Support/Claude/claude-code-sessions` | Session ids, titles, folders, dates, model, effort and the archived flag; the two folder names (account and organization ids), hashed at once | internal |
 | Codex | Rollouts, `~/.codex/sessions` and `~/.codex/archived_sessions` | Token usage per response, session status, plan-limit readings | internal |
 | Codex | `~/.codex/session_index.jsonl` | Session names | internal |
+| DeepSeek Harness | Session logs, `~/.dsh/sessions/<project>/<session>/session.v4.jsonl.zstd` | Token counts, model, timestamps, working folder, turn and approval state, context window, compactions, generated and renamed titles | internal |
 | Claude Code, Codex, Gemini CLI | Command, skill and plugin folders in each agent's home and in the project folders of listed sessions, and `~/.claude/plugins/installed_plugins.json` | Names and descriptions, for the command guide | internal |
 | Signalbox | [`pricing/`](pricing/) and [`models/`](models/) (built into the binary) | List prices and context windows, each with `asOf` and `sourceUrl` | documented |
 
 Without the tap, Claude Code plan limits read "unknown", and context is estimated from the transcripts. The tap is a read-only session mod, [`plugins/signalbox-tap`](plugins/signalbox-tap/), and it is still being tested in desktop sessions ([docs/SPIKE.md](docs/SPIKE.md)). Codex records its plan limits in its own files, so Codex limits need nothing extra. [docs/adapters/codex.md](docs/adapters/codex.md) has the Codex details.
 
+DeepSeek Harness runs on whichever provider a session picks, and its logs hold no plan limits of any of them, so it has no limits card. Its sessions wait for you when a tool call asks for approval. [docs/adapters/deepseek-harness.md](docs/adapters/deepseek-harness.md) has the details, including how its compressed logs are read.
+
 ## Privacy and security
 
-**What Signalbox reads:** token counts, models, timestamps, working folders and session status. It also reads session titles: a title set with `/rename` or generated by Claude Code, a Codex session name, or the Claude app's own title. Each title is cut to one line of at most 120 characters. The command guide reads the names and descriptions of custom commands and skills: the frontmatter of a Markdown file, or the `description` of a TOML file. It looks in the agents' home folders and in the project folders of the sessions it lists.
+**What Signalbox reads:** token counts, models, timestamps, working folders and session status. It also reads session titles: a title set with `/rename` or generated by Claude Code, a Codex session name, the Claude app's own title, or a DeepSeek Harness title that was generated or set by hand (never its fallback title, which is the start of your first prompt). Each title is cut to one line of at most 120 characters. The command guide reads the names and descriptions of custom commands and skills: the frontmatter of a Markdown file, or the `description` of a TOML file. It looks in the agents' home folders and in the project folders of the sessions it lists.
 
 **What it never reads:**
 
-- Credentials. That means `~/.claude/.credentials*`, any `*.key` file, `~/.codex/auth.json`, anything under `~/.gemini` with "token", "oauth" or "credential" in its name, `.env*` and `*.pem` files, and the macOS Keychain.
+- Credentials. That means `~/.claude/.credentials*`, any `*.key` file, `~/.codex/auth.json`, `~/.dsh/.credentials.yaml` and the harness's settings files, anything under `~/.gemini` with "token", "oauth" or "credential" in its name, `.env*` and `*.pem` files, and the macOS Keychain. In the DeepSeek Harness home only the session logs are opened, and its lock files are never touched.
 - Message content: prompts, replies, summaries and tool output. Signalbox takes the usage fields out of each line and drops everything else as it parses. It never stores or displays message text.
 - Agent settings. It never writes agent config either.
 
@@ -240,8 +245,9 @@ Settings ▸ Advanced ▸ Account switching is **off by default**. Turned on, it
 Every dollar figure is a **list-price equivalent, not a bill**: what the usage would cost at the vendor's published API prices. On a subscription you don't pay this amount; it shows what the same usage would cost through the API.
 
 - **Recorded** is the sum of the responses priced from transcripts. It is a lower bound. Subagent and workflow responses often keep a placeholder output count, and some calls never reach a transcript.
-- **Estimated** calibrates recorded spend against Claude Code's own cost ledger, model by model, and is shown as a range. Codex keeps no local cost ledger, so for Codex, estimated equals recorded.
+- **Estimated** calibrates recorded spend against Claude Code's own cost ledger, model by model, and is shown as a range. Codex and DeepSeek Harness keep no local cost ledger, so for them, estimated equals recorded.
 - **Checked against a reference.** `signalbox report` must agree with the research script `research/cost/cc_cost.py` within 0.5% on recorded dollars. `bun apps/cli/scripts/reference-check.ts --days 7` reruns the comparison and prints totals only.
+- **Priced by the hour where the vendor does.** DeepSeek charges half price outside its peak hours, so a DeepSeek response is priced by its own timestamp.
 - **Never guessed.** A model with no price row counts as $0 and is listed as unpriced. A model with no known context window shows tokens and "window unknown" instead of a percentage.
 
 [docs/ACCURACY.md](docs/ACCURACY.md) covers the method, the deliberate differences from the reference script, and how windows and context are computed.
@@ -277,17 +283,18 @@ The reference check reads your own transcripts and prints totals only. `click-pr
 **Repository layout**
 
 ```
-packages/core            the contract (src/types.ts), pricing, aggregation, reconciliation
-packages/adapter-claude  Claude Code and Claude app readers
-packages/adapter-codex   Codex readers
-apps/cli                 the signalbox binary
-apps/web                 the local web page and its server
-apps/macos               the SwiftUI app (SignalboxKit library, the opt-in SignalboxSwitch library, Signalbox app)
-catalog/commands         command guide data, one file per agent
-pricing/, models/        price tables and context windows, each with asOf and sourceUrl
-plugins/signalbox-tap    the read-only session mod (in testing)
-packaging/               the version script and the Homebrew cask template
-research/                research-phase scripts; research/cost/cc_cost.py is the cost reference
+packages/core              the contract (src/types.ts), pricing, aggregation, reconciliation
+packages/adapter-claude    Claude Code and Claude app readers
+packages/adapter-codex     Codex readers
+packages/adapter-deepseek  DeepSeek Harness readers
+apps/cli                   the signalbox binary
+apps/web                   the local web page and its server
+apps/macos                 the SwiftUI app (SignalboxKit library, the opt-in SignalboxSwitch library, Signalbox app)
+catalog/commands           command guide data, one file per agent
+pricing/, models/          price tables and context windows, each with asOf and sourceUrl
+plugins/signalbox-tap      the read-only session mod (in testing)
+packaging/                 the version script and the Homebrew cask template
+research/                  research-phase scripts; research/cost/cc_cost.py is the cost reference
 ```
 
 **More docs:** [apps/macos/README.md](apps/macos/README.md) (the app: settings, notifications, snapshots, troubleshooting) · [docs/ACCURACY.md](docs/ACCURACY.md) · [docs/RELEASE.md](docs/RELEASE.md) · [docs/SPIKE.md](docs/SPIKE.md) · [docs/BRAINSTORM.md](docs/BRAINSTORM.md) · [plugins/signalbox-tap/README.md](plugins/signalbox-tap/README.md)
@@ -304,6 +311,6 @@ Signalbox learned from these projects. It shares no code with any of them.
 
 ## Disclaimer and license
 
-Signalbox is unofficial. It is not affiliated with or endorsed by Anthropic, OpenAI or Google. Claude and Claude Code are trademarks of Anthropic PBC. Codex is a trademark of OpenAI. Gemini is a trademark of Google LLC.
+Signalbox is unofficial. It is not affiliated with or endorsed by Anthropic, OpenAI, Google or DeepSeek. Claude and Claude Code are trademarks of Anthropic PBC. Codex is a trademark of OpenAI. Gemini is a trademark of Google LLC. DeepSeek and Kimi are trademarks of their owners.
 
 **No license yet.** The source is public to read, but all rights are reserved until a license is added.

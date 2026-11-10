@@ -165,6 +165,96 @@ describe("priceTokens", () => {
   });
 });
 
+describe("off-peak tier", () => {
+  const rates = (input: number) => ({ input, output: input * 4, cacheRead: input / 50, cacheWrite5m: input, cacheWrite1h: input });
+  const table: PriceTable = {
+    provider: "test",
+    asOf: "2026-01-01",
+    sourceUrl: "https://example.invalid",
+    currency: "USD",
+    // Monday to Friday, 01:00-04:00 and 06:00-10:00 UTC.
+    peakHours: [
+      { days: [1, 2, 3, 4, 5], from: "01:00", to: "04:00" },
+      { days: [1, 2, 3, 4, 5], from: "06:00", to: "10:00" },
+    ],
+    models: {
+      timed: { ...rates(2), offPeak: rates(1) },
+      flat: rates(2),
+      mixed: { ...rates(2), offPeak: rates(1), longContext: { thresholdTokens: 100, ...rates(8) }, fast: rates(16) },
+    },
+  };
+  const million = tok({ input: 1_000_000 });
+  const at = (iso: string, model = "timed") => priceTokens(model, million, [table], { at: iso });
+
+  test("the row's own rates inside the peak hours, the off-peak ones outside (UTC)", () => {
+    // 2026-11-09 is a Monday.
+    expect(at("2026-11-09T01:00:00Z")).toMatchObject({ offPeak: false, cost: { input: 2 } });
+    expect(at("2026-11-09T03:59:59.999Z")).toMatchObject({ offPeak: false, cost: { input: 2 } });
+    expect(at("2026-11-09T04:00:00Z")).toMatchObject({ offPeak: true, cost: { input: 1 } });
+    expect(at("2026-11-09T05:59:59Z").offPeak).toBe(true);
+    expect(at("2026-11-09T06:00:00Z").offPeak).toBe(false);
+    expect(at("2026-11-09T10:00:00Z").offPeak).toBe(true);
+    expect(at("2026-11-09T00:59:59Z").offPeak).toBe(true);
+    // The same hour in another zone's clothes: 09:30 in Istanbul is 06:30 UTC.
+    expect(at("2026-11-09T09:30:00+03:00").offPeak).toBe(false);
+    // Friday is a weekday; the weekend is off-peak all day.
+    expect(at("2026-11-13T08:00:00Z").offPeak).toBe(false);
+    expect(at("2026-11-14T08:00:00Z").offPeak).toBe(true);
+    expect(at("2026-11-15T02:00:00Z").offPeak).toBe(true);
+    // Every rate of the tier, and the cache saving at that tier's rates.
+    const r = priceTokens("timed", tok({ input: 1e6, output: 1e6, cacheRead: 1e6, cacheWrite5m: 1e6 }), [table], { at: "2026-11-14T08:00:00Z" });
+    expect(r.cost).toMatchObject({ input: 1, output: 4, cacheRead: 0.02, cacheWrite5m: 1 });
+    expect(r.cacheSavingsUsd).toBeCloseTo(0.98, 10);
+  });
+
+  test("with no time of the request, the row's own (peak) rates: never a discount that can't be shown", () => {
+    expect(priceTokens("timed", million, [table])).toMatchObject({ offPeak: false, cost: { input: 2 } });
+    expect(priceTokens("timed", million, [table], { at: "not a time" })).toMatchObject({ offPeak: false, cost: { input: 2 } });
+    expect(priceTokens("timed", million, [table], { at: Date.parse("2026-11-14T08:00:00Z") }).offPeak).toBe(true);
+    expect(priceTokens("timed", million, [table], { at: new Date("2026-11-14T08:00:00Z") }).offPeak).toBe(true);
+  });
+
+  test("a row without the tier is flat; long-context and fast rates are not discounted", () => {
+    expect(at("2026-11-14T08:00:00Z", "flat")).toMatchObject({ offPeak: false, cost: { input: 2 } });
+    expect(at("2026-11-14T08:00:00Z", "mixed")).toMatchObject({ offPeak: false, longContext: true, cost: { input: 8 } });
+    expect(priceTokens("mixed", tok({ input: 50 }), [table], { at: "2026-11-14T08:00:00Z" })).toMatchObject({ offPeak: true, longContext: false });
+    expect(priceTokens("mixed", tok({ input: 50 }), [table], { at: "2026-11-14T08:00:00Z", speed: "fast" })).toMatchObject({ offPeak: false, fast: true });
+  });
+
+  test("priceRecord prices a record by its own timestamp", () => {
+    const rec = (ts: string): UsageRecord => ({ agent: "deepseek-harness", id: "m", keyQuality: "id", sessionId: "s", kind: "main", model: "deepseek-v4-pro", ts, tokens: tok({ input: 1e6, output: 1e6, cacheRead: 1e6 }), outputFinal: true, webSearchRequests: 0 });
+    // The real DeepSeek table: $1.32 / $3.96 / $0.044 at peak, half of each off-peak.
+    const peak = priceRecord(rec("2026-11-09T07:00:00Z"), tables);
+    expect(peak.offPeak).toBe(false);
+    expect(peak.cost.total).toBeCloseTo(1.32 + 3.96 + 0.044, 10);
+    const off = priceRecord(rec("2026-11-09T19:00:00Z"), tables);
+    expect(off.offPeak).toBe(true);
+    expect(off.cost.total).toBeCloseTo(0.66 + 1.98 + 0.022, 10);
+    // A table without the tier is unaffected by the time.
+    const opus = (ts: string) => priceRecord({ ...rec(ts), model: "claude-opus-5-5" }, tables);
+    expect(opus("2026-11-09T07:00:00Z").cost.total).toBe(opus("2026-11-14T19:00:00Z").cost.total);
+    expect(opus("2026-11-14T19:00:00Z").offPeak).toBe(false);
+  });
+
+  test("parsePriceTable checks the tier and its hours", () => {
+    const base = { provider: "p", asOf: "2026-01-01", sourceUrl: "https://example.invalid", currency: "USD" };
+    const row = { ...rates(2), offPeak: rates(1) };
+    const hours = [{ days: [1], from: "01:00", to: "04:00" }];
+    expect(parsePriceTable({ ...base, peakHours: hours, models: { m: row } }).peakHours).toEqual(hours);
+    expect(parsePriceTable({ ...base, peakHours: [{ days: [7], from: "00:00", to: "24:00" }], models: { m: rates(2) } }).provider).toBe("p");
+    expect(() => parsePriceTable({ ...base, models: { m: row } })).toThrow(/peakHours/);
+    expect(() => parsePriceTable({ ...base, peakHours: [], models: { m: row } })).toThrow(/peakHours/);
+    expect(() => parsePriceTable({ ...base, peakHours: hours, models: { m: { ...rates(2), offPeak: { input: 1 } } } })).toThrow(/offPeak\.output/);
+    expect(() => parsePriceTable({ ...base, peakHours: "always", models: { m: rates(2) } })).toThrow(/peakHours/);
+    for (const bad of [{ days: [], from: "01:00", to: "04:00" }, { days: [0], from: "01:00", to: "04:00" }, { days: [8], from: "01:00", to: "04:00" }, { days: [1.5], from: "01:00", to: "04:00" }]) {
+      expect(() => parsePriceTable({ ...base, peakHours: [bad], models: { m: rates(2) } })).toThrow(/weekdays/);
+    }
+    for (const bad of [{ days: [1], from: "4:00", to: "06:00" }, { days: [1], from: "04:00", to: "04:00" }, { days: [1], from: "06:00", to: "04:00" }, { days: [1], from: "01:00", to: "24:30" }, { days: [1], from: "01:60", to: "04:00" }, { days: [1], to: "04:00" }]) {
+      expect(() => parsePriceTable({ ...base, peakHours: [bad], models: { m: rates(2) } })).toThrow(/HH:MM/);
+    }
+  });
+});
+
 describe("findPrice", () => {
   test("dated snapshot ids match prefix keys", () => {
     expect(findPrice("claude-opus-4-5-20251101", tables)?.key).toBe("claude-opus-4-5*");

@@ -162,7 +162,7 @@ apps/macos/scripts/build-app.sh
 apps/macos/scripts/notify-dryrun.sh            # or: notify-dryrun.sh path/to/Signalbox.app; KEEP=1 keeps the log
 ```
 
-The copy gets its own bundle id and runs with an empty `HOME`, `CODEX_HOME` and settings suite, a fake
+The copy gets its own bundle id and runs with an empty `HOME`, `CODEX_HOME`, `DSH_HOME` and settings suite, a fake
 `CLAUDE_CONFIG_DIR` whose registry rows point at `sleep` stand-ins, and a fake `claude` for `agents --json`. Its
 window opens for about 15 seconds. The script stops only the processes it started, checks that the bundled CLI
 exited with the app, and removes the copy's defaults.

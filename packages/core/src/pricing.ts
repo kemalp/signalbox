@@ -2,8 +2,10 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import anthropicPrices from "../../../pricing/anthropic.json" with { type: "json" };
+import deepseekPrices from "../../../pricing/deepseek.json" with { type: "json" };
+import moonshotPrices from "../../../pricing/moonshot.json" with { type: "json" };
 import openaiPrices from "../../../pricing/openai.json" with { type: "json" };
-import type { CostBreakdown, ModelPrice, PriceTable, TokenCounts, TokenRates, UsageRecord } from "./types.ts";
+import type { CostBreakdown, ModelPrice, PeakWindow, PriceTable, TokenCounts, TokenRates, UsageRecord } from "./types.ts";
 
 /** The repo's `pricing/` directory, resolved relative to this source file. It does not exist inside a compiled binary. */
 export const DEFAULT_PRICING_DIR: string = fileURLToPath(new URL("../../../pricing/", import.meta.url));
@@ -14,6 +16,8 @@ export const DEFAULT_PRICING_DIR: string = fileURLToPath(new URL("../../../prici
  */
 const EMBEDDED_PRICES: Readonly<Record<string, unknown>> = {
   "anthropic.json": anthropicPrices,
+  "deepseek.json": deepseekPrices,
+  "moonshot.json": moonshotPrices,
   "openai.json": openaiPrices,
 };
 
@@ -36,6 +40,11 @@ export interface PriceOptions {
   /** "fast" uses the row's `fast` rates when it has them, standard rates otherwise. */
   speed?: string;
   /**
+   * When the request was made (ISO timestamp, epoch ms or a Date). A row with an `offPeak` tier charges it when
+   * this falls outside the table's `peakHours`; without it (a sum, a ledger row) the row's own, peak rates apply.
+   */
+  at?: string | number | Date;
+  /**
    * Whether `tokens` describe a single API request (the default). Set it to false for sums such as
    * ledger rows: per-request long-context tiers can't be decided from a sum, so the base tier is used.
    */
@@ -52,6 +61,8 @@ export interface PriceResult {
   longContext: boolean;
   /** True when fast-mode rates applied. */
   fast: boolean;
+  /** True when the row's off-peak rates applied. */
+  offPeak: boolean;
   /** Gross cache saving at list price: cacheRead x (input rate - cacheRead rate), same tier and geo multiplier. */
   cacheSavingsUsd: number;
 }
@@ -188,20 +199,28 @@ export function priceTokens(
   opts: PriceOptions = {},
 ): PriceResult {
   const match = findPrice(model, tables);
-  if (!match) return { cost: zeroCost(), priced: false, longContext: false, fast: false, cacheSavingsUsd: 0 };
+  if (!match) return { cost: zeroCost(), priced: false, longContext: false, fast: false, offPeak: false, cacheSavingsUsd: 0 };
 
   const { price, table, key } = match;
   let rates: TokenRates = price;
   let longContext = false;
   let fast = false;
+  let offPeak = false;
+  const atMs = timeOf(opts.at);
+  if (price.offPeak && table.peakHours && atMs !== undefined && !inPeakHours(table.peakHours, atMs)) {
+    rates = price.offPeak;
+    offPeak = true;
+  }
   if (opts.perRequest !== false && price.longContext && promptTokens(tokens) > price.longContext.thresholdTokens) {
     rates = price.longContext;
     longContext = true;
+    offPeak = false;
   }
   if (opts.speed === "fast" && price.fast) {
     // Fast-mode pricing covers the full context window, so it replaces any long-context tier.
     rates = price.fast;
     longContext = false;
+    offPeak = false;
     fast = true;
   }
 
@@ -223,16 +242,47 @@ export function priceTokens(
     key,
     longContext,
     fast,
+    offPeak,
     cacheSavingsUsd: usd(tokens.cacheRead, rates.input - rates.cacheRead),
   };
 }
 
-/** Prices one deduplicated usage record with its own web-search count, geo and speed. */
+/** Prices one deduplicated usage record with its own web-search count, geo, speed and time of day. */
 export function priceRecord(rec: UsageRecord, tables: readonly PriceTable[]): PriceResult {
   return priceTokens(rec.model, rec.tokens, tables, {
     webSearchRequests: rec.webSearchRequests,
     geo: rec.geo,
     speed: rec.speed,
+    at: rec.ts,
+  });
+}
+
+function timeOf(at: string | number | Date | undefined): number | undefined {
+  if (at === undefined) return undefined;
+  const ms = typeof at === "number" ? at : at instanceof Date ? at.getTime() : Date.parse(at);
+  return Number.isFinite(ms) ? ms : undefined;
+}
+
+/** Minutes since midnight of "HH:MM" ("24:00" is the end of the day); undefined when it isn't one. */
+function clockMinutes(v: unknown): number | undefined {
+  if (typeof v !== "string") return undefined;
+  const m = /^(\d{2}):(\d{2})$/.exec(v);
+  if (!m) return undefined;
+  const hours = Number(m[1]);
+  const minutes = Number(m[2]);
+  if (minutes > 59 || hours > 24 || (hours === 24 && minutes !== 0)) return undefined;
+  return hours * 60 + minutes;
+}
+
+/** True when `atMs` (epoch ms) falls inside one of the weekly windows, which are in UTC. */
+export function inPeakHours(windows: readonly PeakWindow[], atMs: number): boolean {
+  const d = new Date(atMs);
+  const day = d.getUTCDay() === 0 ? 7 : d.getUTCDay();
+  const minute = d.getUTCHours() * 60 + d.getUTCMinutes();
+  return windows.some((w) => {
+    const from = clockMinutes(w.from);
+    const to = clockMinutes(w.to);
+    return from !== undefined && to !== undefined && w.days.includes(day) && minute >= from && minute < to;
   });
 }
 
@@ -293,6 +343,12 @@ export function parsePriceTable(json: unknown, source = "price table"): PriceTab
       if (!isObject(row.fast)) return fail(`${where}.fast must be an object`);
       checkRates(row.fast, `${where}.fast`, fail);
     }
+    if (row.offPeak !== undefined) {
+      if (!isObject(row.offPeak)) return fail(`${where}.offPeak must be an object`);
+      checkRates(row.offPeak, `${where}.offPeak`, fail);
+      // Without the hours, an off-peak tier would silently never apply.
+      if (!Array.isArray(json.peakHours) || json.peakHours.length === 0) fail(`${where}.offPeak needs the table's "peakHours"`);
+    }
     if (row.webSearchPerRequest !== undefined && !isRate(row.webSearchPerRequest)) {
       fail(`${where}.webSearchPerRequest must be a non-negative number`);
     }
@@ -303,6 +359,20 @@ export function parsePriceTable(json: unknown, source = "price table"): PriceTab
     for (const [geo, m] of Object.entries(json.geoMultipliers)) {
       if (typeof m !== "number" || !Number.isFinite(m) || m <= 0) fail(`geoMultipliers["${geo}"] must be a positive number`);
     }
+  }
+  if (json.peakHours !== undefined) {
+    if (!Array.isArray(json.peakHours)) return fail(`"peakHours" must be an array`);
+    json.peakHours.forEach((w: unknown, i: number) => {
+      const where = `peakHours[${i}]`;
+      if (!isObject(w)) return fail(`${where} must be an object`);
+      const days = w.days;
+      if (!Array.isArray(days) || days.length === 0 || days.some((d) => !Number.isInteger(d) || d < 1 || d > 7)) {
+        fail(`${where}.days must list ISO weekdays (1 = Monday to 7 = Sunday)`);
+      }
+      const from = clockMinutes(w.from);
+      const to = clockMinutes(w.to);
+      if (from === undefined || to === undefined || from >= to) fail(`${where}: "from" and "to" must be "HH:MM" times of one day, in order`);
+    });
   }
   if (json.notes !== undefined && (!Array.isArray(json.notes) || json.notes.some((n) => typeof n !== "string"))) {
     fail(`"notes" must be an array of strings`);

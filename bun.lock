@@ -16,6 +16,9 @@
     "apps/cli": {
       "name": "@signalbox/cli",
       "version": "0.1.0",
+      "bin": {
+        "signalbox": "src/main.ts",
+      },
     },
     "apps/web": {
       "name": "@signalbox/web",
@@ -29,6 +32,10 @@
       "name": "@signalbox/adapter-codex",
       "version": "0.1.0",
     },
+    "packages/adapter-deepseek": {
+      "name": "@signalbox/adapter-deepseek",
+      "version": "0.1.0",
+    },
     "packages/core": {
       "name": "@signalbox/core",
       "version": "0.1.0",
@@ -38,6 +45,8 @@
     "@signalbox/adapter-claude": ["@signalbox/adapter-claude@workspace:packages/adapter-claude"],
 
     "@signalbox/adapter-codex": ["@signalbox/adapter-codex@workspace:packages/adapter-codex"],
+
+    "@signalbox/adapter-deepseek": ["@signalbox/adapter-deepseek@workspace:packages/adapter-deepseek"],
 
     "@signalbox/cli": ["@signalbox/cli@workspace:apps/cli"],
 

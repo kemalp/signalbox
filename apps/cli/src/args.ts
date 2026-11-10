@@ -365,7 +365,7 @@ history  Past and live sessions, newest first, like the Claude app's session lis
          --no-claude-app  sessions with a transcript only, with the titles the transcripts hold
          --json        {v, generatedAt, entries, total, truncated, sources} (also a watch line)
 
-Environment: CLAUDE_CONFIG_DIR, CODEX_HOME, GEMINI_CLI_HOME (agent homes); SIGNALBOX_CLAUDE_BIN
+Environment: CLAUDE_CONFIG_DIR, CODEX_HOME, DSH_HOME, GEMINI_CLI_HOME (agent homes); SIGNALBOX_CLAUDE_BIN
 (the claude binary; otherwise PATH, then ~/.local/bin, ~/.claude/local, ~/.bun/bin, Homebrew,
 nvm, volta, asdf); SIGNALBOX_PRICING_DIR (price tables to use instead of the built-in ones);
 SIGNALBOX_CLAUDE_APP_DIR (the Claude app's session list, read-only; default

@@ -2,6 +2,7 @@
 import { join } from "node:path";
 import { claudeAppSetting, createClaudeAdapter, scanIssues, type ClaudeCodeAdapter } from "@signalbox/adapter-claude";
 import { createCodexAdapter, type CodexAdapter } from "@signalbox/adapter-codex";
+import { createDeepseekAdapter, type DeepseekAdapter } from "@signalbox/adapter-deepseek";
 import type { Adapter, AgentId, ClaudeAppOffReason } from "@signalbox/core";
 import { findBinary } from "./binaries.ts";
 
@@ -16,6 +17,8 @@ export interface AgentBinary {
   /** Environment variable that overrides the PATH lookup, if the adapter honours one. */
   envVar?: string;
   versionArgs: string[];
+  /** Where the agent's app keeps the same command when it isn't on PATH ("~/" is the home); tried last. */
+  appPaths?: string[];
 }
 
 /** Per-run adapter settings from the command line. */
@@ -121,6 +124,27 @@ export const ADAPTERS: readonly AdapterEntry[] = [
       { label: "rollouts", path: join(a.codexHome, "sessions") },
       { label: "archived", path: join(a.codexHome, "archived_sessions") },
       { label: "session index", path: join(a.codexHome, "session_index.jsonl") },
+    ],
+  }),
+  entry<DeepseekAdapter>({
+    id: "deepseek-harness",
+    displayName: "DeepSeek Harness",
+    // The desktop app puts `dsh` on PATH only on request; the launcher inside the app answers `--version` the same.
+    bin: {
+      name: "dsh",
+      versionArgs: ["--version"],
+      appPaths: [
+        "/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh",
+        "~/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh",
+      ],
+    },
+    create: () => createDeepseekAdapter(),
+    homeEnv: "DSH_HOME",
+    sessionWatchMode: () => "poll",
+    scanIssues: (a) => a.scanIssues(),
+    dataDirs: (a) => [
+      { label: "home", path: a.dshHome },
+      { label: "session logs", path: join(a.dshHome, "sessions") },
     ],
   }),
 ];
