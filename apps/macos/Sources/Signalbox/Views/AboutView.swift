@@ -28,7 +28,7 @@ struct AboutView: View {
                     .foregroundStyle(.secondary)
                     .textSelection(.enabled)
             }
-            Text("A local control room for AI coding agents. It reads what Claude Code, Codex and Gemini CLI already write on this Mac, needs no credentials, and sends nothing anywhere.")
+            Text("A local control room for AI coding agents. It reads what Claude Code, Codex, DeepSeek Harness and Gemini CLI already write on this Mac, needs no credentials, and sends nothing anywhere.")
                 .font(.callout)
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
