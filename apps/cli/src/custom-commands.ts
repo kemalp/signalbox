@@ -21,6 +21,7 @@ import { basename, dirname, isAbsolute, join, resolve, sep } from "node:path";
 import {
   cleanCommandName,
   cleanDescription,
+  embeddedCommandCatalogs,
   frontmatterOfWhole,
   geminiSegment,
   geminiSkillName,
@@ -108,6 +109,7 @@ export async function discoverCustomCommands(opts: DiscoveryOptions = {}): Promi
   const parts = await Promise.all([
     quiet(discoverClaude(ctx, env.CLAUDE_CONFIG_DIR || join(home, ".claude"), projects)),
     quiet(discoverCodex(ctx, env.CODEX_HOME?.trim() ? expandHome(env.CODEX_HOME.trim(), home) : join(home, ".codex"), projects)),
+    quiet(discoverDeepseek(ctx, dirFromEnv(env.DSH_HOME, join(home, ".dsh"), home), dirFromEnv(env.DSH_AGENTS_HOME, join(home, ".agents"), home), projects)),
     quiet(discoverGemini(ctx, env.GEMINI_CLI_HOME || home, projects)),
   ]);
   return finish(parts.flat(), ctx.limits.maxEntries);
@@ -117,6 +119,11 @@ export async function discoverCustomCommands(opts: DiscoveryOptions = {}): Promi
 function expandHome(raw: string, home: string): string {
   if (raw === "~") return home;
   return raw.startsWith("~/") ? join(home, raw.slice(2)) : raw;
+}
+
+/** A folder an environment variable can move: its value unless blank (with `~` expanded), else the default. */
+function dirFromEnv(raw: string | undefined, fallback: string, home: string): string {
+  return raw?.trim() ? expandHome(raw.trim(), home) : fallback;
 }
 
 /** Distinct absolute cwds, at most `max`. */
@@ -614,6 +621,88 @@ async function codexPlugins(ctx: Ctx, cacheDir: string, out: CustomCommand[]): P
       const base = { agent: "codex", kind: "plugin-skill" as const, scope: "plugin" as const, plugin: name, within: newest.e.real };
       await codexSkills(ctx, join(newest.e.real, "skills"), base, `${name}:`, out);
     }
+  }
+}
+
+// ---------- DeepSeek Harness ----------
+// Skills, typed as /name like the built-in commands: $DSH_HOME/skills (its bundled .system folder is hidden,
+// so skipped) and the shared agents folder's skills ($DSH_AGENTS_HOME, default ~/.agents), and for each cwd
+// <project>/.dsh/skills and <project>/.agents/skills, where the project is the nearest folder above the cwd
+// with a .git marker, else the cwd itself. A skill is a folder holding SKILL.md, or a flat <name>.md, at the
+// top level of one of those folders; the harness does not look deeper. It needs a kebab-case name and a
+// description in its frontmatter, `user-invocable: false` keeps it out of the menu, a switch the harness
+// can't read as a boolean drops the skill, and a skill named like one of the harness's own commands never
+// runs (the command wins). Skill folders named in the harness's settings (customSkillDirs) are not listed:
+// Signalbox doesn't read settings.
+
+const HARNESS_SKILL_NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+/** Spellings of the two switches that the harness rejects, skill and all (keys as parseFrontmatter returns them). */
+const HARNESS_REJECTED_KEYS = ["disablemodelinvocation", "modelinvocable", "userinvocable"];
+let harnessBuiltins: ReadonlySet<string> | undefined;
+
+/**
+ * The harness's own slash commands, from its catalog: a skill with one of these names is shadowed. The
+ * skills it ships (the catalog's "Skill: …" entries) shadow nothing: a skill of yours with the same name
+ * replaces the bundled one, so it is listed.
+ */
+function harnessCommandNames(): ReadonlySet<string> {
+  harnessBuiltins ??= new Set(
+    embeddedCommandCatalogs()
+      .filter((c) => c.agent === "deepseek-harness")
+      .flatMap((c) => c.commands.filter((e) => !e.summary.startsWith("Skill:")).flatMap((e) => [e.name, ...(e.aliases ?? [])])),
+  );
+  return harnessBuiltins;
+}
+
+/** One of the harness's frontmatter switches: on, off, or "invalid" (it then drops the skill); undefined when absent. */
+function harnessSwitch(value: string | undefined): boolean | "invalid" | undefined {
+  if (value === undefined) return undefined;
+  const v = value.trim().toLowerCase();
+  if (v === "true" || v === "yes" || v === "on" || v === "1") return true;
+  if (v === "false" || v === "no" || v === "off" || v === "0") return false;
+  return "invalid";
+}
+
+async function discoverDeepseek(ctx: Ctx, dshHome: string, agentsHome: string, projects: string[]): Promise<CustomCommand[]> {
+  const out: CustomCommand[] = [];
+  const agent = "deepseek-harness";
+  await harnessSkills(ctx, join(dshHome, "skills"), { agent, kind: "skill", scope: "user" }, out);
+  await harnessSkills(ctx, join(agentsHome, "skills"), { agent, kind: "skill", scope: "user" }, out);
+  const homes = await ctx.homes();
+  const roots = new Set<string>();
+  for (const cwd of projects) {
+    const chain = await upToGitRoot(cwd, ctx);
+    const top = chain[chain.length - 1];
+    const root = top !== undefined && (await exists(join(top, ".git"))) ? top : cwd;
+    // The home folder's own .dsh and .agents are the user folders above, not a project's.
+    if (!homes.includes(root)) roots.add(root);
+  }
+  for (const dir of [...roots].sort()) {
+    for (const sub of [".dsh", ".agents"]) {
+      await harnessSkills(ctx, join(dir, sub, "skills"), { agent, kind: "skill", scope: "project", project: dir, within: dir }, out);
+    }
+  }
+  return out;
+}
+
+/** `<dir>/<folder>/SKILL.md` and `<dir>/<name>.md`, named by frontmatter `name`; nothing deeper. */
+async function harnessSkills(ctx: Ctx, dir: string, base: Emit, out: CustomCommand[]): Promise<void> {
+  const r = await ctx.root(dir, base.within, base.scope === "user");
+  if (!r) return;
+  for (const e of await r.root.list(r.top)) {
+    const file = e.kind === "dir" ? (await r.root.list(e)).find((s) => s.kind === "file" && s.name === "SKILL.md") : e.name.endsWith(".md") ? e : undefined;
+    if (!file || !r.root.takeFile()) continue;
+    const fm = await readFrontmatterFile(file.real, ctx.limits);
+    const name = fm?.name?.trim();
+    const description = cleanDescription(fm?.description);
+    // The harness drops a skill without a valid name or a description, or with a switch it can't read.
+    if (!fm || !name || !HARNESS_SKILL_NAME.test(name) || description === undefined) continue;
+    if (HARNESS_REJECTED_KEYS.some((k) => fm[k] !== undefined) || harnessSwitch(fm["disable-model-invocation"]) === "invalid") continue;
+    // `user-invocable: false` keeps a skill out of the menu; one that only the model can't call stays in it.
+    const invocable = harnessSwitch(fm["user-invocable"]);
+    if (invocable === false || invocable === "invalid" || harnessCommandNames().has(`/${name}`)) continue;
+    const c = make(base, `/${name}`, description, file.path, ctx);
+    if (c) out.push(c);
   }
 }
 

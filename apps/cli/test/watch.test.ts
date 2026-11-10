@@ -691,7 +691,7 @@ describe("signalbox watch --ndjson (spawned)", () => {
       const commands = (await w.waitFor((l) => l.type === "commands")) as Extract<WatchLine, { type: "commands" }>;
       expect(w.lines.filter((l) => l.type === "commands")).toHaveLength(1);
       expect(Object.keys(commands.data)).toEqual(["v", "generatedAt", "installed", "catalogs", "custom"]);
-      expect(commands.data.catalogs.map((c) => c.agent)).toEqual(["claude-code", "codex", "gemini-cli"]);
+      expect(commands.data.catalogs.map((c) => c.agent)).toEqual(["claude-code", "codex", "deepseek-harness", "gemini-cli"]);
       // No agent binaries in the sandbox: versions unknown, so absent.
       expect(commands.data.installed).toEqual({});
 

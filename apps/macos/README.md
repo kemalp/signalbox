@@ -45,7 +45,8 @@ SwiftUI views ──▶ SignalboxStore (@MainActor, @Observable) ──▶ CLIPr
     limits (no window, over 100%, more than fit in the menu bar) and unpriced models. Use it to check layouts.
   - `stream-v1.ndjson`: one line of each type that the real CLI printed for synthetic agent homes.
   - `commands.json`: the `signalbox commands --json` shape: the real catalogs from `catalog/commands/*.json` plus
-    made-up installed versions (Codex newer than its catalog, Gemini CLI not installed) and made-up custom commands.
+    made-up installed versions (Codex newer than its catalog, DeepSeek Harness and Gemini CLI not installed) and
+    made-up custom commands.
     Regenerate after a catalog changes: `bun apps/macos/scripts/make-commands-fixture.ts > apps/macos/Fixtures/commands.json`.
   - `history.json`: the `signalbox history --json` shape with made-up titles, projects and figures: about three months
     of sessions, every title source, untitled ones, two projects with the same folder name, a path with a space and a
@@ -239,7 +240,8 @@ needs the 30-day range, with a "Switch to 30 days" link, instead of prorating (t
   catalog: context at 75% or more suggests compacting ("≈780K of 1M"), a session idle for 30 minutes with half its
   context in use suggests compacting or starting fresh, and a session waiting at a prompt says to answer it in the
   session (Signalbox never answers prompts); a compact suggestion beside it says to answer the prompt first, as one for a
-  busy session says to wait for the turn. Codex gets Codex's commands and Gemini CLI `/compress`.
+  busy session says to wait for the turn. Codex gets Codex's commands, Gemini CLI `/compress`, and DeepSeek Harness
+  `/compact` alone (it has no command that starts a fresh conversation).
 - **About Signalbox** (app menu) shows the app version, the CLI version and protocol from the CLI's hello, the
   versions the command guide was checked against, and links to the docs.
 
@@ -360,7 +362,7 @@ bun apps/macos/scripts/make-stream-fixture.ts > apps/macos/Fixtures/stream-v1.nd
 ```
 
 The command guide has its own guard: `apps/cli/test/commands-fixture.test.ts` runs the real `signalbox commands
---json` on synthetic homes holding every kind and scope of custom command for all three agents, and fails when it
+--json` on synthetic homes holding every kind and scope of custom command for all four agents, and fails when it
 sends a key path, a custom kind or a scope that `Fixtures/commands.json` lacks, or when the fixture's catalogs are
 older than `catalog/commands/*.json`. On this side, `theFixtureUsesOnlyValuesTheAppKnows` fails when the fixture
 carries a category, status, view, surface, check method, kind or scope the app has no name for. Regenerate with
@@ -393,7 +395,8 @@ the whole session inspector on its own (`sessions-inspector-*`).
 
 Milestone 4 adds the Commands screen for all agents (`commands-all-*`), one agent whose installed version differs
 from its catalog (`commands-codex-*`), your commands with a project one selected (`commands-custom-*`), Claude Code's
-context commands (`commands-selected-*`), an agent that isn't installed (`commands-gemini`), a search across agents
+context commands (`commands-selected-*`), an agent that isn't installed (`commands-gemini`), DeepSeek Harness with a
+command that is never offered selected (`commands-deepseek`), a search across agents
 (`commands-search`), searches with no results (`commands-search-empty*`), the "Shown in Signalbox" filter
 (`commands-shown`), a CLI too old to send the guide (`commands-cli-too-old`) and a snapshot without one
 (`commands-no-guide`); session suggestions (`sessions-suggest-*`: compact at 90%, a permission prompt, and a Codex

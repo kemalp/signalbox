@@ -21,7 +21,7 @@ Signalbox watches the coding agents on your Mac and puts them in one place. It s
 
 - **Claude Code first:** terminal, desktop Code tab and background sessions.
 - **Codex:** sessions, usage, plan limits and session names.
-- **DeepSeek Harness:** sessions, usage, context and session titles, whichever provider and model a session runs on.
+- **DeepSeek Harness:** sessions, usage, context and session titles, whichever provider and model a session runs on, and the command guide.
 - **Gemini CLI:** the command guide. Usage tracking is on the [roadmap](#roadmap).
 
 ### What makes it different
@@ -40,7 +40,7 @@ Signalbox watches the coding agents on your Mac and puts them in one place. It s
 - **Limits.** Plan windows (5-hour, weekly) with their reset times, one card per account. A bar fills only while its reading is current. A reading older than 15 minutes, or from before its window reset, shows as "stale" or "reset passed" with the last value. A reading whose window reset more than a day ago, or that is over 8 days old, is no longer shown.
 - **Accounts.** If you use more than one subscription (say a Max and a Team account), each session and limit reading carries its account. The account comes from the Claude app's session list (desktop sessions), from the session's transcript, or, marked as inferred, from the current login of the Claude Code config folder a terminal session runs from (never for desktop sessions or SDK runs). An id found without its organization is completed by the one full id with the same account, if there is exactly one, also marked inferred (for a desktop session, that id must come from the app's folders or a transcript, never only from a login). You give each account a name; until then it shows a short id. Signalbox tells accounts apart by a hash of the vendor's ids and never reads or shows an email. A session whose account it can't determine says "Account unknown" and is never assigned a default. Settings ▸ Advanced ▸ Claude Code folders adds a second config folder (a `CLAUDE_CONFIG_DIR` you use for another account), and the resume command for that folder's sessions sets `CLAUDE_CONFIG_DIR` for you. When two config folders share one `projects/` folder (a symlink), Signalbox can't tell which one an ended session ran under, so the resume command uses the folder a plain `claude` uses, or else the first of them.
 - **Account switching (opt-in, off by default).** Pick the account `claude` uses in Terminal, resume a session under another account in a new Terminal window, and share one session history between your config folders. See [Account switching](#account-switching-opt-in) for what it writes; the design is [docs/SWITCH.md](docs/SWITCH.md).
-- **Commands.** A guide to every built-in slash command and useful shell command in Claude Code, Codex and Gemini CLI. Each entry says what the command does, where it works, its side effects, and whether Signalbox already shows that information. The guide also lists your own commands, skills and plugin commands, by name and description. Signalbox runs no commands: Copy puts one on the clipboard for you to run in the session.
+- **Commands.** A guide to every built-in slash command and useful shell command in Claude Code, Codex, DeepSeek Harness and Gemini CLI. Each entry says what the command does, where it works, its side effects, and whether Signalbox already shows that information. The guide also lists your own commands, skills and plugin commands, by name and description. Signalbox runs no commands: Copy puts one on the clipboard for you to run in the session.
 - **Health.** Each data source, how stable its format is, and whether it's working, as `signalbox doctor` reports them.
 - **Transcript retention.** Claude Code deletes transcripts older than its `cleanupPeriodDays` setting (30 days when it isn't set) in the background after a session starts, and History and the cost figures lose them with it. From Claude Code 2.1.248 on, desktop app sessions are kept unless managed settings set the period or `desktopSessionCleanupPeriodDays` is set. Health shows how long each Claude Code config folder keeps them and where that comes from. The menu bar says when a folder keeps them for less than your threshold (90 days by default; Settings ▸ Advanced) or has a value Claude Code rejects (anything but a whole number of days, 1 or more; Claude Code then pauses the cleanup), and `signalbox doctor` warns below 90 days. Signalbox reads that one setting from the managed settings and each folder's `settings.json`; it never edits them. A project's own `.claude/settings.json`, `--settings`, MDM profiles and settings your organization serves from its console can also set it, and Signalbox doesn't see those (an MDM profile or console-served settings with any policy replace the managed files).
 - **Menu bar.** Limit rings (one row per account), the sessions waiting for you, and recorded spend for the report window (7 days by default) with a per-day sparkline. The menu bar label can show the 5-hour %, the weekly % or today's spend. The app can run from the menu bar alone, with no Dock icon.
@@ -157,7 +157,7 @@ signalbox history --days 30 --agent codex --json # the last 30 days of Codex ses
                · command, skill and plugin folders
  Claude app    session list (titles and metadata, allow-listed)
  Codex         rollouts · session index · skill, prompt and plugin folders
- DeepSeek      session logs (DeepSeek Harness)
+ DeepSeek      session logs · skill folders (DeepSeek Harness)
  Gemini CLI    command and skill folders
                (command guide folders: names and descriptions only)
        │
@@ -191,7 +191,7 @@ Each source declares how much to trust its format: **documented** (published by 
 | Codex | Rollouts, `~/.codex/sessions` and `~/.codex/archived_sessions` | Token usage per response, session status, plan-limit readings | internal |
 | Codex | `~/.codex/session_index.jsonl` | Session names | internal |
 | DeepSeek Harness | Session logs, `~/.dsh/sessions/<project>/<session>/session.v4.jsonl.zstd` | Token counts, model, timestamps, working folder, turn and approval state, context window, compactions, generated and renamed titles | internal |
-| Claude Code, Codex, Gemini CLI | Command, skill and plugin folders in each agent's home and in the project folders of listed sessions, and `~/.claude/plugins/installed_plugins.json` | Names and descriptions, for the command guide | internal |
+| Claude Code, Codex, DeepSeek Harness, Gemini CLI | Command, skill and plugin folders in each agent's home and in the project folders of listed sessions, and `~/.claude/plugins/installed_plugins.json` | Names and descriptions, for the command guide | internal |
 | Signalbox | [`pricing/`](pricing/) and [`models/`](models/) (built into the binary) | List prices and context windows, each with `asOf` and `sourceUrl` | documented |
 
 Without the tap, Claude Code plan limits read "unknown", and context is estimated from the transcripts. The tap is a read-only session mod, [`plugins/signalbox-tap`](plugins/signalbox-tap/), and it is still being tested in desktop sessions ([docs/SPIKE.md](docs/SPIKE.md)). Codex records its plan limits in its own files, so Codex limits need nothing extra. [docs/adapters/codex.md](docs/adapters/codex.md) has the Codex details.
@@ -204,7 +204,7 @@ DeepSeek Harness runs on whichever provider a session picks, and its logs hold n
 
 **What it never reads:**
 
-- Credentials. That means `~/.claude/.credentials*`, any `*.key` file, `~/.codex/auth.json`, `~/.dsh/.credentials.yaml` and the harness's settings files, anything under `~/.gemini` with "token", "oauth" or "credential" in its name, `.env*` and `*.pem` files, and the macOS Keychain. In the DeepSeek Harness home only the session logs are opened, and its lock files are never touched.
+- Credentials. That means `~/.claude/.credentials*`, any `*.key` file, `~/.codex/auth.json`, `~/.dsh/.credentials.yaml` and the harness's settings files, anything under `~/.gemini` with "token", "oauth" or "credential" in its name, `.env*` and `*.pem` files, and the macOS Keychain. In the DeepSeek Harness home only the session logs are opened, plus, for the command guide, the frontmatter of the skill files in its `skills` folder; its lock files are never touched.
 - Message content: prompts, replies, summaries and tool output. Signalbox takes the usage fields out of each line and drops everything else as it parses. It never stores or displays message text.
 - Agent settings. It never writes agent config either.
 

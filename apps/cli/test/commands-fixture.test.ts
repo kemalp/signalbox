@@ -72,6 +72,10 @@ beforeAll(async () => {
   w(join(cplugin, ".codex-plugin", "plugin.json"), JSON.stringify({ name: "plug" }));
   w(join(cplugin, "skills", "s", "SKILL.md"), md("Plugin skill", "s"));
 
+  // DeepSeek Harness: a user skill in its home and a project skill (it also lists the shared ~/.agents skills).
+  w(join(home, ".dsh", "skills", "release-check", "SKILL.md"), md("Check a release branch", "release-check"));
+  w(join(proj, ".dsh", "skills", "deploy-notes", "SKILL.md"), md("Write deploy notes", "deploy-notes"));
+
   // Gemini CLI: user and project TOML commands, a skill, an extension with a command and a skill.
   w(join(gemini, "commands", "commit.toml"), 'prompt = "synthetic"\ndescription = "Commit staged changes"\n');
   w(join(proj, ".gemini", "commands", "g.toml"), 'prompt = "synthetic"\ndescription = "Project command"\n');
@@ -85,6 +89,7 @@ beforeAll(async () => {
   const fake = (name: string, version: string) => w(join(bin, name), `#!/bin/sh\nif [ "$1" = "--version" ]; then echo '${version}'; exit 0; fi\nexit 3\n`, 0o755);
   fake("claude", "2.1.293 (Claude Code)");
   fake("codex", "codex-cli 0.161.0");
+  fake("dsh", "0.2.2-rc.1");
   fake("gemini", "0.63.0");
 
   const proc = Bun.spawn([process.execPath, MAIN, "commands", "--json"], {
@@ -111,7 +116,8 @@ afterAll(() => rmSync(root, { recursive: true, force: true }));
 
 describe("apps/macos/Fixtures/commands.json", () => {
   test("the synthetic run covers every agent, kind and scope (so the checks below mean something)", () => {
-    expect(Object.keys(fresh.installed).sort()).toEqual(["claude-code", "codex", "gemini-cli"]);
+    expect(Object.keys(fresh.installed).sort()).toEqual(["claude-code", "codex", "deepseek-harness", "gemini-cli"]);
+    expect(fresh.installed["deepseek-harness"]).toBe("0.2.2-rc.1");
     const combos = new Set(fresh.custom.map((c) => `${c.agent} ${c.kind} ${c.scope}`));
     for (const combo of [
       "claude-code command user",
@@ -124,6 +130,8 @@ describe("apps/macos/Fixtures/commands.json", () => {
       "codex skill project",
       "codex prompt user",
       "codex plugin-skill plugin",
+      "deepseek-harness skill user",
+      "deepseek-harness skill project",
       "gemini-cli command user",
       "gemini-cli command project",
       "gemini-cli skill user",

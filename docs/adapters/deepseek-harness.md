@@ -135,11 +135,34 @@ One entry per session the user started, with every record of the sessions it del
 
 One row, `deepseek-harness:session-logs`: how many logs there are, how many were written in the last 24h, and what the newest one holds (its format generation, its responses with usage, unknown event types, unparseable lines, a damaged frame). It fails when there is a home but no log in it, when the newest log cannot be read, or when its usage lines no longer parse. When there is no harness home at all, the harness is not installed and there is no row: that is not a failing source.
 
+## Command guide
+
+Not part of the adapter. The built-in commands are a catalog, [`catalog/commands/deepseek-harness.json`](../../catalog/commands/deepseek-harness.json), and your own skills are found by custom command discovery in `apps/cli/src/custom-commands.ts`, as for the other agents.
+
+**The catalog** was checked on 2026-11-10 against `0.2.2-rc.1`: 15 slash commands and 14 `dsh` commands and flags. The slash commands were read from the command registrations and the package notes inside the installed app, and each entry links the matching page of the harness's public repository at the `dsh-v0.2.2-rc.1` tag. None was run in a session. `dsh --help` and `dsh --version` were run; both only print.
+
+- **Eight commands of its own.** The host registers `/goal`, `/plan`, `/feedback`, `/compact`, `/permission` and `/export`, each also under a Chinese name (`/目标`, `/计划`, `/反馈`, `/压缩`, `/权限`, `/导出`), listed as an alias. The client adds `/model` and `/file`. All eight are marked as working in the desktop app and not in a headless run: the harness's notes say its headless, ACP and JSON-RPC entry points have no slash commands. The terminal app is not part of the install that was checked, so "terminal" is unknown.
+- **Seven skills it ships.** The desktop app mounts the Office skills in `Contents/Resources/runtime/office-skills` (`/office`, `/office-docx`, `/office-pptx`, `/office-xlsx`, `/office-render`, `/office-recalculate`, `/office-export-pdf`). A skill is typed as `/name`, like a command, so they are in the catalog, with a summary that starts "Skill:". Whether a headless run has them was not checked: unknown.
+- **Never offered:** `/permission` (what the agent may do), `/export` and `/feedback` (both carry the conversation), `dsh headless --session-id` (sends a prompt to a session), `dsh --dump-config` (prints settings), `dsh --from-default-profile` and `dsh plugin` (rewrite a profile, install code).
+- A session whose context is filling up gets `/compact` as a copyable suggestion. The harness has no command that starts a fresh conversation, so there is no second one.
+
+**Your skills.** The harness reads skills from these folders, the first one winning when two skills share a name, and the guide lists what it finds in them:
+
+| Folder | Scope |
+|---|---|
+| `<project>/.dsh/skills` | project |
+| `<project>/.agents/skills` | project |
+| `$DSH_HOME/skills` (default `~/.dsh/skills`) | user |
+| `$DSH_AGENTS_HOME/skills` (default `~/.agents/skills`) | user |
+
+The project is the nearest folder above a listed session's working folder that holds `.git`, else the working folder itself; Signalbox never takes the home folder for a project. Only the top level of each folder counts: `<name>/SKILL.md`, or a flat `<name>.md`. Like the harness, the guide leaves a skill out when its frontmatter has no kebab-case `name` or no `description`, when `user-invocable` is off (it is then for the model only), when `user-invocable` or `disable-model-invocation` is not a boolean (`true`/`false`, `yes`/`no`, `on`/`off`, `1`/`0`) or is spelled in camel case, and when it is named like one of the eight commands above, because the command wins. A skill named like a shipped one is listed: yours replaces it. When two of your skills share a name, the guide lists each file.
+
+Only the frontmatter is read, up to its closing line, and only `name`, `description` and the two switches are used. Three things the harness can do are not covered: skill folders named in its settings (`customSkillDirs`), because Signalbox doesn't read settings; skill folders whose name starts with a dot, which the guide skips everywhere; and anything a plugin registers at run time.
+
 ## Not available
 
 - **Plan limits.** The logs hold no limit readings of any provider, so the adapter has no `readLimits`, and the Limits screen shows no card for the harness.
 - **Accounts.** Nothing in the logs names one.
-- **Command guide.** There is no catalog for the harness yet.
 
 ## Other files seen, not used
 

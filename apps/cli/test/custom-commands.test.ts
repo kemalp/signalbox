@@ -125,6 +125,30 @@ beforeAll(async () => {
   const past = new Date(Date.now() - 86_400_000);
   utimesSync(plugOld, past, past);
 
+  // ---- DeepSeek Harness (it also reads the shared ~/.agents/skills above, top level only)
+  const dsh = join(home, ".dsh");
+  w(join(dsh, ".credentials.yaml"), "synthetic: decoy\n");
+  w(join(dsh, "skills", ".system", "sys", "SKILL.md"), md({ name: "bundled-dsh", description: "System skill" }));
+  w(join(dsh, "skills", "release-check", "SKILL.md"), md({ name: "release-check", description: "Check a release branch" }));
+  w(join(dsh, "skills", "flat-one.md"), md({ name: "flat-one", description: "A flat skill file" }));
+  w(join(dsh, "skills", "group", "deep", "SKILL.md"), md({ name: "too-deep", description: "Nested: the harness does not look here" }));
+  w(join(dsh, "skills", "nodesc", "SKILL.md"), md({ name: "nodesc" }));
+  w(join(dsh, "skills", "badname", "SKILL.md"), md({ name: "Bad_Name", description: "Not kebab-case" }));
+  w(join(dsh, "skills", "model-only", "SKILL.md"), md({ name: "model-only", description: "Kept out of the menu", "user-invocable": "no" }));
+  w(join(dsh, "skills", "zero", "SKILL.md"), md({ name: "zero", description: "Kept out of the menu too", "user-invocable": "0" }));
+  w(join(dsh, "skills", "menu-on", "SKILL.md"), md({ name: "menu-on", description: "Switched on in so many words", "user-invocable": "Yes" }));
+  // Only the model is kept from calling it: the menu still has it.
+  w(join(dsh, "skills", "by-hand", "SKILL.md"), md({ name: "by-hand", description: "Typed, never model-picked", "disable-model-invocation": "true" }));
+  // The harness drops a skill whose switch isn't a boolean, or is spelled in camel case.
+  w(join(dsh, "skills", "maybe", "SKILL.md"), md({ name: "maybe", description: "A switch that is no boolean", "user-invocable": "maybe" }));
+  w(join(dsh, "skills", "sometimes", "SKILL.md"), md({ name: "sometimes", description: "Another one", "disable-model-invocation": "sometimes" }));
+  w(join(dsh, "skills", "camel", "SKILL.md"), md({ name: "camel", description: "A rejected spelling", userInvocable: "true" }));
+  // A skill named like a built-in command never runs: the command wins.
+  w(join(dsh, "skills", "plan", "SKILL.md"), md({ name: "plan", description: "Shadowed by /plan" }));
+  // A skill named like one the harness ships replaces the shipped one.
+  w(join(dsh, "skills", "office-docx", "SKILL.md"), md({ name: "office-docx", description: "My own Word workflow" }));
+  w(join(dsh, "skills", "README.md"), "# Notes about my skills\n");
+
   // ---- Gemini CLI
   w(join(gemini, "oauth_creds.json"), '{"synthetic":"decoy"}');
   w(join(gemini, "commands", "commit.toml"), 'prompt = """\nWrite the commit. BODY-MARKER\n"""\ndescription = "Commit staged changes"\n');
@@ -148,6 +172,9 @@ beforeAll(async () => {
   w(join(app, ".claude", "commands", "proj.md"), md({ description: "Project command" }));
   w(join(app, ".claude", "skills", "ps", "SKILL.md"), md({ description: "Project skill" }));
   w(join(app, ".agents", "skills", "ps", "SKILL.md"), md({ name: "ps", description: "Codex project skill" }));
+  w(join(app, ".dsh", "skills", "deploy-notes", "SKILL.md"), md({ name: "deploy-notes", description: "Harness project skill" }));
+  // The harness reads a project's skills at its git root only, not in a subfolder between the root and the cwd.
+  w(join(app, "sub", ".dsh", "skills", "inner", "SKILL.md"), md({ name: "inner-skill", description: "Below the project root" }));
   w(join(app, ".gemini", "commands", "g.toml"), 'prompt = "g"\ndescription = "Gemini project command"\n');
   w(join(app, "sub", ".claude", "commands", "inner.md"), md({ description: "Subfolder command" }));
   w(join(work(), ".claude", "commands", "above-git.md"), md({ description: "Above the git root: not loaded" }));
@@ -157,7 +184,7 @@ beforeAll(async () => {
   symlinkSync(join(root, "outside"), join(evil, ".claude", "commands"));
   w(join(work(), "notscanned", ".claude", "commands", "x.md"), md({ description: "No session here" }));
 
-  env = { CLAUDE_CONFIG_DIR: claude, CODEX_HOME: codex, GEMINI_CLI_HOME: home };
+  env = { CLAUDE_CONFIG_DIR: claude, CODEX_HOME: codex, DSH_HOME: dsh, GEMINI_CLI_HOME: home };
   found = await discoverCustomCommands({ env, home, projects: [join(app, "sub"), app, evil, "relative/ignored"] });
 });
 afterAll(() => rmSync(root, { recursive: true, force: true }));
@@ -277,6 +304,78 @@ describe("Codex", () => {
   test("plugin skills from the newest cached version, as $<plugin>:<name>", () => {
     expect(one("codex", "$plug:s")).toMatchObject({ kind: "plugin-skill", scope: "plugin", source: "plug" });
     expect(by("codex", "$plug:old")).toEqual([]);
+  });
+});
+
+describe("DeepSeek Harness", () => {
+  const mine = () => found.filter((c) => c.agent === "deepseek-harness");
+
+  test("skills by frontmatter name, typed as /name: a SKILL.md folder or a flat file, top level only", () => {
+    expect(one("deepseek-harness", "/release-check")).toEqual({
+      agent: "deepseek-harness",
+      name: "/release-check",
+      description: "Check a release branch",
+      kind: "skill",
+      scope: "user",
+      source: "~/.dsh/skills/release-check/SKILL.md",
+    });
+    expect(one("deepseek-harness", "/flat-one")).toMatchObject({ kind: "skill", scope: "user", source: "~/.dsh/skills/flat-one.md" });
+    // The shared agents folder, which Codex reads too (and searches deeper than the harness does).
+    expect(one("deepseek-harness", "/browse").source).toBe("~/.agents/skills/browse/SKILL.md");
+    expect(one("deepseek-harness", "/oauth-flow").description).toBe("Walk through an OAuth flow");
+    expect(by("deepseek-harness", "/deep-one")).toEqual([]);
+    expect(by("deepseek-harness", "/too-deep")).toEqual([]);
+    expect(by("deepseek-harness", "/bundled-dsh")).toEqual([]);
+  });
+
+  test("a skill needs a kebab-case name and a description, and can be kept out of the menu", () => {
+    for (const name of ["/nodesc", "/Bad_Name", "/badname", "/model-only", "/zero", "/README"]) expect(by("deepseek-harness", name), name).toEqual([]);
+    expect(mine().some((c) => c.description?.startsWith("No name"))).toBe(false);
+    expect(one("deepseek-harness", "/menu-on").description).toBe("Switched on in so many words");
+    expect(one("deepseek-harness", "/by-hand").description).toBe("Typed, never model-picked");
+  });
+
+  test("a switch that is no boolean, or a camel-case spelling of one, drops the skill as the harness does", () => {
+    for (const name of ["/maybe", "/sometimes", "/camel"]) expect(by("deepseek-harness", name), name).toEqual([]);
+  });
+
+  test("a skill named like a built-in command is not listed: the command wins", () => {
+    expect(by("deepseek-harness", "/plan")).toEqual([]);
+  });
+
+  test("a skill named like one the harness ships is listed: it replaces the shipped one", () => {
+    expect(one("deepseek-harness", "/office-docx")).toMatchObject({ description: "My own Word workflow", scope: "user", source: "~/.dsh/skills/office-docx/SKILL.md" });
+  });
+
+  test("project skills from .dsh/skills and .agents/skills at the project's git root", () => {
+    const app = join(work(), "app");
+    expect(one("deepseek-harness", "/deploy-notes")).toEqual({
+      agent: "deepseek-harness",
+      name: "/deploy-notes",
+      description: "Harness project skill",
+      kind: "skill",
+      scope: "project",
+      source: join(app, ".dsh", "skills", "deploy-notes", "SKILL.md"),
+      project: app,
+    });
+    expect(one("deepseek-harness", "/ps")).toMatchObject({ scope: "project", project: app, description: "Codex project skill" });
+    expect(by("deepseek-harness", "/inner-skill")).toEqual([]);
+  });
+
+  test("DSH_HOME and DSH_AGENTS_HOME move the folders; a blank value means the default", async () => {
+    const elsewhere = join(root, "elsewhere-dsh");
+    const shared = join(root, "elsewhere-agents");
+    w(join(elsewhere, "skills", "moved", "SKILL.md"), md({ name: "moved", description: "In a moved harness home" }));
+    w(join(shared, "skills", "shared-one", "SKILL.md"), md({ name: "shared-one", description: "In a moved agents folder" }));
+    const moved = await discoverCustomCommands({ env: { ...env, DSH_HOME: elsewhere, DSH_AGENTS_HOME: shared }, home, projects: [] });
+    expect(moved.filter((c) => c.agent === "deepseek-harness").map((c) => c.name)).toEqual(["/moved", "/shared-one"]);
+    const blank = await discoverCustomCommands({ env: { ...env, DSH_HOME: "  ", DSH_AGENTS_HOME: "" }, home, projects: [] });
+    expect(blank.filter((c) => c.agent === "deepseek-harness").map((c) => c.name)).toEqual(["/browse", "/by-hand", "/flat-one", "/menu-on", "/oauth-flow", "/office-docx", "/release-check"]);
+  });
+
+  test("nothing but skill frontmatter is read in the harness home", () => {
+    expect(JSON.stringify(mine())).not.toContain("decoy");
+    expect(JSON.stringify(mine())).not.toContain("Body text");
   });
 });
 

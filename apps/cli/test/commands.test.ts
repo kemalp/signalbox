@@ -54,9 +54,8 @@ describe("args", () => {
   });
 
   test("every agent with a catalog has a binary to ask for its version", () => {
-    expect([...CATALOG_AGENTS]).toEqual(["claude-code", "codex", "gemini-cli"]);
-    // DeepSeek Harness has an adapter and a binary (dsh), and no command catalog yet.
-    expect(agentBinaries().map((b) => b.agent).sort()).toEqual([...CATALOG_AGENTS, "deepseek-harness"].sort());
+    expect([...CATALOG_AGENTS]).toEqual(["claude-code", "codex", "deepseek-harness", "gemini-cli"]);
+    expect(agentBinaries().map((b) => b.agent).sort()).toEqual([...CATALOG_AGENTS]);
   });
 });
 
@@ -217,7 +216,7 @@ describe("signalbox commands (spawned)", () => {
     expect(Object.keys(snap)).toEqual(["v", "generatedAt", "installed", "catalogs", "custom"]);
     expect(snap.v).toBe(1);
     expect(snap.installed).toEqual({ "claude-code": "2.1.293", codex: "0.161.0" });
-    expect(snap.catalogs.map((c) => c.agent)).toEqual(["claude-code", "codex", "gemini-cli"]);
+    expect(snap.catalogs.map((c) => c.agent)).toEqual(["claude-code", "codex", "deepseek-harness", "gemini-cli"]);
     expect(snap.custom).toEqual([
       { agent: "claude-code", name: "/review", description: "Review the diff", kind: "command", scope: "user", source: "~/.claude/commands/review.md" },
       {
