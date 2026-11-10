@@ -2,7 +2,7 @@ import AppKit
 import SignalboxKit
 
 /// Diagnostics for list selection in the running app (SIGNALBOX_CLICK_PROBE=1, see scripts/click-probe.sh).
-/// It sends the app's own window real mouse events (in-process, so no Accessibility permission is needed):
+/// It posts mouse events to the app's own event queue (in-process, so no Accessibility permission is needed):
 /// a click on each sidebar row, then on the first session row, the first history row and the first command row, then
 /// opens About from the app menu, then flips Settings ▸ Advanced ▸ "Include the Claude app's session list" off, on and
 /// off without waiting (the CLI must end up as one child with the last setting), and prints one RESULT line to stderr.
@@ -37,14 +37,21 @@ enum ClickProbe {
         }
         let r = table.convert(table.rect(ofRow: row), to: nil)
         let p = NSPoint(x: inset.map { r.minX + $0 } ?? r.midX, y: r.midY)
-        func event(_ type: NSEvent.EventType) -> NSEvent? {
-            NSEvent.mouseEvent(with: type, location: p, modifierFlags: [], timestamp: ProcessInfo.processInfo.systemUptime,
-                               windowNumber: window.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1)
+        let now = ProcessInfo.processInfo.systemUptime
+        func event(_ type: NSEvent.EventType, pressure: Float) -> NSEvent? {
+            NSEvent.mouseEvent(with: type, location: p, modifierFlags: [], timestamp: now, windowNumber: window.windowNumber,
+                               context: nil, eventNumber: 0, clickCount: 1, pressure: pressure)
         }
-        // The table's mouse tracking loop pulls the mouse-up from the queue, so queue it before the mouse-down.
-        if let up = event(.leftMouseUp), let down = event(.leftMouseDown) {
+        // Both events go through the queue, mouse-down first, so the run loop delivers them as it does a real click's
+        // (the selection changes after this returns). Handing the mouse-down straight to the window, as this did
+        // before, breaks on macOS 27: a table view now recognises a click on a row's empty part with gesture
+        // recognizers, and once a mouse tracking loop has taken an event from the queue (a click on a row's text
+        // still runs one) the run loop cancels the active recognizers the next time it takes one. A mouse-down sent
+        // from inside that wait arms them just before they are cancelled; the table then gets it late, starts a
+        // tracking loop whose mouse-up has already gone by, and every later click lands one click behind.
+        if let down = event(.leftMouseDown, pressure: 1), let up = event(.leftMouseUp, pressure: 0) {
+            NSApp.postEvent(down, atStart: false)
             NSApp.postEvent(up, atStart: false)
-            window.sendEvent(down)
         }
     }
 
