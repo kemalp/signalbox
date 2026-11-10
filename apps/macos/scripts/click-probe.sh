@@ -25,7 +25,8 @@ done
 work=$(mktemp -d "${TMPDIR:-/tmp}/signalbox-click-probe.XXXXXX")
 work=$(cd "$work" && pwd -P)   # /var -> /private/var, as the process list shows it
 pid=""
-cleanup() { [ -n "$pid" ] && kill "$pid" 2>/dev/null; rm -rf "$work"; }
+# `|| true`: under `set -e` a kill that fails (the app already quit or crashed) would end the script before the rm.
+cleanup() { [ -n "$pid" ] && kill "$pid" 2>/dev/null || true; rm -rf "$work"; }
 trap cleanup EXIT INT TERM
 
 app="$work/SignalboxProbe.app"
