@@ -6,6 +6,7 @@ import SwiftUI
 struct HistoryInspector: View {
     @Environment(SignalboxStore.self) private var store
     @Environment(NavigationModel.self) private var nav
+    @Environment(AppController.self) private var controller
     @Environment(\.money) private var money
     @Environment(\.directoryExists) private var directoryExists
     let entry: SessionHistoryEntry?
@@ -154,6 +155,14 @@ struct HistoryInspector: View {
     private func resumeSection(_ e: SessionHistoryEntry, live: HistoryLiveRoute?) -> some View {
         Section {
             resume(e)
+            if controller.switcher.isOn() {
+                HStack {
+                    Spacer()
+                    ResumeWithMenu(entry: e)
+                        .fixedSize()
+                        .controlSize(.small)
+                }
+            }
         } header: {
             Text("Resume")
         } footer: {
@@ -166,7 +175,9 @@ struct HistoryInspector: View {
                     }
                 }
                 if HistoryBrowser.resumeLine(e, directoryExists: directoryExists) != nil {
-                    Text("Paste it into a terminal. Signalbox never resumes, messages or changes a session itself.")
+                    Text(controller.switcher.isOn()
+                        ? "Paste it into a terminal, or use Resume With to open one under a chosen account: Signalbox writes a one-time script and Terminal runs it, after you confirm."
+                        : "Paste it into a terminal. Signalbox never resumes, messages or changes a session itself.")
                 }
             }
             .font(.caption)

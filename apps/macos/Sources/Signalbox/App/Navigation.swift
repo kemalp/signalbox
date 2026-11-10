@@ -26,7 +26,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
         case .general: 430
         case .notifications: 640
         case .display: 430
-        case .advanced: 560
+        case .advanced: 620
         }
     }
 

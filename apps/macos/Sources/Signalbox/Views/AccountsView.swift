@@ -17,6 +17,7 @@ struct AccountsView: View {
                             .fixedSize(horizontal: false, vertical: true)
                             .font(.callout)
                             .foregroundStyle(.secondary)
+                        TerminalAccountBox()
                         if store.fleet?.accounts == nil {
                             ContentUnavailableView("Update the CLI", systemImage: "arrow.down.circle",
                                                    description: Text("This CLI doesn't report accounts yet."))

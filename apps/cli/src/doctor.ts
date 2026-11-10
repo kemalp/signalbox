@@ -35,6 +35,8 @@ export interface BinaryInfo {
   path?: string;
   /** Where the path came from: an override variable's name, "PATH", or the fallback directory it was found in. */
   via?: string;
+  /** signalbox-switch shims passed over to find the real binary. */
+  skippedShims?: string[];
   version?: string;
   error?: string;
 }
@@ -62,6 +64,7 @@ export async function agentVersion(bin: AgentBinary, env: Record<string, string 
   const { path } = found;
   info.path = path;
   info.via = found.via;
+  if (found.skippedShims) info.skippedShims = found.skippedShims;
   let proc: ReturnType<typeof Bun.spawn>;
   try {
     proc = Bun.spawn([path, ...bin.versionArgs], { stdin: "ignore", stdout: "pipe", stderr: "ignore", env: envForBinary(path, env) });
@@ -307,7 +310,8 @@ export function formatDoctor(d: DoctorReport, width = 100): string {
   out.push("", "Agents");
   for (const a of d.agents) {
     const b = a.binary;
-    const bin = b ? (b.path ? `${b.version ?? "version unknown"}  ${tildify(b.path)}  ${binarySource(b.via)}` : `${b.name}: ${b.error}`) : "";
+    const shim = b?.skippedShims?.length ? `  (skipped the signalbox-switch shim: ${b.skippedShims.map((p) => tildify(p)).join(", ")})` : "";
+    const bin = b ? (b.path ? `${b.version ?? "version unknown"}  ${tildify(b.path)}  ${binarySource(b.via)}${shim}` : `${b.name}: ${b.error}`) : "";
     const state = a.adapter ? (a.detected ? "data found" : "no data") : "no adapter yet";
     out.push(`  ${a.displayName.padEnd(12)} ${state.padEnd(15)} ${bin}`);
   }
