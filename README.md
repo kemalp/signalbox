@@ -2,7 +2,7 @@
 
 **A local control room for your AI coding agents.** See every session, its context and plan limits, and what the usage would cost at API list prices, without handing over any credentials.
 
-> **Status:** pre-release (0.1.0). macOS 14 or later. The app is built for Apple Silicon, ad-hoc signed and not notarized.
+> **Status:** pre-release (0.2.0). macOS 14 or later. The app is built for Apple Silicon, ad-hoc signed and not notarized.
 
 [What it is](#what-it-is) · [Features](#features) · [Install](#install) · [CLI](#cli) · [How it works](#how-it-works) · [Privacy](#privacy-and-security) · [Accuracy](#accuracy) · [Roadmap](#roadmap) · [Development](#development)
 

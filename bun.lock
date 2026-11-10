@@ -15,30 +15,30 @@
     },
     "apps/cli": {
       "name": "@signalbox/cli",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "bin": {
         "signalbox": "src/main.ts",
       },
     },
     "apps/web": {
       "name": "@signalbox/web",
-      "version": "0.1.0",
+      "version": "0.2.0",
     },
     "packages/adapter-claude": {
       "name": "@signalbox/adapter-claude",
-      "version": "0.1.0",
+      "version": "0.2.0",
     },
     "packages/adapter-codex": {
       "name": "@signalbox/adapter-codex",
-      "version": "0.1.0",
+      "version": "0.2.0",
     },
     "packages/adapter-deepseek": {
       "name": "@signalbox/adapter-deepseek",
-      "version": "0.1.0",
+      "version": "0.2.0",
     },
     "packages/core": {
       "name": "@signalbox/core",
-      "version": "0.1.0",
+      "version": "0.2.0",
     },
   },
   "packages": {
