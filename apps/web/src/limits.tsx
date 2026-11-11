@@ -1,6 +1,6 @@
 import type { AccountInfo, AdapterHealth, AgentId, FleetSession, LimitSnapshot } from "@signalbox/core";
 import { AccountChip, limitGroups } from "./accounts.tsx";
-import { ageMs, agentOrder, fmtAgo, fmtCountdown, fmtPercent, limitLabel, severity, windowLabel } from "./format.ts";
+import { ageMs, agentOrder, fmtAgo, fmtCountdown, fmtPercent, limitLabel, recordsPlanLimits, severity, windowLabel } from "./format.ts";
 import { sessionTitle } from "./fleet.tsx";
 import { AgentBadge, Icon, Meter, Section } from "./ui.tsx";
 
@@ -125,7 +125,8 @@ export function Limits(props: {
   const sessions = props.sessions ?? [];
   const agents = new Set<AgentId>(["claude-code"]);
   for (const l of limits) agents.add(l.agent);
-  for (const s of sessions) agents.add(s.agent);
+  // An agent that records no plan limits at all gets no "unknown" card just for having sessions.
+  for (const s of sessions) if (recordsPlanLimits(s.agent)) agents.add(s.agent);
   const ordered = [...agents].sort(agentOrder);
 
   return (

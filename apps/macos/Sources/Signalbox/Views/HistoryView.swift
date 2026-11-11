@@ -22,7 +22,7 @@ struct HistoryView: View {
                     ContentUnavailableView {
                         Label("No Sessions Yet", systemImage: SidebarSection.history.systemImage)
                     } description: {
-                        Text("Signalbox found no Claude Code or Codex sessions on this Mac. A session shows here once its agent has written a transcript.")
+                        Text("Signalbox found no Claude Code, Codex or DeepSeek Harness sessions on this Mac. A session shows here once its agent has written a transcript.")
                     }
                 } else {
                     HistoryList(history: history)

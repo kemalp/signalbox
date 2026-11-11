@@ -22,6 +22,7 @@
       "@signalbox/core": ["packages/core/src/index.ts"],
       "@signalbox/adapter-claude": ["packages/adapter-claude/src/index.ts"],
       "@signalbox/adapter-codex": ["packages/adapter-codex/src/index.ts"],
+      "@signalbox/adapter-deepseek": ["packages/adapter-deepseek/src/index.ts"],
       "@signalbox/web": ["apps/web/src/index.ts"]
     }
   },

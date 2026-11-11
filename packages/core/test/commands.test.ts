@@ -46,10 +46,16 @@ describe("embedded command catalogs", () => {
   });
 
   test("one catalog per agent, each verified on a version and dated", () => {
-    expect(catalogs.map((c) => c.agent)).toEqual(["claude-code", "codex", "gemini-cli"]);
+    expect(catalogs.map((c) => c.agent)).toEqual(["claude-code", "codex", "deepseek-harness", "gemini-cli"]);
     for (const c of catalogs) {
       expect(c.verifiedVersion, c.agent).toMatch(/^\d+\.\d+\.\d+/);
-      expect(c.commands.length, c.agent).toBeGreaterThan(20);
+      // DeepSeek Harness has eight commands of its own (six from its host, two from its client) and ships seven skills.
+      if (c.agent === "deepseek-harness") {
+        expect(c.commands.map((e) => e.name)).toEqual([
+          ...["/goal", "/plan", "/feedback", "/compact", "/permission", "/export", "/model", "/file"],
+          ...["/office", "/office-docx", "/office-pptx", "/office-xlsx", "/office-render", "/office-recalculate", "/office-export-pdf"],
+        ]);
+      } else expect(c.commands.length, c.agent).toBeGreaterThan(20);
       expect(c.cliCommands.length, c.agent).toBeGreaterThan(10);
       // Checked against the installed binary: that version. From docs only (desktop-app commands): the docs named.
       for (const e of [...c.commands, ...c.cliCommands]) {
@@ -86,6 +92,43 @@ describe("embedded command catalogs", () => {
     expect(status("claude-code", "/logout")).toBe("never");
     expect(status("claude-code", "/heapdump")).toBe("never");
     expect(status("codex", "/logout")).toBe("never");
+    // What the agent may do, and what can carry a conversation off the machine, is the session owner's call.
+    for (const name of ["/permission", "/export", "/feedback"]) expect(status("deepseek-harness", name), name).toBe("never");
+  });
+
+  test("DeepSeek Harness: every host command has its Chinese spelling; the two client commands have none", () => {
+    const harness = catalogs.find((c) => c.agent === "deepseek-harness")!;
+    const own = harness.commands.filter((e) => !e.summary.startsWith("Skill:"));
+    const aliases = Object.fromEntries(own.map((e) => [e.name, e.aliases ?? []]));
+    expect(aliases).toEqual({
+      "/goal": ["/目标"],
+      "/plan": ["/计划"],
+      "/feedback": ["/反馈"],
+      "/compact": ["/压缩"],
+      "/permission": ["/权限"],
+      "/export": ["/导出"],
+      "/model": [],
+      "/file": [],
+    });
+    // In the desktop app and the web client, never in a headless run; a terminal app is not part of the install checked.
+    for (const e of own) expect(e.surfaces, e.name).toEqual({ terminal: "unknown", desktop: true, headless: false, remoteControl: "unknown" });
+    for (const e of [...harness.commands, ...harness.cliCommands]) expect(e.sourceUrl, e.name).toStartWith("https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/");
+  });
+
+  // Custom command discovery tells the skills the harness ships from its own commands by this prefix: a
+  // command shadows a skill of the same name, a shipped skill is replaced by one.
+  test('DeepSeek Harness: the skills it ships are the "Skill:" entries, and only those', () => {
+    const harness = catalogs.find((c) => c.agent === "deepseek-harness")!;
+    const skills = harness.commands.filter((e) => e.summary.startsWith("Skill:"));
+    expect(skills.map((e) => e.name).sort()).toEqual(["/office", "/office-docx", "/office-export-pdf", "/office-pptx", "/office-recalculate", "/office-render", "/office-xlsx"]);
+    for (const e of skills) {
+      expect(e.name, e.name).toMatch(/^\/[a-z0-9]+(?:-[a-z0-9]+)*$/);
+      expect(e.aliases, e.name).toBeUndefined();
+      expect(e.category, e.name).toBe("tools");
+      expect(e.signalbox.status, e.name).toBe("no");
+      // Mounted by the desktop app; whether a headless run or the terminal app has them was not checked.
+      expect(e.surfaces, e.name).toEqual({ terminal: "unknown", desktop: true, headless: "unknown", remoteControl: "unknown" });
+    }
   });
 
   test("each call returns fresh objects", () => {

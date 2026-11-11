@@ -28,7 +28,7 @@ struct AboutView: View {
                     .foregroundStyle(.secondary)
                     .textSelection(.enabled)
             }
-            Text("A local control room for AI coding agents. It reads what Claude Code, Codex and Gemini CLI already write on this Mac, needs no credentials, and sends nothing anywhere.")
+            Text("A local control room for AI coding agents. It reads what Claude Code, Codex, DeepSeek Harness and Gemini CLI already write on this Mac, needs no credentials, and sends nothing anywhere.")
                 .font(.callout)
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
@@ -45,7 +45,7 @@ struct AboutView: View {
             .frame(maxWidth: .infinity)
             .background(.quaternary.opacity(0.45), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
 
-            Text("Unofficial — not affiliated with Anthropic, OpenAI or Google.")
+            Text("Unofficial — not affiliated with Anthropic, OpenAI, Google or DeepSeek.")
                 .font(.callout.weight(.medium))
                 .multilineTextAlignment(.center)
 

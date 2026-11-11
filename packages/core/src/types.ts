@@ -78,8 +78,23 @@ export interface ModelPrice extends TokenRates {
   longContext?: { thresholdTokens: number } & TokenRates;
   /** Fast-mode rates (`speed: "fast"`), caching multipliers already applied. Replaces the base and long-context tiers. */
   fast?: TokenRates;
+  /**
+   * Rates for a request made outside the table's `peakHours` (DeepSeek's off-peak discount). The row's own rates
+   * are the peak ones, and they apply whenever the time of a request isn't known (a sum, a ledger row).
+   */
+  offPeak?: TokenRates;
   /** USD per web search request. */
   webSearchPerRequest?: number;
+}
+
+/** A weekly window in UTC, e.g. Monday to Friday 01:00-04:00. */
+export interface PeakWindow {
+  /** ISO weekdays: 1 is Monday, 7 is Sunday. */
+  days: number[];
+  /** "HH:MM", inclusive. */
+  from: string;
+  /** "HH:MM", exclusive; "24:00" is the end of the day. */
+  to: string;
 }
 
 /** A provider price file, e.g. pricing/anthropic.json. */
@@ -92,6 +107,8 @@ export interface PriceTable {
   models: Record<string, ModelPrice>;
   /** Multipliers keyed by geo value, e.g. { "us": 1.1 }. */
   geoMultipliers?: Record<string, number>;
+  /** When rows with an `offPeak` tier charge their full rates (UTC). Outside these windows they charge `offPeak`. */
+  peakHours?: PeakWindow[];
   notes?: string[];
 }
 

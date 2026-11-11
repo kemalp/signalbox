@@ -16,6 +16,7 @@ beforeAll(() => {
     HOME: join(root, "home"),
     CLAUDE_CONFIG_DIR: join(root, "home", ".claude"),
     CODEX_HOME: join(root, "home", ".codex"),
+    DSH_HOME: join(root, "home", ".dsh"),
     SIGNALBOX_CLAUDE_BIN: "/nonexistent",
     SIGNALBOX_BIN_DIRS: "",
     SIGNALBOX_CLAUDE_MANAGED_SETTINGS_DIR: "",

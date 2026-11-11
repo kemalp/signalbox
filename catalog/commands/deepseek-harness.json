@@ -1,0 +1,701 @@
+{
+  "agent": "deepseek-harness",
+  "displayName": "DeepSeek Harness",
+  "verifiedVersion": "0.2.2-rc.1",
+  "asOf": "2026-11-10",
+  "sources": [
+    "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/apps/cli/README.md",
+    "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/interaction/commands/README.md",
+    "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/client/ui-commands/README.md",
+    "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/client/ui-model-selection/README.md",
+    "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/compaction/command-compact/README.md",
+    "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/goal/command-goal/README.md",
+    "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/plan/plan-mode/README.md",
+    "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/feedback/command-feedback/README.md",
+    "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/interaction/permission-presets/README.md",
+    "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/session-query/session-log-export/README.md",
+    "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/skill/skill-office/README.md",
+    "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/client/ui-skill/README.md",
+    "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/bundle/web-app/README.md",
+    "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/bundle/headless/README.md"
+  ],
+  "commands": [
+    {
+      "name": "/goal",
+      "aliases": [
+        "/目标"
+      ],
+      "args": "[objective|edit <objective>|pause|resume|clear]",
+      "summary": "Set, view or change a lasting goal the agent keeps working toward.",
+      "details": "Bare, it shows the current objective, its phase, the round count and cap, and which commands are valid next. Any other text creates a goal; edit replaces the objective, pause and resume stop and restart automatic continuation, and clear removes the goal, each only when it is the whole input. Images and files can go with an objective. A goal survives resume and forks.",
+      "category": "session",
+      "surfaces": {
+        "terminal": "unknown",
+        "desktop": true,
+        "headless": false,
+        "remoteControl": "unknown"
+      },
+      "sideEffects": "While a goal is armed the agent keeps starting new rounds until it is done or reaches the round cap (256 by default), which adds usage.",
+      "signalbox": {
+        "status": "no",
+        "note": "Signalbox does not read goals; set them in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "0.2.2-rc.1"
+      },
+      "sourceUrl": "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/goal/command-goal/README.md"
+    },
+    {
+      "name": "/plan",
+      "aliases": [
+        "/计划"
+      ],
+      "args": "[off|message]",
+      "summary": "Enter plan mode, optionally with a first request; /plan off leaves it.",
+      "details": "In plan mode the agent explores and designs first, then presents a finished plan that you approve or send back with feedback. Text after the command becomes your next request under plan guidance, and images and files can go with it. Plan mode guides the agent but leaves every tool available, so enforced limits come from the permission preset and approvals. The mode survives resume and forks.",
+      "category": "session",
+      "surfaces": {
+        "terminal": "unknown",
+        "desktop": true,
+        "headless": false,
+        "remoteControl": "unknown"
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Changes how the session works; do it there."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "0.2.2-rc.1"
+      },
+      "sourceUrl": "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/plan/plan-mode/README.md"
+    },
+    {
+      "name": "/feedback",
+      "aliases": [
+        "/反馈"
+      ],
+      "args": "[text]",
+      "summary": "Record feedback about this session; bare, the app opens a feedback form.",
+      "details": "With text, the remark is recorded exactly as typed and the reply names the session id and your anonymous user id. Sent bare from the app's composer, it opens a form with seven categories and an optional description instead. Recording starts no model work, and the model never sees the remark.",
+      "category": "other",
+      "surfaces": {
+        "terminal": "unknown",
+        "desktop": true,
+        "headless": false,
+        "remoteControl": "unknown"
+      },
+      "sideEffects": "Writes the feedback into the session log; the harness says the conversation log travels with it, and it uploads session logs with requests to DeepSeek's own API.",
+      "signalbox": {
+        "status": "never",
+        "note": "Feedback can carry the conversation off the machine; only you should send it, in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "0.2.2-rc.1"
+      },
+      "sourceUrl": "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/feedback/command-feedback/README.md"
+    },
+    {
+      "name": "/compact",
+      "aliases": [
+        "/压缩"
+      ],
+      "summary": "Condense older conversation history into one summary to free context.",
+      "details": "Replaces an older span of the conversation with one summary, leaves recent history as it is, and reports how many items were condensed and the estimated tokens saved. It takes no arguments and only runs while the agent is idle; prompts sent meanwhile start after it finishes. The harness also compacts by itself when context fills up.",
+      "category": "context",
+      "surfaces": {
+        "terminal": "unknown",
+        "desktop": true,
+        "headless": false,
+        "remoteControl": "unknown"
+      },
+      "sideEffects": "Uses a model call; the condensed history is no longer in context afterwards.",
+      "signalbox": {
+        "status": "no",
+        "note": "Sessions shows each harness session's context use and its compactions (manual or automatic, tokens before). Running one happens in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "0.2.2-rc.1"
+      },
+      "sourceUrl": "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/compaction/command-compact/README.md"
+    },
+    {
+      "name": "/permission",
+      "aliases": [
+        "/权限"
+      ],
+      "args": "[preset]",
+      "summary": "Show or switch the permission preset: sandbox mode plus approval policy.",
+      "details": "Bare, it reports the current preset and the available ones; from the app's composer it opens a picker. With a preset name it switches. The shipped presets are workspace-write (writes confined to the workspace, approvals asked) and danger-full-access (no sandbox, approvals never asked); a deployment can define others, and an Auto review option appears when that integration is loaded. A combination that matches no preset shows as custom.",
+      "category": "config",
+      "surfaces": {
+        "terminal": "unknown",
+        "desktop": true,
+        "headless": false,
+        "remoteControl": "unknown"
+      },
+      "sideEffects": "Changes what the agent can run or write without asking, for this session.",
+      "signalbox": {
+        "status": "never",
+        "note": "What an agent may do is the session owner's call, made in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "0.2.2-rc.1"
+      },
+      "sourceUrl": "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/interaction/permission-presets/README.md"
+    },
+    {
+      "name": "/export",
+      "aliases": [
+        "/导出"
+      ],
+      "summary": "Download this session's log, sub-sessions and attachments as a ZIP archive.",
+      "details": "Starts a download of dsh-session-<id>.zip holding the session's full log, the logs of the sessions it delegated, and its attachments. It takes no path: the file goes wherever downloads go. The session header's menu offers the same download, and a copy of the conversation as Markdown.",
+      "category": "session",
+      "surfaces": {
+        "terminal": "unknown",
+        "desktop": true,
+        "headless": false,
+        "remoteControl": "unknown"
+      },
+      "sideEffects": "Saves an archive with the whole conversation and its attachments to your downloads.",
+      "signalbox": {
+        "status": "never",
+        "note": "Holds message content, which Signalbox never reads or shows."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "0.2.2-rc.1"
+      },
+      "sourceUrl": "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/session-query/session-log-export/README.md"
+    },
+    {
+      "name": "/model",
+      "summary": "Pick the model for this conversation from a searchable list.",
+      "details": "Opens a popup of the configured models, grouped by provider, with search. The pick applies from the next request and takes that model's default reasoning effort; a step already running keeps what it started with. The composer's model control shows the same list and also lets you choose the effort. It is not offered inside a delegated session.",
+      "category": "model",
+      "surfaces": {
+        "terminal": "unknown",
+        "desktop": true,
+        "headless": false,
+        "remoteControl": "unknown"
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Sessions shows each harness session's model and effort. Switching happens in the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "0.2.2-rc.1"
+      },
+      "sourceUrl": "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/client/ui-model-selection/README.md"
+    },
+    {
+      "name": "/file",
+      "summary": "Open the file picker to attach images or files to your message.",
+      "details": "A composer action: it sends nothing by itself. It is the File row of the menu that / and the composer's + button open, and it is offered only where files can be picked.",
+      "category": "context",
+      "surfaces": {
+        "terminal": "unknown",
+        "desktop": true,
+        "headless": false,
+        "remoteControl": "unknown"
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Composer helper inside the session."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "0.2.2-rc.1"
+      },
+      "sourceUrl": "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/client/ui-commands/README.md"
+    },
+    {
+      "name": "/office",
+      "args": "[request]",
+      "summary": "Skill: point the agent at the right Office skill for a document task.",
+      "details": "The entry point of the seven Office skills that ship with the desktop app: it tells the agent which of the other six to load for the job. Typed in a message, it adds those instructions to that request. The agent also loads it by itself when a task involves Office files.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": "unknown",
+        "desktop": true,
+        "headless": "unknown",
+        "remoteControl": "unknown"
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Runs inside the session: copy it and type it there, with your request."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "0.2.2-rc.1"
+      },
+      "sourceUrl": "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/skill/skill-office/README.md"
+    },
+    {
+      "name": "/office-docx",
+      "args": "[request]",
+      "summary": "Skill: write new Word documents and read or change existing ones (.docx).",
+      "details": "Gives the agent the harness's method for Word files: python-docx from the Python runtime that ships with the app, with nothing to install. It saves a new file unless you ask for an edit in place. Checking the pages by eye is /office-render, and a PDF copy is /office-export-pdf.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": "unknown",
+        "desktop": true,
+        "headless": "unknown",
+        "remoteControl": "unknown"
+      },
+      "sideEffects": "The agent writes .docx files in the workspace.",
+      "signalbox": {
+        "status": "no",
+        "note": "Runs inside the session: copy it and type it there, with your request."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "0.2.2-rc.1"
+      },
+      "sourceUrl": "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/skill/skill-office/README.md"
+    },
+    {
+      "name": "/office-pptx",
+      "args": "[request]",
+      "summary": "Skill: build PowerPoint decks and read or change existing ones (.pptx).",
+      "details": "Gives the agent the harness's method for decks: python-pptx from the Python runtime that ships with the app. It saves a new file unless you ask for an edit in place, and rebuilding a slide can lose animations or SmartArt.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": "unknown",
+        "desktop": true,
+        "headless": "unknown",
+        "remoteControl": "unknown"
+      },
+      "sideEffects": "The agent writes .pptx files in the workspace.",
+      "signalbox": {
+        "status": "no",
+        "note": "Runs inside the session: copy it and type it there, with your request."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "0.2.2-rc.1"
+      },
+      "sourceUrl": "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/skill/skill-office/README.md"
+    },
+    {
+      "name": "/office-xlsx",
+      "args": "[request]",
+      "summary": "Skill: read, build and change Excel workbooks, formulas included (.xlsx).",
+      "details": "Gives the agent the harness's method for workbooks: openpyxl for cells, styles and formulas and pandas for analysis, both from the Python runtime that ships with the app. It saves a new workbook unless you ask for an edit in place. Formula results are refreshed by a separate skill, /office-recalculate.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": "unknown",
+        "desktop": true,
+        "headless": "unknown",
+        "remoteControl": "unknown"
+      },
+      "sideEffects": "The agent writes .xlsx files in the workspace.",
+      "signalbox": {
+        "status": "no",
+        "note": "Runs inside the session: copy it and type it there, with your request."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "0.2.2-rc.1"
+      },
+      "sourceUrl": "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/skill/skill-office/README.md"
+    },
+    {
+      "name": "/office-render",
+      "args": "[request]",
+      "summary": "Skill: turn pages, slides or a sheet range into images to check the layout.",
+      "details": "The agent runs the bundled LibreOffice Kit command through the shell, then reads the images it made. It needs a model that accepts images. Images made only for checking go into a temporary folder inside the workspace and are removed afterwards. What LibreOffice draws can differ from Word, PowerPoint or Excel.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": "unknown",
+        "desktop": true,
+        "headless": "unknown",
+        "remoteControl": "unknown"
+      },
+      "sideEffects": "Runs a shell command, subject to the session's permission preset, and writes image files into the workspace.",
+      "signalbox": {
+        "status": "no",
+        "note": "Runs inside the session: copy it and type it there, with your request."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "0.2.2-rc.1"
+      },
+      "sourceUrl": "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/skill/skill-office/README.md"
+    },
+    {
+      "name": "/office-recalculate",
+      "args": "[request]",
+      "summary": "Skill: recompute a workbook's formulas and check the values that result.",
+      "details": "The agent runs the bundled LibreOffice Kit command through the shell, which writes a recalculated copy and keeps the original. It then reopens the copy to check that the formulas are still there and the stored values are right.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": "unknown",
+        "desktop": true,
+        "headless": "unknown",
+        "remoteControl": "unknown"
+      },
+      "sideEffects": "Runs a shell command, subject to the session's permission preset, and writes a new workbook into the workspace.",
+      "signalbox": {
+        "status": "no",
+        "note": "Runs inside the session: copy it and type it there, with your request."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "0.2.2-rc.1"
+      },
+      "sourceUrl": "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/skill/skill-office/README.md"
+    },
+    {
+      "name": "/office-export-pdf",
+      "args": "[request]",
+      "summary": "Skill: save a PDF copy of a Word, Excel or PowerPoint file.",
+      "details": "The agent runs the bundled LibreOffice Kit command through the shell to convert the saved file, leaving the source as it is. It checks only that the command succeeded and that the output is a PDF. Page breaks and fonts can differ from the original application.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": "unknown",
+        "desktop": true,
+        "headless": "unknown",
+        "remoteControl": "unknown"
+      },
+      "sideEffects": "Runs a shell command, subject to the session's permission preset, and writes a PDF into the workspace.",
+      "signalbox": {
+        "status": "no",
+        "note": "Runs inside the session: copy it and type it there, with your request."
+      },
+      "verified": {
+        "method": "binary",
+        "version": "0.2.2-rc.1"
+      },
+      "sourceUrl": "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/skill/skill-office/README.md"
+    }
+  ],
+  "cliCommands": [
+    {
+      "name": "dsh web",
+      "aliases": [
+        "dsh --profile web"
+      ],
+      "args": "[--no-open] [--port N] [--host IP]",
+      "summary": "Start the web client on this machine and open it in your browser.",
+      "details": "Serves the same chat UI as the desktop app on loopback (port 3080 by default) and prints a URL that carries a fresh token. --no-open skips the browser, --port and --host move the listener to another port or one concrete local address, --tls-cert with --tls-key serve HTTPS, and --public-url with --trusted-host are for running it behind a proxy.",
+      "category": "session",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": false,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Run it yourself in a terminal. Its sessions are logged like the desktop app's, so Signalbox lists them."
+      },
+      "verified": {
+        "method": "help",
+        "version": "0.2.2-rc.1"
+      },
+      "sourceUrl": "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/bundle/web-app/README.md"
+    },
+    {
+      "name": "dsh headless",
+      "aliases": [
+        "dsh --profile headless"
+      ],
+      "args": "[TASK|-] [--json] [--permission-mode PRESET] [--add-dir DIR]",
+      "summary": "Run one task without any UI, print the final answer and exit.",
+      "details": "The task is the argument, or stdin when it is left out or is a lone -. Reasoning goes to stderr and the answer to stdout; the exit code is 0 when the task completed and 1 when it aborted or failed. --json prints a stream of JSON events instead, --permission-mode picks a permission preset, --approval-policy ask or never sets approvals, and --add-dir grants one more writable folder. It uses keys from the environment or a .env file, not the sign-ins saved by the app, and has no slash commands.",
+      "category": "tools",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Signalbox doesn't start agent turns. Headless runs are logged like every other session, so it lists them and their usage."
+      },
+      "verified": {
+        "method": "help",
+        "version": "0.2.2-rc.1"
+      },
+      "sourceUrl": "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/bundle/headless/README.md"
+    },
+    {
+      "name": "dsh headless --session-id",
+      "args": "ID [TASK|-]",
+      "summary": "Send one more task to a saved session and print the answer.",
+      "details": "The run adopts the stored session with exactly that id and fails when there is none, rather than starting an empty one. Folder grants and policy options are per run, so give them again. It is refused while another run in the same process still owns that session.",
+      "category": "session",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "never",
+        "note": "Signalbox never sends prompts to a session."
+      },
+      "verified": {
+        "method": "help",
+        "version": "0.2.2-rc.1"
+      },
+      "sourceUrl": "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/packages/bundle/headless/README.md"
+    },
+    {
+      "name": "dsh --profile",
+      "aliases": [
+        "dsh <name>"
+      ],
+      "args": "NAME [APP-ARGS...]",
+      "summary": "Boot a named profile from the profiles folder of the harness home.",
+      "details": "A profile is an ordered stack of plugin bundles under your own overrides, kept in $DSH_HOME/profiles/NAME. Whatever follows the launcher's own flags is handed to the profile's app, so dsh web --help prints the web app's flags. The web, headless, sdk, sdk-minimal and acp profiles are created from shipped templates on first use; desktop is reserved for the desktop app.",
+      "category": "session",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": "partial",
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Launch flag; run it yourself."
+      },
+      "verified": {
+        "method": "help",
+        "version": "0.2.2-rc.1"
+      },
+      "sourceUrl": "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/apps/cli/README.md"
+    },
+    {
+      "name": "dsh --from-default-profile",
+      "args": "TEMPLATE",
+      "summary": "Replace a custom profile with a fresh copy of a shipped template, then boot it.",
+      "details": "Used with a profile name, for example dsh rescue --from-default-profile web. It is for profiles at names that are not shipped ones.",
+      "category": "config",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": "partial",
+        "remoteControl": false
+      },
+      "sideEffects": "Replaces that profile's configuration with the template's.",
+      "signalbox": {
+        "status": "never",
+        "note": "Rewrites a profile; that is yours to decide."
+      },
+      "verified": {
+        "method": "help",
+        "version": "0.2.2-rc.1"
+      },
+      "sourceUrl": "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/apps/cli/README.md"
+    },
+    {
+      "name": "dsh --patch",
+      "args": "PATH",
+      "summary": "Apply one more settings overlay on top of the profile, for this run.",
+      "details": "Repeatable. Overlays are applied after the profile's own layer and the home-level one, so they win.",
+      "category": "config",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": "partial",
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Launch flag; Signalbox never reads or writes harness settings."
+      },
+      "verified": {
+        "method": "help",
+        "version": "0.2.2-rc.1"
+      },
+      "sourceUrl": "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/apps/cli/README.md"
+    },
+    {
+      "name": "dsh --dump-config",
+      "summary": "Print the composed profile tree and exit, without booting it.",
+      "details": "Shows what a profile resolves to after every layer is applied. Use it with a profile name.",
+      "category": "debug",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "never",
+        "note": "Prints settings, which can hold keys; Signalbox never reads agent settings."
+      },
+      "verified": {
+        "method": "help",
+        "version": "0.2.2-rc.1"
+      },
+      "sourceUrl": "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/apps/cli/README.md"
+    },
+    {
+      "name": "dsh --dump-default-config",
+      "summary": "Print the profile tree without your own layer or --patch overlays, and exit.",
+      "category": "debug",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Run it yourself; Signalbox never reads agent settings."
+      },
+      "verified": {
+        "method": "help",
+        "version": "0.2.2-rc.1"
+      },
+      "sourceUrl": "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/apps/cli/README.md"
+    },
+    {
+      "name": "dsh --dump-config-schema",
+      "summary": "Print JSON Schema for profile entries and patches, without mounting them.",
+      "details": "It imports the plugins' declared schemas to do so, which matters for plugins you don't trust.",
+      "category": "debug",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "Run it yourself."
+      },
+      "verified": {
+        "method": "help",
+        "version": "0.2.2-rc.1"
+      },
+      "sourceUrl": "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/apps/cli/README.md"
+    },
+    {
+      "name": "dsh plugin",
+      "args": "--profile NAME PNPM-ARGS...",
+      "summary": "Manage a profile's plugins by handing the arguments to pnpm in its folder.",
+      "details": "For example dsh plugin --profile NAME add PACKAGE installs a plugin into that profile. The command installed from npm refuses the desktop profile; the one that ships inside the desktop app can manage it.",
+      "category": "integrations",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": "partial",
+        "remoteControl": false
+      },
+      "sideEffects": "Adds or removes packages in the profile's folder.",
+      "signalbox": {
+        "status": "never",
+        "note": "Installs code that runs inside the harness; that is yours to decide."
+      },
+      "verified": {
+        "method": "help",
+        "version": "0.2.2-rc.1"
+      },
+      "sourceUrl": "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/apps/cli/README.md"
+    },
+    {
+      "name": "dsh acp",
+      "aliases": [
+        "dsh --profile acp"
+      ],
+      "summary": "Serve automation clients over the Agent Client Protocol on stdio.",
+      "details": "Runs until the client disconnects. It has no slash commands.",
+      "category": "integrations",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "For editors and tools that speak the protocol; they start it themselves."
+      },
+      "verified": {
+        "method": "docs",
+        "version": "0.2.2-rc.1"
+      },
+      "sourceUrl": "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/apps/cli/README.md"
+    },
+    {
+      "name": "dsh sdk",
+      "aliases": [
+        "dsh --profile sdk"
+      ],
+      "summary": "Serve SDK clients over JSON-RPC on stdio until they shut it down.",
+      "details": "dsh sdk-minimal serves the standalone minimal agent tree the same way. Neither has slash commands.",
+      "category": "integrations",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "For programs built on the harness SDK; they start it themselves."
+      },
+      "verified": {
+        "method": "docs",
+        "version": "0.2.2-rc.1"
+      },
+      "sourceUrl": "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/apps/cli/README.md"
+    },
+    {
+      "name": "dsh --version",
+      "aliases": [
+        "dsh -V"
+      ],
+      "summary": "Print the harness version.",
+      "category": "info",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "view",
+        "view": "health",
+        "note": "Health and the command guide show the installed version; Signalbox runs this to read it, from PATH or from inside the desktop app."
+      },
+      "verified": {
+        "method": "observed",
+        "version": "0.2.2-rc.1"
+      },
+      "sourceUrl": "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/apps/cli/README.md"
+    },
+    {
+      "name": "dsh --help",
+      "summary": "List the launcher's own flags, with examples.",
+      "details": "A profile's app has its own help: dsh web --help.",
+      "category": "info",
+      "surfaces": {
+        "terminal": true,
+        "desktop": false,
+        "headless": true,
+        "remoteControl": false
+      },
+      "signalbox": {
+        "status": "no",
+        "note": "The command guide summarises them."
+      },
+      "verified": {
+        "method": "observed",
+        "version": "0.2.2-rc.1"
+      },
+      "sourceUrl": "https://github.com/deepseek-ai/deepseek-harness/blob/dsh-v0.2.2-rc.1/apps/cli/README.md"
+    }
+  ]
+}

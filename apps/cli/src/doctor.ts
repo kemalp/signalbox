@@ -56,7 +56,7 @@ export interface DoctorReport {
 
 export async function agentVersion(bin: AgentBinary, env: Record<string, string | undefined> = process.env, home?: string): Promise<BinaryInfo> {
   const info: BinaryInfo = { name: bin.name };
-  const found = findBinary(bin.name, { envVar: bin.envVar, env, home });
+  const found = findBinary(bin.name, { envVar: bin.envVar, env, home, appPaths: bin.appPaths });
   if (!found) {
     info.error = `not found on PATH or in the usual install dirs${bin.envVar ? ` (or set ${bin.envVar})` : ""}`;
     return info;
@@ -297,6 +297,8 @@ export async function runDoctor(opts: {
 export function binarySource(via: string | undefined): string {
   if (!via) return "";
   if (via === "PATH") return "(on PATH)";
+  // The path printed before this already names the bundle.
+  if (/\.app\//.test(via)) return "(not on PATH; found in the app's bundle)";
   if (via.startsWith("/")) return `(not on PATH; found in ${tildify(via)})`;
   return `(from $${via})`;
 }
@@ -307,18 +309,24 @@ export function formatDoctor(d: DoctorReport, width = 100): string {
   out.push(`Signalbox doctor  v${d.signalbox.version}  (bun ${d.signalbox.bun}, ${d.signalbox.platform})`);
   out.push("Read-only: this ran `<agent> --version`, `claude agents --json --all` (only when Claude Code's config file exists) and the adapters' own health checks.");
 
+  // The first column is as wide as its longest name, and never narrower than it used to be.
+  const col = (names: string[], min = 12) => Math.max(min, ...names.map((n) => n.length));
+  const agentW = col(d.agents.map((a) => a.displayName));
+  const idW = col([...d.dataDirs.map((dd) => dd.agent), ...d.usage.map((u) => u.agent)]);
+  const sourceW = col(d.sources.map((src) => src.name), 26);
+
   out.push("", "Agents");
   for (const a of d.agents) {
     const b = a.binary;
     const shim = b?.skippedShims?.length ? `  (skipped the signalbox-switch shim: ${b.skippedShims.map((p) => tildify(p)).join(", ")})` : "";
     const bin = b ? (b.path ? `${b.version ?? "version unknown"}  ${tildify(b.path)}  ${binarySource(b.via)}${shim}` : `${b.name}: ${b.error}`) : "";
     const state = a.adapter ? (a.detected ? "data found" : "no data") : "no adapter yet";
-    out.push(`  ${a.displayName.padEnd(12)} ${state.padEnd(15)} ${bin}`);
+    out.push(`  ${a.displayName.padEnd(agentW)} ${state.padEnd(15)} ${bin}`);
   }
 
   out.push("", "Data");
   for (const dd of d.dataDirs) {
-    out.push(`  ${dd.agent.padEnd(12)} ${dd.label.padEnd(14)} ${dd.exists ? "ok     " : "missing"}  ${tildify(dd.path)}`);
+    out.push(`  ${dd.agent.padEnd(idW)} ${dd.label.padEnd(14)} ${dd.exists ? "ok     " : "missing"}  ${tildify(dd.path)}`);
   }
   if (d.spool) {
     const s = d.spool;
@@ -326,12 +334,12 @@ export function formatDoctor(d: DoctorReport, width = 100): string {
       ? `mode ${s.mode}, ${s.files ?? 0} spool files${s.newestAt ? `, newest ${fmtLocal(s.newestAt)}` : ""}`
       : "missing (signalbox-tap not loaded yet)";
     const label = !s.exists ? "missing" : spoolIsOpen(s) ? "OPEN   " : "ok     ";
-    out.push(`  ${"tap".padEnd(12)} ${"spool".padEnd(14)} ${label}  ${tildify(s.path)}  ${s.exists ? state : ""}`.trimEnd());
+    out.push(`  ${"tap".padEnd(idW)} ${"spool".padEnd(14)} ${label}  ${tildify(s.path)}  ${s.exists ? state : ""}`.trimEnd());
   }
 
   out.push("", "Sources  (stability: documented > preview > internal; internal formats can change in any release)");
   for (const s of d.sources) {
-    const head = `  ${s.ok ? "ok  " : "FAIL"}  ${`[${s.stability}]`.padEnd(12)} ${s.name.padEnd(26)} `;
+    const head = `  ${s.ok ? "ok  " : "FAIL"}  ${`[${s.stability}]`.padEnd(12)} ${s.name.padEnd(sourceW)} `;
     const home = homedir();
     const detail = home ? s.detail.split(home).join("~") : s.detail;
     out.push(wrap(head, detail, w));
@@ -353,7 +361,7 @@ export function formatDoctor(d: DoctorReport, width = 100): string {
     for (const u of d.usage) {
       const unpriced = Object.entries(u.unpriced);
       out.push(
-        `  ${u.agent.padEnd(12)} ${fmtInt(u.responses).padStart(7)} ${u.responses === 1 ? "response" : "responses"}, ${plural(u.models, "model")}, ${unpriced.length ? `${unpriced.length} unpriced` : "all priced"}, ${u.hashKeyed} hash-keyed  (scan ${u.scanMs} ms)`,
+        `  ${u.agent.padEnd(idW)} ${fmtInt(u.responses).padStart(7)} ${u.responses === 1 ? "response" : "responses"}, ${plural(u.models, "model")}, ${unpriced.length ? `${unpriced.length} unpriced` : "all priced"}, ${u.hashKeyed} hash-keyed  (scan ${u.scanMs} ms)`,
       );
     }
   }

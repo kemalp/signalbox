@@ -621,6 +621,7 @@ beforeAll(() => {
     HOME: join(root, "home"),
     CLAUDE_CONFIG_DIR: claude,
     CODEX_HOME: join(root, "home", ".codex"),
+    DSH_HOME: join(root, "home", ".dsh"),
     SIGNALBOX_CLAUDE_BIN: "/nonexistent",
     SIGNALBOX_BIN_DIRS: "",
     SIGNALBOX_CLAUDE_MANAGED_SETTINGS_DIR: "",
@@ -690,7 +691,7 @@ describe("signalbox watch --ndjson (spawned)", () => {
       const commands = (await w.waitFor((l) => l.type === "commands")) as Extract<WatchLine, { type: "commands" }>;
       expect(w.lines.filter((l) => l.type === "commands")).toHaveLength(1);
       expect(Object.keys(commands.data)).toEqual(["v", "generatedAt", "installed", "catalogs", "custom"]);
-      expect(commands.data.catalogs.map((c) => c.agent)).toEqual(["claude-code", "codex", "gemini-cli"]);
+      expect(commands.data.catalogs.map((c) => c.agent)).toEqual(["claude-code", "codex", "deepseek-harness", "gemini-cli"]);
       // No agent binaries in the sandbox: versions unknown, so absent.
       expect(commands.data.installed).toEqual({});
 
@@ -823,6 +824,7 @@ describe("watch --ndjson status pushes (spawned)", () => {
       HOME: home,
       CLAUDE_CONFIG_DIR: claude,
       CODEX_HOME: join(home, ".codex"),
+      DSH_HOME: join(home, ".dsh"),
       SIGNALBOX_CLAUDE_BIN: fake,
       SIGNALBOX_BIN_DIRS: "",
       SIGNALBOX_CLAUDE_MANAGED_SETTINGS_DIR: "",

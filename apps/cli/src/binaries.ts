@@ -1,8 +1,9 @@
 // Finds agent CLIs (claude, codex, gemini). A Finder-launched app hands its children
 // PATH=/usr/bin:/bin:/usr/sbin:/sbin, so a PATH lookup alone misses every usual install location.
-// Order: the override variable, PATH, then the fallback directories below. Only stat() is used, plus the first
-// bytes of a candidate, to skip signalbox-switch's `claude` shim (docs/SWITCH.md §3): Signalbox's own `claude
-// agents --json` must run the real binary, never the account the shim's pointer picks.
+// Order: the override variable, PATH, the fallback directories below, then an agent's own app-bundle paths.
+// Only stat() is used, plus the first bytes of a candidate, to skip signalbox-switch's `claude` shim
+// (docs/SWITCH.md §3): Signalbox's own `claude agents --json` must run the real binary, never the account the
+// shim's pointer picks.
 import { accessSync, constants, readdirSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { delimiter, dirname, isAbsolute, join } from "node:path";
@@ -28,6 +29,11 @@ export interface DiscoveryOptions {
   home?: string;
   /** Default: /opt/homebrew/bin and /usr/local/bin. */
   systemDirs?: readonly string[];
+  /**
+   * Full paths tried last: the launcher inside an agent's app bundle, for an app that puts no command on PATH
+   * unless asked. "~/" is the home. Like the fallback directories, they are left out when $SIGNALBOX_BIN_DIRS is set.
+   */
+  appPaths?: readonly string[];
 }
 
 function isExecutableFile(path: string): boolean {
@@ -81,7 +87,7 @@ export function fallbackDirs(opts: Omit<DiscoveryOptions, "envVar"> = {}): strin
   ];
 }
 
-/** Locates `name`: the override variable, then PATH, then {@link fallbackDirs}. Undefined when nowhere. */
+/** Locates `name`: the override variable, then PATH, then {@link fallbackDirs}, then `appPaths`. Undefined when nowhere. */
 export function findBinary(name: string, opts: DiscoveryOptions = {}): FoundBinary | undefined {
   const env = opts.env ?? process.env;
   const override = opts.envVar ? env[opts.envVar] : undefined;
@@ -102,6 +108,12 @@ export function findBinary(name: string, opts: DiscoveryOptions = {}): FoundBina
   for (const dir of fallbackDirs(opts)) {
     const p = join(dir, name);
     if (pick(p)) return found(p, dir);
+  }
+  if (env[BIN_DIRS_ENV] !== undefined) return undefined;
+  const home = opts.home ?? homedir();
+  for (const raw of opts.appPaths ?? []) {
+    const p = raw.startsWith("~/") ? (home ? join(home, raw.slice(2)) : undefined) : raw;
+    if (p && isAbsolute(p) && pick(p)) return found(p, dirname(p));
   }
   return undefined;
 }

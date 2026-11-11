@@ -1,0 +1,24 @@
+{
+  "provider": "moonshot",
+  "asOf": "2026-11-10",
+  "sourceUrl": "https://platform.kimi.ai/docs/pricing/chat",
+  "currency": "USD",
+  "models": {
+    "kimi-k3.1-pro": { "input": 2, "output": 10, "cacheRead": 0.2, "cacheWrite5m": 2, "cacheWrite1h": 4 },
+    "kimi-k3.1-pro:cloud": { "input": 2, "output": 10, "cacheRead": 0.2, "cacheWrite5m": 2, "cacheWrite1h": 4 },
+    "kimi-k3.1-pro-highspeed": { "input": 4, "output": 20, "cacheRead": 0.2, "cacheWrite5m": 4, "cacheWrite1h": 8 },
+    "kimi-k3": { "input": 3, "output": 15, "cacheRead": 0.3, "cacheWrite5m": 3, "cacheWrite1h": 6 },
+    "kimi-k2.7-code": { "input": 0.95, "output": 4, "cacheRead": 0.19, "cacheWrite5m": 0.95, "cacheWrite1h": 0.95 },
+    "kimi-k2.7-code-highspeed": { "input": 1.9, "output": 8, "cacheRead": 0.38, "cacheWrite5m": 1.9, "cacheWrite1h": 1.9 },
+    "kimi-k2.6": { "input": 0.95, "output": 4, "cacheRead": 0.16, "cacheWrite5m": 0.95, "cacheWrite1h": 0.95 }
+  },
+  "notes": [
+    "Kimi API Platform (Moonshot AI) list prices, USD per 1M tokens, read from platform.kimi.ai/docs/pricing/chat on 2026-11-10 (platform.moonshot.ai redirects there). Prices exclude taxes.",
+    "K3 series (kimi-k3.1-pro, kimi-k3.1-pro-highspeed, kimi-k3): the page's Input, Output, Cached Input, 5m writes and 1h writes columns, as they are.",
+    "K2 series (kimi-k2.7-code, kimi-k2.7-code-highspeed, kimi-k2.6): the page lists Input, Output and Cached Input only, and says cache writes are billed separately 'for K3 series models'. K2 cache writes are therefore priced as ordinary input in both write columns. The page plans to retire the K2 series by the end of December 2026; the rows stay for old logs.",
+    "kimi-k3.1-pro:cloud is not a Kimi API id. It is Ollama Cloud's tag for Kimi K3.1 Pro, as DeepSeek Harness session logs record it. Ollama Cloud has no per-token price list, so that usage is priced at the model maker's own kimi-k3.1-pro rates: what the same tokens would cost at the Kimi API. Remove the row to leave it unpriced instead.",
+    "The DeepSeek Harness logs one cache-write count with no TTL. It is priced at the 5m rate, the Kimi API's default TTL.",
+    "The Batch API (60% of the standard price for kimi-k3.1-pro and kimi-k3) is not modelled, because agent logs don't record it.",
+    "Only exact model ids are listed, no prefix keys."
+  ]
+}

@@ -122,7 +122,7 @@ function Footer({ report, now }: { report: Report | undefined; now: number }) {
         </ul>
       ) : null}
       <div>
-        Signalbox is unofficial and not affiliated with or endorsed by Anthropic, OpenAI or Google. It reads files on
+        Signalbox is unofficial and not affiliated with or endorsed by Anthropic, OpenAI, Google or DeepSeek. It reads files on
         this machine, needs no credentials, and sends nothing anywhere.
       </div>
     </footer>

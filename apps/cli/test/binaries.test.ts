@@ -108,6 +108,22 @@ describe("findBinary", () => {
     const shim = exe(join(home, ".asdf", "shims"), "gemini");
     expect(findBinary("gemini", opts())).toEqual({ path: shim, via: join(home, ".asdf/shims") });
   });
+
+  test("an app bundle's own launcher is tried last, and never when the fallbacks are overridden", () => {
+    const system = exe(join(root, "Applications", "Some Agent.app", "Contents", "Resources", "cli", "bin"), "agentx");
+    const user = exe(join(home, "Applications", "Some Agent.app", "Contents", "Resources", "cli", "bin"), "agentx");
+    const appPaths = [join(root, "missing", "agentx"), "relative/agentx", system, "~/Applications/Some Agent.app/Contents/Resources/cli/bin/agentx"];
+    expect(findBinary("agentx", opts())).toBeUndefined();
+    expect(findBinary("agentx", { ...opts(), appPaths })).toEqual({ path: system, via: join(root, "Applications", "Some Agent.app", "Contents", "Resources", "cli", "bin") });
+    expect(findBinary("agentx", { ...opts(), appPaths: appPaths.slice(3) })?.path).toBe(user);
+    // A copy in a fallback directory, or on PATH, comes first.
+    const brew = exe(sys[1]!, "agentx");
+    expect(findBinary("agentx", { ...opts(), appPaths })?.path).toBe(brew);
+    rmSync(brew);
+    // $SIGNALBOX_BIN_DIRS replaces every fallback, the app paths included: tests never reach a real install.
+    expect(findBinary("agentx", { ...opts({ [BIN_DIRS_ENV]: "" }), appPaths })).toBeUndefined();
+    expect(findBinary("agentx", { ...opts({ [BIN_DIRS_ENV]: sys[0]! }), appPaths })).toBeUndefined();
+  });
 });
 
 describe("envForBinary", () => {
@@ -128,6 +144,7 @@ describe("doctor agentVersion", () => {
     expect(binarySource(info.via)).toBe(`(not on PATH; found in ${dir})`);
     expect(binarySource("PATH")).toBe("(on PATH)");
     expect(binarySource("SIGNALBOX_CLAUDE_BIN")).toBe("(from $SIGNALBOX_CLAUDE_BIN)");
+    expect(binarySource("/Applications/Some Agent.app/Contents/Resources/cli/bin")).toBe("(not on PATH; found in the app's bundle)");
   });
 
   test("not found anywhere says so", async () => {

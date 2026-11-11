@@ -115,7 +115,7 @@ cat > "$app/Contents/Info.plist" <<'PLIST'
   <key>LSApplicationCategoryType</key>
   <string>public.app-category.developer-tools</string>
   <key>NSHumanReadableCopyright</key>
-  <string>Unofficial. Not affiliated with Anthropic, OpenAI or Google.</string>
+  <string>Unofficial. Not affiliated with Anthropic, OpenAI, Google or DeepSeek.</string>
   <key>NSHighResolutionCapable</key>
   <true/>
   <key>NSPrincipalClass</key>

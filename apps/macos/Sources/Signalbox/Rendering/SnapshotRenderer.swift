@@ -674,6 +674,12 @@ enum SnapshotRenderer {
             c.navigation.commandFilter = CommandFilter(agent: .geminiCLI)
             c.navigation.selectedCommandID = id(.geminiCLI, "/compress")
         }
+        // DeepSeek Harness: commands with a second, Chinese name and the skills it ships; one that is never offered selected.
+        shot("commands-deepseek") { c in
+            c.navigation.section = .commands
+            c.navigation.commandFilter = CommandFilter(agent: .deepseekHarness)
+            c.navigation.selectedCommandID = id(.deepseekHarness, "/permission")
+        }
         shot("commands-search") { c in
             c.navigation.section = .commands
             c.navigation.commandFilter = CommandFilter(query: "compact")

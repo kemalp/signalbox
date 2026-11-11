@@ -72,7 +72,7 @@ export class CommandGuide {
     const env = this.opts.env ?? process.env;
     const found = await Promise.all(
       (this.opts.bins ?? agentBinaries()).map(async ({ agent, bin }) => {
-        const where = findBinary(bin.name, { envVar: bin.envVar, env, home: this.opts.home });
+        const where = findBinary(bin.name, { envVar: bin.envVar, env, home: this.opts.home, appPaths: bin.appPaths });
         if (!where) return undefined;
         const st = await stat(where.path).catch(() => undefined);
         if (!st?.isFile()) return undefined;

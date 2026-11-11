@@ -104,11 +104,20 @@ export function fmtCountdown(iso: string | undefined, now: number): string {
 const AGENT_LABELS: Record<string, string> = {
   "claude-code": "Claude Code",
   codex: "Codex",
+  "deepseek-harness": "DeepSeek Harness",
   "gemini-cli": "Gemini",
 };
 
 export function agentLabel(id: AgentId): string {
   return AGENT_LABELS[id] ?? id;
+}
+
+/**
+ * False for an agent whose files hold no plan-limit readings at all. DeepSeek Harness runs on whichever provider
+ * a session picks and logs no limits of any of them.
+ */
+export function recordsPlanLimits(id: AgentId): boolean {
+  return id !== "deepseek-harness";
 }
 
 /** Stable display order: known agents first, then the rest alphabetically. */

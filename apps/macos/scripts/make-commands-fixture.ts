@@ -8,7 +8,7 @@ import { join } from "node:path";
 
 const REPO = join(import.meta.dir, "..", "..", "..");
 const CATALOG_DIR = join(REPO, "catalog", "commands");
-const ORDER = ["claude-code", "codex", "gemini-cli"];
+const ORDER = ["claude-code", "codex", "deepseek-harness", "gemini-cli"];
 
 const catalogs = readdirSync(CATALOG_DIR)
   .filter((f) => f.endsWith(".json"))
@@ -20,7 +20,8 @@ const catalogs = readdirSync(CATALOG_DIR)
   });
 
 // Claude Code matches its catalog, Codex is a newer release than the one its catalog was checked against
-// (the app says so), and Gemini CLI is not installed (absent), so every version state shows up in renders.
+// (the app says so), and DeepSeek Harness and Gemini CLI are not installed (absent), so every version state
+// shows up in renders.
 const installed: Record<string, string> = { "claude-code": "2.1.293", codex: "0.162.1" };
 
 const PROJECT = "/Users/you/code/storefront";
@@ -34,6 +35,8 @@ const custom = [
   { agent: "codex", name: "$api-docs", description: "Regenerate the API reference from the OpenAPI file", kind: "skill", scope: "project", source: ".agents/skills/api-docs/SKILL.md", project: PROJECT },
   // A legacy Codex prompt (~/.codex/prompts): the CLI still lists them, the app marks them as legacy.
   { agent: "codex", name: "/prompts:draft-pr", description: "Draft a pull request body from the staged changes", kind: "prompt", scope: "user", source: "~/.codex/prompts/draft-pr.md" },
+  // A DeepSeek Harness skill: typed as /name, like its built-in commands.
+  { agent: "deepseek-harness", name: "/release-check", description: "Check the release branch before tagging", kind: "skill", scope: "user", source: "~/.dsh/skills/release-check/SKILL.md" },
 ];
 
 const out = { v: 1, generatedAt: "2026-10-09T14:30:00.000Z", installed, catalogs, custom };

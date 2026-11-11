@@ -54,7 +54,7 @@ describe("args", () => {
   });
 
   test("every agent with a catalog has a binary to ask for its version", () => {
-    expect([...CATALOG_AGENTS]).toEqual(["claude-code", "codex", "gemini-cli"]);
+    expect([...CATALOG_AGENTS]).toEqual(["claude-code", "codex", "deepseek-harness", "gemini-cli"]);
     expect(agentBinaries().map((b) => b.agent).sort()).toEqual([...CATALOG_AGENTS]);
   });
 });
@@ -194,6 +194,7 @@ describe("signalbox commands (spawned)", () => {
       HOME: home,
       CLAUDE_CONFIG_DIR: claude,
       CODEX_HOME: join(home, ".codex"),
+      DSH_HOME: join(home, ".dsh"),
       SIGNALBOX_CLAUDE_BIN: join(sandbox, "fake-claude"),
       SIGNALBOX_BIN_DIRS: "",
       SIGNALBOX_CLAUDE_MANAGED_SETTINGS_DIR: "",
@@ -215,7 +216,7 @@ describe("signalbox commands (spawned)", () => {
     expect(Object.keys(snap)).toEqual(["v", "generatedAt", "installed", "catalogs", "custom"]);
     expect(snap.v).toBe(1);
     expect(snap.installed).toEqual({ "claude-code": "2.1.293", codex: "0.161.0" });
-    expect(snap.catalogs.map((c) => c.agent)).toEqual(["claude-code", "codex", "gemini-cli"]);
+    expect(snap.catalogs.map((c) => c.agent)).toEqual(["claude-code", "codex", "deepseek-harness", "gemini-cli"]);
     expect(snap.custom).toEqual([
       { agent: "claude-code", name: "/review", description: "Review the diff", kind: "command", scope: "user", source: "~/.claude/commands/review.md" },
       {

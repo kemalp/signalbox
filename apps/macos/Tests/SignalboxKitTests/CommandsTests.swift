@@ -8,10 +8,31 @@ struct CommandDecodingTests {
         let c = try TestPaths.loadCommands()
         #expect(c.v == 1)
         #expect(c.generatedAt == date("2026-10-09T14:30:00.000Z"))
-        #expect(c.catalogs.map(\.agent) == [.claudeCode, .codex, .geminiCLI])
+        #expect(c.catalogs.map(\.agent) == [.claudeCode, .codex, .deepseekHarness, .geminiCLI])
         #expect(c.installedVersion(.claudeCode) == "2.1.293")
+        #expect(c.installedVersion(.deepseekHarness) == nil)
         #expect(c.installedVersion(.geminiCLI) == nil)
-        #expect(c.agents == [.claudeCode, .codex, .geminiCLI])
+        #expect(c.agents == [.claudeCode, .codex, .deepseekHarness, .geminiCLI])
+
+        // DeepSeek Harness: eight commands of its own (the host's with their Chinese spelling as an alias)
+        // and the seven Office skills it ships.
+        let harness = try #require(c.catalog(for: .deepseekHarness))
+        #expect(harness.verifiedVersion == "0.2.2-rc.1")
+        #expect(harness.commands.map(\.name) == [
+            "/goal", "/plan", "/feedback", "/compact", "/permission", "/export", "/model", "/file",
+            "/office", "/office-docx", "/office-pptx", "/office-xlsx", "/office-render", "/office-recalculate", "/office-export-pdf",
+        ])
+        let harnessCompact = try #require(harness.command(["/compact"]))
+        #expect(harnessCompact.aliases == ["/压缩"])
+        #expect(harnessCompact.surfaces.desktop == .yes)
+        #expect(harnessCompact.surfaces.headless == .no)
+        #expect(harnessCompact.signalbox.status == .no)
+        #expect(harness.command(["/permission"])?.signalbox.status == .never)
+        let officeRender = try #require(harness.command(["/office-render"]))
+        #expect(officeRender.category == .tools)
+        #expect(officeRender.surfaces.desktop == .yes)
+        #expect(officeRender.surfaces.headless == .unknown)
+        #expect(officeRender.sideEffects != nil)
 
         let claude = try #require(c.catalog(for: .claudeCode))
         #expect(claude.verifiedVersion == "2.1.293")
@@ -33,8 +54,9 @@ struct CommandDecodingTests {
             #expect(decoded.commands.count == (r["commands"] as? [Any])?.count)
             #expect(decoded.cliCommands.count == (r["cliCommands"] as? [Any])?.count)
         }
-        #expect(c.custom.count == 8)
+        #expect(c.custom.count == 9)
         #expect(c.custom.contains { $0.scope == .project && $0.project == "/Users/you/code/storefront" })
+        #expect(c.custom.filter { $0.agent == .deepseekHarness }.map(\.name) == ["/release-check"])
     }
 
     /// The fixture uses only values this app knows by name, so a new value the CLI starts sending (which
@@ -215,7 +237,7 @@ struct CommandStoreTests {
     @Test func theDebugLogCountsWithoutNames() throws {
         let line = DebugLog.describe(.commands(at: nil, try TestPaths.loadCommands()))
         #expect(line.hasPrefix("commands catalogs=[claude-code="))
-        #expect(line.contains("custom=8"))
+        #expect(line.contains("custom=9"))
         #expect(!line.contains("release-notes"))
     }
 }
@@ -455,6 +477,15 @@ struct SessionSuggestionTests {
         #expect(codex[0].plannedNote == nil)
         let gemini = SessionSuggestions.suggest(for: session(.geminiCLI, status: .idle, tokens: 900_000), commands: data, now: now)
         #expect(gemini.map(\.command) == ["/compress"])
+    }
+
+    @Test func aHarnessSessionGetsCompactAndNoClear() throws {
+        // DeepSeek Harness has /compact, and no command that starts a fresh conversation.
+        let s = SessionSuggestions.suggest(for: session(.deepseekHarness, status: .idle, since: 3 * 3600, tokens: 210_000, window: 256_000), commands: data, now: now)
+        #expect(s.map(\.command) == ["/compact"])
+        let compact = try #require(s.first)
+        #expect(compact.reason == "Context 82% full · ≈210K of 256K")
+        #expect(compact.plannedNote == nil)
     }
 
     @Test func onlyCommandsFromTheCatalogAreSuggested() {

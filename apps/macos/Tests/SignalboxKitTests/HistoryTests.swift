@@ -519,6 +519,14 @@ struct HistoryResumeTests {
         #expect(HistoryBrowser.resumeLine(entry("s", last: now, project: "/p")) == nil)
     }
 
+    /// DeepSeek Harness has no resume command at all; the inspector says so instead of blaming the CLI.
+    @Test func noResumeExplanationNamesTheAgentThatHasNone() {
+        let dsh = entry("session-d5a1", last: now, agent: .deepseekHarness, project: "/p")
+        #expect(HistoryBrowser.resumeLine(dsh) == nil)
+        #expect(HistoryBrowser.noResumeExplanation(dsh) == "DeepSeek Harness has no one command that reopens a session. Open it in the app it ran in.")
+        #expect(HistoryBrowser.noResumeExplanation(entry("s", last: now, project: "/p")) == "The CLI didn't send a resume command for this session.")
+    }
+
     /// A `cd` into a deleted folder would fail and stop the command after it, so the line leaves it out and the
     /// inspector says why.
     @Test func aFolderThatIsGoneGetsNoCd() {

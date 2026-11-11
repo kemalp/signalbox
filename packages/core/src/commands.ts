@@ -3,6 +3,7 @@
 import { fileURLToPath } from "node:url";
 import claudeCodeCommands from "../../../catalog/commands/claude-code.json" with { type: "json" };
 import codexCommands from "../../../catalog/commands/codex.json" with { type: "json" };
+import deepseekHarnessCommands from "../../../catalog/commands/deepseek-harness.json" with { type: "json" };
 import geminiCliCommands from "../../../catalog/commands/gemini-cli.json" with { type: "json" };
 import type { CommandCatalog } from "./types.ts";
 
@@ -13,6 +14,7 @@ export const DEFAULT_COMMAND_CATALOG_DIR: string = fileURLToPath(new URL("../../
 const EMBEDDED_CATALOGS: Readonly<Record<string, unknown>> = {
   "claude-code.json": claudeCodeCommands,
   "codex.json": codexCommands,
+  "deepseek-harness.json": deepseekHarnessCommands,
   "gemini-cli.json": geminiCliCommands,
 };
 

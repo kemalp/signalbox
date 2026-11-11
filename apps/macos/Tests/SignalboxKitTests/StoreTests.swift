@@ -209,6 +209,22 @@ struct StoreTests {
         #expect(store.limits(for: .claudeCode).first?.kind == "five_hour")
     }
 
+    /// DeepSeek Harness logs no plan limits, so its sessions alone don't earn it an "unknown" limits card; a
+    /// reading, should one ever arrive, does.
+    @Test func anAgentThatRecordsNoPlanLimitsGetsNoEmptyLimitCard() {
+        let store = makeStore()
+        let dsh = FleetSession(agent: .deepseekHarness, sessionId: "session-d5a1", status: .busy)
+        let codex = FleetSession(agent: .codex, sessionId: "019a", status: .idle)
+        store.handle(.message(.fleet(at: t0, FleetSnapshot(generatedAt: t0, sessions: [dsh, codex]))))
+        #expect(store.activeSessionsByAgent.map(\.agent) == [.codex, .deepseekHarness])
+        #expect(store.limitAgents == [.claudeCode, .codex])
+        #expect(AgentID.deepseekHarness.recordsPlanLimits == false)
+        #expect(AgentID.codex.recordsPlanLimits && AgentID(rawValue: "cursor-agent").recordsPlanLimits)
+        let reading = LimitSnapshot(agent: .deepseekHarness, kind: "five_hour", usedPercent: 10, observedAt: t0)
+        store.handle(.message(.fleet(at: t0, FleetSnapshot(generatedAt: t0, sessions: [dsh], limits: [reading]))))
+        #expect(store.limitAgents == [.claudeCode, .deepseekHarness])
+    }
+
     @Test func limitStatesAndMenuBarPercent() throws {
         let store = makeStore()
         let snapshot = try TestPaths.loadSnapshot()
