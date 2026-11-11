@@ -5,13 +5,16 @@ import SwiftUI
 /// login) is drawn with a dashed outline. Nothing is drawn for an unknown account: rows stay quiet, and the inspector
 /// says "Account unknown".
 struct AccountChip: View {
-    @Environment(SignalboxStore.self) private var store
+    // Optional on purpose: SwiftUI can build this chip with no environment at all. When a list is taken down while
+    // AppKit is still resizing it (its inspector is sliding in or out), AppKit asks for the rows it had put off, and
+    // SwiftUI builds them in a view tree it has already emptied. The plain form traps there.
+    @Environment(SignalboxStore.self) private var store: SignalboxStore?
     let account: AccountRef?
     /// The widest the name may be (the chip adds 12 pt of padding).
     var maxWidth: CGFloat = 110
 
     var body: some View {
-        if let account {
+        if let account, let store {
             let name = store.accountName(account.id)
             Text(name)
                 .font(.caption2.weight(.semibold))
