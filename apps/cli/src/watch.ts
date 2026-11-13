@@ -38,6 +38,10 @@
 // the user's labels from Signalbox's accounts.json and live session counts), and Claude Code sessions and history
 // entries name their `configDir` when it is known (one config dir holds the session's registry row or transcript).
 //
+// Usage by account (also additive): report lines add `byAccount` (core AccountTotals[]: the in-range usage of the
+// sessions under each account, keyed by account id or "unknown", with session, inferred and conflict counts),
+// `accountAgents` (the agents it covers: Claude Code) and `byDay[].byAccount`. Absent when no account data was read.
+//
 // Retention (also additive): the fleet adds `retention` (core RetentionInfo[]: per Claude Code config dir, the
 // cleanupPeriodDays in force as far as the managed settings and the dir's settings.json say, where it comes from,
 // an `invalid` value as written, or a `problem` when a file couldn't be read). Raw values only: whether a period is

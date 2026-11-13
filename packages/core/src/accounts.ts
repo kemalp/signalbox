@@ -3,7 +3,7 @@
 // ids never travel further than the parse; this module picks one account per session and one reading per gauge.
 import { createHash } from "node:crypto";
 import { sanitizeTitle } from "./history.ts";
-import type { AccountEvidence, AccountInfo, AccountRef, AccountSource, LimitSnapshot } from "./types.ts";
+import type { AccountEvidence, AccountInfo, AccountRef, AccountSource, LimitSnapshot, ResolvedAccount } from "./types.ts";
 
 /** The vendor UUID shape (Claude Code account and organization ids). Anything else is not used. */
 const VENDOR_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -58,12 +58,6 @@ function newest(list: readonly AccountEvidence[]): AccountEvidence | undefined {
   let best: AccountEvidence | undefined;
   for (const e of list) if (!best || (e.atMs ?? -Infinity) > (best.atMs ?? -Infinity)) best = e;
   return best;
-}
-
-export interface ResolvedAccount {
-  account?: AccountRef;
-  /** Recorded evidence named more than one account; `account` is the newest. */
-  conflict: boolean;
 }
 
 /**

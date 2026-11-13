@@ -352,3 +352,67 @@ describe("buildReport", () => {
     expect(inverted.totals.responses).toBe(0);
   });
 });
+
+describe("buildReport byAccount", () => {
+  const max = { id: "acct-aaaaaaaaaaaa", orgKnown: true, source: "claude-app-folder", quality: "recorded" } as const;
+  const team = { id: "acct-bbbbbbbbbbbb", orgKnown: true, source: "config-login", quality: "inferred" } as const;
+  const records = [
+    rec({ sessionId: "s1", tokens: { input: 1000, output: 100 } }),
+    rec({ sessionId: "s1", ts: "2026-10-06T12:00:00Z", tokens: { input: 500 } }),
+    rec({ sessionId: "s2", tokens: { input: 2000, output: 300 } }),
+    rec({ sessionId: "s3", tokens: { input: 50 } }),
+    rec({ sessionId: "s4", ts: "2026-09-20T12:00:00Z", tokens: { input: 9999 } }),
+    rec({ agent: "codex", sessionId: "c1", model: "gpt-5.5", tokens: { input: 700 } }),
+  ];
+  const accounts = new Map([
+    [
+      "claude-code",
+      new Map([
+        ["s1", { account: max, conflict: true }],
+        ["s2", { account: team, conflict: false }],
+        ["s4", { account: max, conflict: false }],
+      ]),
+    ],
+  ]);
+
+  test("is absent without account data", () => {
+    const r = buildReport({ ...WEEK, records });
+    expect(r.byAccount).toBeUndefined();
+    expect(r.accountAgents).toBeUndefined();
+    expect(r.byDay[0]!.byAccount).toBeUndefined();
+  });
+
+  test("splits the account agents' in-range usage by session account, unknown last, and sums to their byAgent row", () => {
+    const r = buildReport({ ...WEEK, records, accounts });
+    expect(r.accountAgents).toEqual(["claude-code"]);
+    const rows = r.byAccount!;
+    expect(rows.map((x) => x.key)).toEqual(expect.arrayContaining([max.id, team.id, "unknown"]));
+    expect(rows.at(-1)!.key).toBe("unknown");
+    const byKey = Object.fromEntries(rows.map((x) => [x.key, x]));
+    expect(byKey[max.id]!.tokens.input).toBe(1500);
+    expect(byKey[max.id]!.responses).toBe(2);
+    expect(byKey[max.id]!.sessions).toBe(1);
+    expect(byKey[max.id]!.conflictSessions).toBe(1);
+    expect(byKey[team.id]!.inferredSessions).toBe(1);
+    expect(byKey.unknown!.tokens.input).toBe(50);
+    // s4 is out of range; codex has no accounts.
+    const cc = r.byAgent.find((g) => g.key === "claude-code")!;
+    const sum = rows.reduce((a, x) => a + x.cost.total, 0);
+    expect(sum).toBeCloseTo(cc.cost.total, 12);
+    expect(rows.reduce((a, x) => a + x.tokens.input, 0)).toBe(cc.tokens.input);
+    expect(rows.reduce((a, x) => a + x.responses, 0)).toBe(cc.responses);
+    const day6 = r.byDay.find((d) => d.key === "2026-10-06")!;
+    expect(day6.byAccount!.map((x) => x.key)).toEqual([max.id]);
+    expect(r.byDay.find((d) => d.key === "2026-10-02")!.byAccount).toEqual([]);
+    expect(r.notes.some((n) => n.startsWith("By account: 1 session has its account inferred"))).toBe(true);
+    expect(r.notes.some((n) => n.startsWith("By account: 1 session named more than one account"))).toBe(true);
+  });
+
+  test("leaves totals and the other groups unchanged", () => {
+    const a = buildReport({ ...WEEK, records });
+    const b = buildReport({ ...WEEK, records, accounts });
+    expect(b.totals).toEqual(a.totals);
+    expect(b.byAgent).toEqual(a.byAgent);
+    expect(b.estimate).toEqual(a.estimate);
+  });
+});

@@ -97,6 +97,7 @@ struct AccountsView: View {
 
 private struct AccountCard: View {
     @Environment(SignalboxStore.self) private var store
+    @Environment(NavigationModel.self) private var nav
     @Environment(\.money) private var money
     let account: AccountInfo
     let now: Date
@@ -136,6 +137,29 @@ private struct AccountCard: View {
                 }
                 LabeledContent("Live sessions") {
                     Text("\(account.liveSessions ?? 0)").monospacedDigit()
+                }
+                if let usage = store.accountUsage(account.id) {
+                    LabeledContent {
+                        HStack(spacing: 6) {
+                            Text(usage.responses == 0 ? "No usage" : "\(money.amount(usage.cost.total)) · \(Fmt.count(usage.responses)) responses · \(Fmt.tokens(usage.tokens.processed)) tokens")
+                                .monospacedDigit()
+                                .help("\(Fmt.listPriceNote). \(usage.sessions ?? 0) \(usage.sessions == 1 ? "session" : "sessions") in this window")
+                            if let n = usage.inferredSessions, n > 0 {
+                                Tag(text: n == usage.sessions ? "inferred" : "\(n)/\(usage.sessions ?? n) inferred", color: Theme.warning, systemImage: "questionmark.circle")
+                                    .help("Account taken from a config folder's current login: usage from before a login change there can sit under the newer account")
+                            }
+                            Button {
+                                nav.usageGrouping = .account
+                                nav.section = .usage
+                            } label: {
+                                Image(systemName: "chart.bar")
+                            }
+                            .buttonStyle(.borderless)
+                            .help("Show usage by account")
+                        }
+                    } label: {
+                        Text("Usage, \(UsageRange.describe(days: store.reportDays ?? store.range.days).lowercased())")
+                    }
                 }
                 LabeledContent("In History") {
                     Text(past.isEmpty ? "None" : "\(past.count) \(past.count == 1 ? "session" : "sessions")\(cost.map { " · \(money.amount($0))" } ?? "")")

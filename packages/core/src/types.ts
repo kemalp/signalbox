@@ -316,6 +316,11 @@ export interface Adapter {
   listHistory?(opts?: HistoryOptions): Promise<HistorySession[]>;
   /** Every account this adapter has seen evidence of so far (hashed ids only), for FleetSnapshot.accounts. */
   readAccounts?(): Promise<AccountInfo[]>;
+  /**
+   * The account of each listed session (resolveAccount over the same evidence as the history), for Report.byAccount.
+   * Only adapters whose agent has accounts implement it; a session left out of the map is unknown.
+   */
+  sessionAccounts?(sessionIds: Iterable<string>): Promise<Map<string, ResolvedAccount>>;
   /** How long each config dir keeps transcripts (one settings value per dir, nothing else), for FleetSnapshot.retention. */
   readRetention?(): Promise<RetentionInfo[]>;
 }
@@ -341,6 +346,22 @@ export interface GroupTotals extends Totals {
 export interface DayTotals extends GroupTotals {
   byModel?: GroupTotals[];
   byKind?: GroupTotals[];
+  /** Split by account (keys as in Report.byAccount); set when the report has byAccount. */
+  byAccount?: GroupTotals[];
+}
+
+/**
+ * A byAccount row: the in-range usage of the sessions that ran under one subscription. `key` is the account id, or
+ * UNKNOWN_ACCOUNT for sessions nothing names an account for (never a default account). A session counts whole under
+ * the account resolveAccount picks for it (the newest one when its evidence conflicts).
+ */
+export interface AccountTotals extends GroupTotals {
+  /** Sessions with records in the range. */
+  sessions: number;
+  /** Of those, sessions whose account was inferred (a config dir's current login, or an id completed by a match). */
+  inferredSessions: number;
+  /** Of those, sessions whose recorded evidence named more than one account. */
+  conflictSessions: number;
 }
 
 export interface ReconciliationRow {
@@ -374,6 +395,13 @@ export interface Report {
   /** Keyed by each session's project: the cwd of its earliest main-thread record, else of its earliest record. */
   byProject: GroupTotals[];
   byKind: GroupTotals[];
+  /**
+   * Usage per subscription, for the agents that have accounts (Claude Code); other agents' records are left out, so
+   * the rows sum to those agents' byAgent rows. Absent when no account data was supplied (and from older CLIs).
+   */
+  byAccount?: AccountTotals[];
+  /** The agents byAccount covers. */
+  accountAgents?: AgentId[];
   /** One row per local calendar day (YYYY-MM-DD), oldest first. */
   byDay: DayTotals[];
   reconciliation: ReconciliationRow[];
@@ -528,6 +556,13 @@ export interface AppSessionRecord {
   transcriptUnavailable?: boolean;
   /** The account the app filed the record under (its folder), hashed. */
   accountEvidence?: AccountEvidence;
+}
+
+/** A session's account as resolveAccount picks it from its evidence. */
+export interface ResolvedAccount {
+  account?: AccountRef;
+  /** Recorded evidence named more than one account; `account` is the newest. */
+  conflict: boolean;
 }
 
 /** One piece of evidence for a session's account, before resolveAccount picks one. Never serialized. */

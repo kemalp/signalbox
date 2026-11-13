@@ -1,5 +1,6 @@
 import { useState } from "preact/hooks";
-import type { FleetSession, GroupTotals, Report } from "@signalbox/core";
+import type { AccountInfo, AccountTotals, FleetSession, GroupTotals, Report } from "@signalbox/core";
+import { accountName, accountShortId } from "./accounts.tsx";
 import { DASH, agentLabel, basename, clipId, fmtCount, fmtRatio, fmtTokens, fmtUsd, shortId } from "./format.ts";
 import { DailyChart } from "./daily-chart.tsx";
 import { kindLabel } from "./stack.ts";
@@ -75,6 +76,8 @@ interface BreakdownProps {
   /** True for the by-model table: a row is either priced or not. */
   modelRows?: boolean;
   unpricedModels: Set<string>;
+  /** An extra badge after the name (text and its tooltip). */
+  badgeOf?(g: GroupTotals): { text: string; title: string } | undefined;
 }
 
 function Breakdown(p: BreakdownProps) {
@@ -120,6 +123,14 @@ function Breakdown(p: BreakdownProps) {
                         <span class="label" title={p.titleOf?.(g) ?? name}>
                           {name}
                         </span>
+                        {(() => {
+                          const b = p.badgeOf?.(g);
+                          return b ? (
+                            <span class="badge amber" title={b.title}>
+                              {b.text}
+                            </span>
+                          ) : null;
+                        })()}
                         {unpriced ? (
                           <span class="badge amber" title="No price row for this model; its tokens count as $0">
                             {p.modelRows ? "unpriced" : `${fmtTokens(g.unpricedTokens)} unpriced`}
@@ -152,6 +163,18 @@ function Breakdown(p: BreakdownProps) {
   );
 }
 
+/** core's UNKNOWN_ACCOUNT (the page bundle imports only types from core). */
+const UNKNOWN_ACCOUNT = "unknown";
+
+/** Sessions behind a byAccount row and how their account was found. */
+export function accountRowTitle(g: AccountTotals): string {
+  const who = g.key === UNKNOWN_ACCOUNT ? "Nothing on this Mac names their account" : `Account ${accountShortId(g.key)}`;
+  const parts = [`${g.sessions} session${g.sessions === 1 ? "" : "s"}`];
+  if (g.inferredSessions > 0) parts.push(`${g.inferredSessions} inferred from a config dir's current login`);
+  if (g.conflictSessions > 0) parts.push(`${g.conflictSessions} named more than one account (counted under the newest)`);
+  return `${who}: ${parts.join("; ")}`;
+}
+
 export function Ledger(props: {
   report: Report | undefined;
   refreshing: boolean;
@@ -160,6 +183,7 @@ export function Ledger(props: {
   agent: string;
   setAgent(a: string): void;
   agents: string[];
+  accounts?: AccountInfo[];
 }) {
   const r = props.report;
   const unpricedModels = new Set(r?.totals.unpricedModels ?? []);
@@ -243,6 +267,22 @@ export function Ledger(props: {
               titleOf={(g) => g.key || "(no project)"}
               unpricedModels={unpricedModels}
             />
+            {r.byAccount ? (
+              <Breakdown
+                title={`By account${(r.accountAgents ?? []).length ? ` (${(r.accountAgents ?? []).map(agentLabel).join(", ")})` : ""}`}
+                rows={r.byAccount}
+                totalUsd={r.byAccount.reduce((a, g) => a + g.cost.total, 0)}
+                nameOf={(g) => (g.key === UNKNOWN_ACCOUNT ? "Account unknown" : accountName(g.key, props.accounts))}
+                titleOf={(g) => accountRowTitle(g as AccountTotals)}
+                badgeOf={(g) => {
+                  const a = g as AccountTotals;
+                  if (a.inferredSessions === 0) return undefined;
+                  const text = a.inferredSessions === a.sessions ? "inferred" : `${a.inferredSessions}/${a.sessions} inferred`;
+                  return { text, title: "Account taken from a config dir's current login: usage from before a login change there can sit under the newer account" };
+                }}
+                unpricedModels={unpricedModels}
+              />
+            ) : null}
             <Breakdown
               title="By kind"
               rows={r.byKind}

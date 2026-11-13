@@ -171,6 +171,7 @@ enum SnapshotRenderer {
         let peak = snapshot.report.byDay.max { $0.cost.total < $1.cost.total }?.key
         usage("usage-by-model-tall", grouping: .model, size: tall)
         usage("usage-by-project-tall", grouping: .project, size: tall)
+        usage("usage-by-account-tall", grouping: .account, size: tall)
         usage("usage-chart-kind", breakdown: .kind, grouping: .kind, hover: peak, size: tall)
         usage("usage-chart-tokentype", dark: true, breakdown: .tokenType, hover: keys.last, size: tall)
         usage("usage-hover", hover: peak)

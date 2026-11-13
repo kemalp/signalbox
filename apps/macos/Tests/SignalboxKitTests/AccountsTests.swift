@@ -31,6 +31,44 @@ struct AccountsTests {
         #expect(history.entries.contains { $0.account?.isInferred == true && $0.configDir?.hasSuffix(".claude-team") == true })
     }
 
+    @Test func theReportSplitsUsageByAccount() throws {
+        let snap = try TestPaths.loadSnapshot()
+        let rows = try #require(snap.report.byAccount)
+        #expect(snap.report.accountAgents == ["claude-code"])
+        #expect(rows.map(\.key).contains(max) == false, "fixture ids are hashes, not the test's ids")
+        let ids = Set(try #require(snap.fleet.accounts).map(\.id))
+        #expect(rows.filter { $0.key != Report.unknownAccount }.allSatisfy { ids.contains($0.key) })
+        let claude = try #require(snap.report.byAgent.first { $0.key == "claude-code" })
+        #expect(abs(rows.reduce(0) { $0 + $1.cost.total } - claude.cost.total) < 1e-9)
+        #expect(rows.reduce(0) { $0 + $1.responses } == claude.responses)
+        #expect(rows.contains { ($0.inferredSessions ?? 0) > 0 })
+        #expect(snap.report.byDay.contains { !($0.byAccount ?? []).isEmpty })
+    }
+
+    @Test func accountUsageIsTheAccountsRowOrAnEmptyOneAndNilWithoutByAccount() throws {
+        let store = SignalboxStore(clock: { date("2026-10-09T14:30:00Z") })
+        var snap = try TestPaths.loadSnapshot()
+        store.load(snapshot: snap, name: "fixture")
+        let first = try #require(snap.report.byAccount?.first)
+        #expect(store.accountUsage(first.key)?.cost.total == first.cost.total)
+        let none = try #require(store.accountUsage("acct-cccccccccccc"))
+        #expect(none.responses == 0)
+        #expect(none.sessions == 0)
+        snap.report.byAccount = nil
+        store.load(snapshot: snap, name: "old CLI")
+        #expect(store.accountUsage(first.key) == nil, "a CLI from before byAccount: unknown, not zero")
+    }
+
+    @Test func byAccountIsOptionalAndKeepsItsSessionCounts() throws {
+        let json = #"{"generatedAt":"2026-10-09T14:30:00Z","totals":{"tokens":{"input":0,"output":0,"cacheRead":0,"cacheWrite5m":0,"cacheWrite1h":0},"cost":{"input":0,"output":0,"cacheRead":0,"cacheWrite5m":0,"cacheWrite1h":0,"webSearch":0,"total":0},"responses":0,"placeholderResponses":0,"unpricedTokens":0,"unpricedModels":[],"processedTokens":0,"freshTokens":0,"cacheHitRatio":0,"savedByCachingUsd":0},"byAgent":[],"byModel":[],"byProject":[],"byKind":[],"byDay":[],"reconciliation":[],"priceTables":[],"notes":[]}"#
+        let old = try SignalboxJSON.decoder().decode(Report.self, from: Data(json.utf8))
+        #expect(old.byAccount == nil)
+        let row = #"{"key":"unknown","tokens":{"input":1,"output":0,"cacheRead":0,"cacheWrite5m":0,"cacheWrite1h":0},"cost":{"input":0,"output":0,"cacheRead":0,"cacheWrite5m":0,"cacheWrite1h":0,"webSearch":0,"total":0},"responses":1,"placeholderResponses":0,"unpricedTokens":0,"unpricedModels":[],"sessions":2,"inferredSessions":0,"conflictSessions":1}"#
+        let g = try SignalboxJSON.decoder().decode(GroupTotals.self, from: Data(row.utf8))
+        #expect(g.key == Report.unknownAccount)
+        #expect(g.sessions == 2 && g.inferredSessions == 0 && g.conflictSessions == 1)
+    }
+
     @Test func aBadAccountReadsAsUnknownQualityAndNeverDropsTheRow() throws {
         let json = #"{"generatedAt":"2026-10-09T14:30:00Z","sessions":[{"agent":"claude-code","sessionId":"s1","status":"idle","account":{"id":"acct-aaaaaaaaaaaa"}}],"limits":[],"compactions":[],"health":[]}"#
         let fleet = try SignalboxJSON.decoder().decode(FleetSnapshot.self, from: Data(json.utf8))

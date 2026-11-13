@@ -20,6 +20,7 @@ import {
   type LimitSnapshot,
   type PriceTable,
   type Report,
+  type ResolvedAccount,
   type SessionInfo,
   type UsageRecord,
 } from "@signalbox/core";
@@ -118,6 +119,7 @@ export class SignalboxData {
   private lastHealth?: AdapterHealth[];
   private lastFleetSessions?: SessionInfo[];
   private readonly sessionCost = new WeakMap<AdapterScan, Map<string, SessionCost>>();
+  private readonly scanAccounts = new WeakMap<AdapterScan, Promise<{ map?: Map<string, ResolvedAccount>; error?: string }>>();
 
   constructor(opts: DataOptions) {
     this.adapters = opts.adapters;
@@ -195,6 +197,15 @@ export class SignalboxData {
     const adapters = await this.detected(req.agent);
     const scans = await Promise.all(adapters.map((a) => this.scan(a, req.since, req.until, fresh)));
     const until = req.until ?? (scans.length ? new Date(Math.min(...scans.map((s) => s.until.getTime()))) : this.now());
+    const accounts = new Map<string, Map<string, ResolvedAccount>>();
+    const accountErrors: string[] = [];
+    await Promise.all(
+      adapters.map(async (la, i) => {
+        const { map, error } = await this.accountsOf(la, scans[i]!);
+        if (map) accounts.set(la.adapter.id, map);
+        if (error) accountErrors.push(`${la.adapter.id}: account lookup failed (${error}), so the report has no split by account.`);
+      }),
+    );
     const report = buildReport({
       records: scans.flatMap((s) => s.records),
       ledger: scans.flatMap((s) => s.ledger),
@@ -203,13 +214,34 @@ export class SignalboxData {
       until: until.getTime() > req.since.getTime() ? until : req.since,
       timeZone: this.timeZone,
       now: this.now(),
+      ...(accounts.size > 0 ? { accounts } : {}),
     });
     for (const s of scans) {
       if (s.error) report.notes.push(`${s.agent}: ${s.error}.`);
       for (const issue of s.issues) report.notes.push(`${s.agent}: ${issue}.`);
     }
+    report.notes.push(...accountErrors);
     if (adapters.length === 0) report.notes.unshift(noDataMessage(this.adapters.filter((a) => !req.agent || a.adapter.id === req.agent), req.agent));
     return report;
+  }
+
+  /**
+   * Each scanned session's account, from adapters whose agent has accounts; once per scan (a report tick that reuses
+   * the scan reuses this too). No map when the adapter has none or the read failed (byAccount is then left out, and
+   * a failure is reported in the notes).
+   */
+  private accountsOf(la: LoadedAdapter, scan: AdapterScan): Promise<{ map?: Map<string, ResolvedAccount>; error?: string }> {
+    const read = la.adapter.sessionAccounts;
+    if (!read) return Promise.resolve({});
+    let p = this.scanAccounts.get(scan);
+    if (!p) {
+      p = read.call(la.adapter, scan.records.map((r) => r.sessionId)).then(
+        (map) => ({ map }),
+        (err: unknown) => ({ error: message(err) }),
+      );
+      this.scanAccounts.set(scan, p);
+    }
+    return p;
   }
 
   health(fresh: Freshness = {}): Promise<AdapterHealth[]> {

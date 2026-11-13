@@ -351,7 +351,7 @@ public struct FleetSnapshot: Codable, Hashable, Sendable {
 
 // MARK: - Report
 
-/// A row of a report grouping (byAgent, byModel, byProject, byKind, byDay).
+/// A row of a report grouping (byAgent, byModel, byProject, byKind, byAccount, byDay).
 public struct GroupTotals: Codable, Hashable, Sendable, Identifiable {
     public var key: String
     public var tokens: TokenCounts
@@ -363,10 +363,17 @@ public struct GroupTotals: Codable, Hashable, Sendable, Identifiable {
     /// Present on byDay rows only.
     public var byModel: [GroupTotals]?
     public var byKind: [GroupTotals]?
+    /// byDay rows of a report with byAccount: the day split by account.
+    public var byAccount: [GroupTotals]?
+    /// byAccount rows only: sessions with records in the range, how many of them had their account inferred (a config
+    /// folder's current login), and how many named more than one account (counted under the newest).
+    public var sessions: Int?
+    public var inferredSessions: Int?
+    public var conflictSessions: Int?
 
     public var id: String { key }
 
-    public init(key: String, tokens: TokenCounts = .init(), cost: CostBreakdown = .init(), responses: Int = 0, placeholderResponses: Int = 0, unpricedTokens: Double = 0, unpricedModels: [String] = [], byModel: [GroupTotals]? = nil, byKind: [GroupTotals]? = nil) {
+    public init(key: String, tokens: TokenCounts = .init(), cost: CostBreakdown = .init(), responses: Int = 0, placeholderResponses: Int = 0, unpricedTokens: Double = 0, unpricedModels: [String] = [], byModel: [GroupTotals]? = nil, byKind: [GroupTotals]? = nil, byAccount: [GroupTotals]? = nil, sessions: Int? = nil, inferredSessions: Int? = nil, conflictSessions: Int? = nil) {
         self.key = key
         self.tokens = tokens
         self.cost = cost
@@ -376,9 +383,13 @@ public struct GroupTotals: Codable, Hashable, Sendable, Identifiable {
         self.unpricedModels = unpricedModels
         self.byModel = byModel
         self.byKind = byKind
+        self.byAccount = byAccount
+        self.sessions = sessions
+        self.inferredSessions = inferredSessions
+        self.conflictSessions = conflictSessions
     }
 
-    enum CodingKeys: String, CodingKey { case key, tokens, cost, responses, placeholderResponses, unpricedTokens, unpricedModels, byModel, byKind }
+    enum CodingKeys: String, CodingKey { case key, tokens, cost, responses, placeholderResponses, unpricedTokens, unpricedModels, byModel, byKind, byAccount, sessions, inferredSessions, conflictSessions }
 
     public init(from decoder: any Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -391,6 +402,10 @@ public struct GroupTotals: Codable, Hashable, Sendable, Identifiable {
         unpricedModels = c.lossyArray(String.self, forKey: .unpricedModels)
         byModel = c.lossyArrayIfPresent(GroupTotals.self, forKey: .byModel)
         byKind = c.lossyArrayIfPresent(GroupTotals.self, forKey: .byKind)
+        byAccount = c.lossyArrayIfPresent(GroupTotals.self, forKey: .byAccount)
+        sessions = try? c.decodeIfPresent(Int.self, forKey: .sessions)
+        inferredSessions = try? c.decodeIfPresent(Int.self, forKey: .inferredSessions)
+        conflictSessions = try? c.decodeIfPresent(Int.self, forKey: .conflictSessions)
     }
 
     /// True when some of this row's tokens have no price row (so its $ is a lower bound).
@@ -499,13 +514,17 @@ public struct Report: Codable, Hashable, Sendable {
     public var byModel: [GroupTotals]
     public var byProject: [GroupTotals]
     public var byKind: [GroupTotals]
+    /// Usage per subscription for `accountAgents` (Claude Code); nil from CLIs before it. The key is an account id or
+    /// `Report.unknownAccount`.
+    public var byAccount: [GroupTotals]?
+    public var accountAgents: [String]?
     public var byDay: [GroupTotals]
     public var reconciliation: [ReconciliationRow]
     public var estimate: ReportEstimate?
     public var priceTables: [PriceTableInfo]
     public var notes: [String]
 
-    public init(generatedAt: Date, range: DateRange? = nil, totals: ReportTotals = .init(), byAgent: [GroupTotals] = [], byModel: [GroupTotals] = [], byProject: [GroupTotals] = [], byKind: [GroupTotals] = [], byDay: [GroupTotals] = [], reconciliation: [ReconciliationRow] = [], estimate: ReportEstimate? = nil, priceTables: [PriceTableInfo] = [], notes: [String] = []) {
+    public init(generatedAt: Date, range: DateRange? = nil, totals: ReportTotals = .init(), byAgent: [GroupTotals] = [], byModel: [GroupTotals] = [], byProject: [GroupTotals] = [], byKind: [GroupTotals] = [], byAccount: [GroupTotals]? = nil, accountAgents: [String]? = nil, byDay: [GroupTotals] = [], reconciliation: [ReconciliationRow] = [], estimate: ReportEstimate? = nil, priceTables: [PriceTableInfo] = [], notes: [String] = []) {
         self.generatedAt = generatedAt
         self.range = range
         self.totals = totals
@@ -513,6 +532,8 @@ public struct Report: Codable, Hashable, Sendable {
         self.byModel = byModel
         self.byProject = byProject
         self.byKind = byKind
+        self.byAccount = byAccount
+        self.accountAgents = accountAgents
         self.byDay = byDay
         self.reconciliation = reconciliation
         self.estimate = estimate
@@ -520,7 +541,10 @@ public struct Report: Codable, Hashable, Sendable {
         self.notes = notes
     }
 
-    enum CodingKeys: String, CodingKey { case generatedAt, range, totals, byAgent, byModel, byProject, byKind, byDay, reconciliation, estimate, priceTables, notes }
+    /// The byAccount key of sessions with no known account (core's UNKNOWN_ACCOUNT).
+    public static let unknownAccount = "unknown"
+
+    enum CodingKeys: String, CodingKey { case generatedAt, range, totals, byAgent, byModel, byProject, byKind, byAccount, accountAgents, byDay, reconciliation, estimate, priceTables, notes }
 
     public init(from decoder: any Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -531,6 +555,8 @@ public struct Report: Codable, Hashable, Sendable {
         byModel = c.lossyArray(GroupTotals.self, forKey: .byModel)
         byProject = c.lossyArray(GroupTotals.self, forKey: .byProject)
         byKind = c.lossyArray(GroupTotals.self, forKey: .byKind)
+        byAccount = c.lossyArrayIfPresent(GroupTotals.self, forKey: .byAccount)
+        accountAgents = c.lossyArrayIfPresent(String.self, forKey: .accountAgents)
         byDay = c.lossyArray(GroupTotals.self, forKey: .byDay)
         reconciliation = c.lossyArray(ReconciliationRow.self, forKey: .reconciliation)
         estimate = try? c.decodeIfPresent(ReportEstimate.self, forKey: .estimate)
