@@ -1,8 +1,10 @@
 {
   "provider": "anthropic",
-  "asOf": "2026-10-10",
+  "asOf": "2026-11-13",
   "sourceUrl": "https://platform.claude.com/docs/en/build-with-claude/context-windows",
   "models": {
+    "claude-fable-5-2": { "contextWindow": 1000000, "maxOutput": 128000, "asOf": "2026-11-13", "sourceUrl": "https://platform.claude.com/docs/en/models/overview" },
+    "claude-mythos-5-2": { "contextWindow": 1000000, "maxOutput": 128000, "asOf": "2026-11-13", "sourceUrl": "https://platform.claude.com/docs/en/models/mythos-5-2/overview" },
     "claude-fable-5-1": { "contextWindow": 1000000, "maxOutput": 128000, "asOf": "2026-10-10", "sourceUrl": "https://platform.claude.com/docs/en/models/overview" },
     "claude-mythos-5-1": { "contextWindow": 1000000, "maxOutput": 128000, "asOf": "2026-10-10", "sourceUrl": "https://platform.claude.com/docs/en/build-with-claude/context-windows" },
     "claude-fable-5": { "contextWindow": 1000000, "maxOutput": 128000, "asOf": "2026-10-10", "sourceUrl": "https://platform.claude.com/docs/en/build-with-claude/context-windows" },
@@ -46,7 +48,7 @@
     }
   },
   "notes": [
-    "Context windows and synchronous max output from the official docs, fetched 2026-10-10: the models overview and the per-model pages for Opus 4.5, Sonnet 4.5 and Haiku 4.5, and the context-windows page, which lists every 1M-token model (all with 128k max output) and says that other Claude models have a 200k-token window.",
+    "Context windows and synchronous max output from the official docs, fetched 2026-10-10 (Fable 5.2 and Mythos 5.2 on 2026-11-13, from the models overview and the Mythos 5.2 page): the models overview and the per-model pages for Opus 4.5, Sonnet 4.5 and Haiku 4.5, and the context-windows page, which lists every 1M-token model (all with 128k max output) and says that other Claude models have a 200k-token window.",
     "For every 1M-token model, 1M is the default: no beta header is needed.",
     "Opus 4.1, Opus 4, Sonnet 4 and Haiku 3.5 are retired, and their pages are gone. Their window comes from the context-windows page's 'other Claude models' statement; their max output is not documented any more, so it is left out.",
     "Keys match the price table: exact ids, or prefixes ending in '*' for dated snapshots (longest match wins). An unknown model has no window: it is never guessed."

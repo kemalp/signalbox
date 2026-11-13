@@ -16,6 +16,8 @@ import argparse, collections, datetime as dt, glob, json, os, re, sys
 
 # base input, output, cache-read multiplier (x base input)
 PRICES = {
+    'claude-fable-5-2':  (8.0, 40.0, 0.025),
+    'claude-mythos-5-2': (8.0, 40.0, 0.025),
     'claude-fable-5-1':  (10.0, 50.0, 0.025),
     'claude-mythos-5-1': (10.0, 50.0, 0.025),
     'claude-fable-5':    (10.0, 50.0, 0.10),
@@ -37,7 +39,7 @@ PRICES = {
     'claude-haiku-4-5':  (1.0, 5.0, 0.10),
 }
 HAIKU55_LONG = (0.50, 2.50, 0.10)               # prompt (input+cache read+cache write) > 100K
-FAST = {'claude-opus-5-5': (8.0, 40.0), 'claude-opus-5': (10.0, 50.0), 'claude-opus-4-8': (10.0, 50.0)}
+FAST = {'claude-fable-5-2': (16.0, 80.0), 'claude-mythos-5-2': (16.0, 80.0), 'claude-opus-5-5': (8.0, 40.0), 'claude-opus-5': (10.0, 50.0), 'claude-opus-4-8': (10.0, 50.0)}
 CACHE_WRITE_5M, CACHE_WRITE_1H = 1.25, 2.0
 US_GEO_MULT = 1.1                               # inference_geo == "us", Claude 4.6+ models
 WEB_SEARCH_USD = 10.0 / 1000
