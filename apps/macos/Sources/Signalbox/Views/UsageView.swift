@@ -86,7 +86,15 @@ private struct UsageContent: View {
                         Spacer()
                         ListPriceNote()
                     }
-                    UsageTable(rows: rows(for: nav.usageGrouping), grouping: nav.usageGrouping)
+                    if nav.usageGrouping == .account, report.byAccount == nil {
+                        // Unknown, not zero: a CLI from before the split, or the account lookup failed (see the notes).
+                        ContentUnavailableView("No Account Split", systemImage: "person.2",
+                                               description: Text("This report doesn't say which subscription its usage ran under: the CLI predates it, or reading the accounts failed."))
+                            .frame(maxWidth: .infinity, minHeight: 160)
+                            .background(.background.secondary, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    } else {
+                        UsageTable(rows: rows(for: nav.usageGrouping), grouping: nav.usageGrouping)
+                    }
                 }
                 notes
             }
@@ -220,23 +228,40 @@ private struct UsageContent: View {
         case .model: groups = report.byModel
         case .kind: groups = report.byKind
         case .project: groups = report.byProject
+        case .account: groups = report.byAccount ?? []
         }
-        let total = max(report.totals.cost.total, 0)
+        // Accounts cover only the agents that have them, so their shares are of those agents' cost.
+        let total = grouping == .account ? groups.reduce(0) { $0 + $1.cost.total } : max(report.totals.cost.total, 0)
         return groups.map { g in
             UsageRow(
                 id: g.key,
                 swatch: swatch(g, grouping),
                 name: displayName(g.key, grouping),
-                fullName: g.key,
+                fullName: grouping == .account ? accountHelp(g) : g.key,
                 cost: g.cost.total,
                 share: total > 0 ? g.cost.total / total : 0,
                 processed: g.tokens.processed,
                 fresh: g.tokens.fresh,
                 cacheRead: g.tokens.cacheRead,
                 responses: g.responses,
-                unpriced: g.hasUnpriced
+                unpriced: g.hasUnpriced,
+                inferred: grouping == .account ? inferredTag(g) : nil
             )
         }
+    }
+
+    /// "inferred" (or "2/5 inferred") when some sessions' account came from a config folder's current login.
+    private func inferredTag(_ g: GroupTotals) -> String? {
+        guard let n = g.inferredSessions, n > 0 else { return nil }
+        return n == g.sessions ? "inferred" : "\(n)/\(g.sessions ?? n) inferred"
+    }
+
+    private func accountHelp(_ g: GroupTotals) -> String {
+        let who = g.key == Report.unknownAccount ? "Nothing on this Mac names these sessions' account" : g.key
+        var parts = [g.sessions.map { "\($0) \($0 == 1 ? "session" : "sessions")" } ?? ""]
+        if let n = g.inferredSessions, n > 0 { parts.append("\(n) inferred from a config folder's current login") }
+        if let n = g.conflictSessions, n > 0 { parts.append("\(n) named more than one account (counted under the newest)") }
+        return "\(who): \(parts.filter { !$0.isEmpty }.joined(separator: "; "))"
     }
 
     /// The row's chart colour, so the table reads as the chart's legend: models by the app's colour registry,
@@ -246,7 +271,7 @@ private struct UsageContent: View {
         switch grouping {
         case .model: return .slot(store.modelSlots.slot(for: g.key))
         case .kind: return .slot(SeriesSlots.kinds.slot(for: g.key))
-        case .agent, .project: return .none
+        case .agent, .project, .account: return .none
         }
     }
 
@@ -256,6 +281,7 @@ private struct UsageContent: View {
         case .model: key
         case .kind: Fmt.kindLabel(key)
         case .project: Fmt.shortPath(key)
+        case .account: key == Report.unknownAccount ? "Account unknown" : store.accountName(key)
         }
     }
 }
@@ -278,6 +304,8 @@ struct UsageRow: Identifiable, Hashable {
     let cacheRead: Double
     let responses: Int
     let unpriced: Bool
+    /// Account rows: how many sessions' account was inferred, as a tag ("inferred", "2/5 inferred").
+    var inferred: String? = nil
 }
 
 private struct UsageTable: View {
@@ -322,8 +350,12 @@ private struct UsageTable: View {
                             .lineLimit(1)
                             .truncationMode(.middle)
                             .help(row.fullName)
-                            // Project folders are the user's own; agents, models and kinds read as is.
-                            .privacySensitive(grouping == .project)
+                            // Project folders and account labels are the user's own; agents, models and kinds read as is.
+                            .privacySensitive(grouping == .project || grouping == .account)
+                        if let inferred = row.inferred {
+                            Tag(text: inferred, color: Theme.warning, systemImage: "questionmark.circle")
+                                .help("Account taken from a config folder's current login: usage from before a login change there can sit under the newer account")
+                        }
                         if row.unpriced {
                             Tag(text: "unpriced", color: Theme.warning, systemImage: "exclamationmark.triangle.fill")
                                 .help(grouping == .model ? "No price row for this model: its tokens count as zero" : "Some of these tokens are on models with no price row and count as zero")

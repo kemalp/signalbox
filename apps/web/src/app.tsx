@@ -190,6 +190,7 @@ function Dashboard({ token, onAuthFail }: { token: string; onAuthFail(): void })
           agent={agent}
           setAgent={setAgent}
           agents={agents}
+          accounts={fleet.data?.accounts}
         />
         <Reconciliation report={report.data} sessions={sessions ?? []} />
         <section class="section panels" aria-label="Compactions and data sources">

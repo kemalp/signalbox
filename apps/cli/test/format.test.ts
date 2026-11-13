@@ -217,3 +217,32 @@ describe("formatHistory", () => {
     expect(formatHistory(empty, { noData: true })).toContain("unknown rather than empty");
   });
 });
+
+describe("formatReport by account", () => {
+  const max = { id: "acct-aaaaaaaaaaaa", orgKnown: true, source: "claude-app-folder", quality: "recorded" } as const;
+  const team = { id: "acct-bbbbbbbbbbbb", orgKnown: true, source: "config-login", quality: "inferred" } as const;
+  const window = { since: "2026-10-01T00:00:00Z", until: "2026-10-08T00:00:00Z", timeZone: "UTC", tables };
+  const records = [
+    rec({ sessionId: "s1", tokens: tok({ input: 1000 }) }),
+    rec({ sessionId: "s2", tokens: tok({ input: 2000 }) }),
+    rec({ sessionId: "s3", tokens: tok({ input: 3000 }) }),
+    rec({ sessionId: "s4", tokens: tok({ input: 4000 }) }),
+  ];
+  const accounts = new Map([
+    ["claude-code", new Map([["s1", { account: max, conflict: false }], ["s2", { account: team, conflict: false }], ["s3", { account: team, conflict: false }]])],
+  ]);
+
+  test("prints the label and short id, the inferred share and the unknown row last", () => {
+    const r = buildReport({ ...window, records, accounts });
+    const text = formatReport(r, { width: 120, accountLabels: { [team.id]: "Team" } });
+    const block = text.slice(text.indexOf("By account (claude-code)"));
+    const lines = block.split("\n").slice(1, 4);
+    expect(lines[0]).toContain("Team (bbbbbb, 2/2 inferred)");
+    expect(lines[1]).toContain("(aaaaaa)");
+    expect(lines[2]).toContain("account unknown");
+  });
+
+  test("prints no block without account data", () => {
+    expect(formatReport(buildReport({ ...window, records }))).not.toContain("By account");
+  });
+});

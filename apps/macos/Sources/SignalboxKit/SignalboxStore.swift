@@ -665,6 +665,13 @@ public final class SignalboxStore {
     public var reportForSelectedRange: Report? {
         reportDays == range.days ? report : nil
     }
+
+    /// One account's usage in the current report's window: nil while no report has arrived or when the CLI predates
+    /// byAccount; an empty row (zero responses) when the account has no usage in the window.
+    public func accountUsage(_ id: String) -> GroupTotals? {
+        guard let rows = report?.byAccount else { return nil }
+        return rows.first { $0.key == id } ?? GroupTotals(key: id, sessions: 0, inferredSessions: 0, conflictSessions: 0)
+    }
 }
 
 public enum CommandGuideState: Sendable, Equatable {

@@ -223,6 +223,19 @@ function scale(t: TokenCounts, f: number): TokenCounts {
   return out;
 }
 
+/** Mock accounts for byAccount: the signalbox project runs under Team (inferred), infra under none, the rest under Max. */
+function mockAccountOf(c: Cell): string {
+  if (c.project === PROJECTS[1]) return MOCK_ACCOUNTS.team;
+  if (c.project === PROJECTS[3]) return "unknown";
+  return MOCK_ACCOUNTS.max;
+}
+
+const MOCK_ACCOUNT_SESSIONS: Record<string, { sessions: number; inferredSessions: number; conflictSessions: number }> = {
+  [MOCK_ACCOUNTS.max]: { sessions: 14, inferredSessions: 0, conflictSessions: 1 },
+  [MOCK_ACCOUNTS.team]: { sessions: 6, inferredSessions: 6, conflictSessions: 0 },
+  unknown: { sessions: 2, inferredSessions: 0, conflictSessions: 0 },
+};
+
 export function mockReport(q: ReportQuery, now: Date = new Date()): Report {
   const days = Math.max(1, Math.min(365, Math.floor(q.days)));
   const streams = STREAMS.filter((s) => !q.agent || s.agent === q.agent);
@@ -282,6 +295,7 @@ export function mockReport(q: ReportQuery, now: Date = new Date()): Report {
       ...acc.out(key),
       byModel: group(dayCells, (c) => c.stream.model),
       byKind: group(dayCells, (c) => c.stream.kind),
+      byAccount: group(dayCells.filter((c) => c.stream.agent === "claude-code"), mockAccountOf),
     };
   });
 
@@ -303,6 +317,10 @@ export function mockReport(q: ReportQuery, now: Date = new Date()): Report {
     byModel: group(cells, (c) => c.stream.model),
     byProject: group(cells, (c) => c.project),
     byKind: group(cells, (c) => c.stream.kind),
+    byAccount: group(cells.filter((c) => c.stream.agent === "claude-code"), mockAccountOf)
+      .map((g) => ({ ...g, ...MOCK_ACCOUNT_SESSIONS[g.key]! }))
+      .sort((a, b) => Number(a.key === "unknown") - Number(b.key === "unknown")),
+    accountAgents: ["claude-code"],
     byDay,
     reconciliation,
     estimate: {

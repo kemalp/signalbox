@@ -41,13 +41,14 @@ enum SettingsTab: String, CaseIterable, Identifiable {
 }
 
 enum UsageGrouping: String, CaseIterable, Identifiable {
-    case agent, model, kind, project
+    case agent, account, model, kind, project
 
     var id: String { rawValue }
 
     var title: String {
         switch self {
         case .agent: "By agent"
+        case .account: "By account"
         case .model: "By model"
         case .kind: "By kind"
         case .project: "By project"

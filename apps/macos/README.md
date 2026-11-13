@@ -272,7 +272,8 @@ needs the 30-day range, with a "Switch to 30 days" link, instead of prorating (t
 - **Accounts** lists every account the CLI has seen: its name (Rename… saves a label to
   `~/Library/Application Support/signalbox/accounts.json`, 0600, which the CLI and the web page read too; nothing
   agent-side is written), where its id came from, which config folder's terminal login it is, its live and past
-  sessions with their recorded cost, and its plan windows. "Current logins" maps each config folder and the Claude
+  sessions with their recorded cost, its usage in the selected range (from `report.byAccount`, with a button to Usage ▸
+  By account), and its plan windows. "Current logins" maps each config folder and the Claude
   app to an account. Sessions with no account are counted, never given one. Sessions and History rows carry an account
   chip (dashed when inferred: from a folder's login, or an id found without its organization completed by the one full
   id with the same account), the inspectors say where it came from (or why it is unknown) and the config folder, and
@@ -388,7 +389,7 @@ in-memory settings and fake notification and login-item services; nothing touche
 item itself comes as a strip of every label mode, today's spend in GBP, a waiting session and the CLI down
 (`menubar-labels-*`, drawn at 2× so the gauge symbols can be told apart).
 `SIGNALBOX_RENDER_ONLY=settings,menubar` renders only the shots whose names start with those prefixes. Usage also comes as whole-page "tall" shots
-(by model, by project, the chart by kind and by token type), with the hover callout pinned to a day
+(by model, by project, by account, the chart by kind and by token type), with the hover callout pinned to a day
 (`usage-hover-*`), and for Today and 30 days (`usage-today`, `usage-30d`, `menubar-30d`, `menubar-today`). It also
 renders the CLI-missing and empty states, the Diagnostics sheet for a CLI that keeps failing (`diagnostics-light`) and
 the whole session inspector on its own (`sessions-inspector-*`).

@@ -1,7 +1,7 @@
 // Plain-text rendering for the terminal. Pure functions over core's Report: no I/O.
 import { homedir } from "node:os";
 import { basename } from "node:path";
-import { accountShortId, type GroupTotals, type HistorySnapshot, type Report } from "@signalbox/core";
+import { accountShortId, UNKNOWN_ACCOUNT, type AccountTotals, type GroupTotals, type HistorySnapshot, type Report } from "@signalbox/core";
 
 export function fmtUsd(n: number): string {
   const sign = n < 0 ? "-" : "";
@@ -127,6 +127,17 @@ export interface ReportTextOptions {
   noData?: boolean;
   /** Also print whole-session k, the token-type breakdown, the notes and the estimate method. */
   verbose?: boolean;
+  /** The user's account labels (accounts.json), by account id, for "By account". */
+  accountLabels?: Record<string, string>;
+}
+
+/** A byAccount row's name: the label and short id (or the short id alone), and how many sessions' accounts were inferred. */
+function accountRowName(row: AccountTotals, labels: Record<string, string> | undefined): string {
+  if (row.key === UNKNOWN_ACCOUNT) return "account unknown";
+  const short = accountShortId(row.key);
+  const label = labels?.[row.key];
+  const inferred = row.inferredSessions > 0 ? `, ${row.inferredSessions}/${row.sessions} inferred` : "";
+  return `${label ? `${label} (${short}` : `(${short}`}${inferred})`;
 }
 
 export function formatReport(r: Report, opts: ReportTextOptions = {}): string {
@@ -196,6 +207,12 @@ export function formatReport(r: Report, opts: ReportTextOptions = {}): string {
     groupTable("By agent", r.byAgent, { width }),
     groupTable("By model", r.byModel, { width }),
     groupTable("By kind", r.byKind, { width }),
+    r.byAccount
+      ? groupTable(`By account (${(r.accountAgents ?? []).join(", ")})`, r.byAccount, {
+          width,
+          label: (k) => accountRowName(r.byAccount!.find((a) => a.key === k)!, opts.accountLabels),
+        })
+      : [],
     groupTable("By project", r.byProject, { width, limit: 10, label: (k) => tildify(k, home), clipKey: clipPath }),
   ]) {
     if (block.length === 0) continue;

@@ -804,6 +804,63 @@
         "unpricedModels": []
       }
     ],
+    "byAccount": [
+      {
+        "key": "acct-fbc9ff170b0e",
+        "tokens": {
+          "input": 6864885,
+          "output": 1296947,
+          "cacheRead": 1034000720,
+          "cacheWrite5m": 21476163,
+          "cacheWrite1h": 5302481
+        },
+        "cost": {
+          "input": 6.958118999999999,
+          "output": 21.478645000000004,
+          "cacheRead": 204.41298810000004,
+          "cacheWrite5m": 103.42384250000002,
+          "cacheWrite1h": 42.419847999999995,
+          "webSearch": 0.28,
+          "total": 378.9734426
+        },
+        "responses": 6832,
+        "placeholderResponses": 3615,
+        "unpricedTokens": 0,
+        "unpricedModels": [],
+        "sessions": 14,
+        "inferredSessions": 0,
+        "conflictSessions": 1
+      },
+      {
+        "key": "acct-946376a35368",
+        "tokens": {
+          "input": 2940337,
+          "output": 496532,
+          "cacheRead": 274788645,
+          "cacheWrite5m": 6234962,
+          "cacheWrite1h": 1767492
+        },
+        "cost": {
+          "input": 2.9717600000000006,
+          "output": 7.41118,
+          "cacheRead": 52.570573,
+          "cacheWrite5m": 27.217837499999998,
+          "cacheWrite1h": 14.139935999999999,
+          "webSearch": 0.11,
+          "total": 104.4212865
+        },
+        "responses": 2204,
+        "placeholderResponses": 958,
+        "unpricedTokens": 0,
+        "unpricedModels": [],
+        "sessions": 6,
+        "inferredSessions": 6,
+        "conflictSessions": 0
+      }
+    ],
+    "accountAgents": [
+      "claude-code"
+    ],
     "byDay": [
       {
         "key": "2026-10-03",
@@ -988,6 +1045,54 @@
             },
             "responses": 130,
             "placeholderResponses": 0,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          }
+        ],
+        "byAccount": [
+          {
+            "key": "acct-fbc9ff170b0e",
+            "tokens": {
+              "input": 389568,
+              "output": 71458,
+              "cacheRead": 57445189,
+              "cacheWrite5m": 1164995,
+              "cacheWrite1h": 301470
+            },
+            "cost": {
+              "input": 0.394726,
+              "output": 1.18566,
+              "cacheRead": 11.375219300000001,
+              "cacheWrite5m": 5.6363075,
+              "cacheWrite1h": 2.41176,
+              "webSearch": 0.02,
+              "total": 21.023672799999996
+            },
+            "responses": 380,
+            "placeholderResponses": 199,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "acct-946376a35368",
+            "tokens": {
+              "input": 166835,
+              "output": 26453,
+              "cacheRead": 14776958,
+              "cacheWrite5m": 315490,
+              "cacheWrite1h": 100490
+            },
+            "cost": {
+              "input": 0.168522,
+              "output": 0.39572,
+              "cacheRead": 2.8415730999999997,
+              "cacheWrite5m": 1.3887825,
+              "cacheWrite1h": 0.80392,
+              "webSearch": 0.01,
+              "total": 5.608517599999999
+            },
+            "responses": 119,
+            "placeholderResponses": 50,
             "unpricedTokens": 0,
             "unpricedModels": []
           }
@@ -1211,6 +1316,54 @@
             "unpricedTokens": 0,
             "unpricedModels": []
           }
+        ],
+        "byAccount": [
+          {
+            "key": "acct-fbc9ff170b0e",
+            "tokens": {
+              "input": 366079,
+              "output": 74814,
+              "cacheRead": 61990782,
+              "cacheWrite5m": 1339045,
+              "cacheWrite1h": 289593
+            },
+            "cost": {
+              "input": 0.371493,
+              "output": 1.2517800000000001,
+              "cacheRead": 12.255773400000002,
+              "cacheWrite5m": 6.459210000000001,
+              "cacheWrite1h": 2.316744,
+              "webSearch": 0.02,
+              "total": 22.6750004
+            },
+            "responses": 402,
+            "placeholderResponses": 225,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "acct-946376a35368",
+            "tokens": {
+              "input": 156802,
+              "output": 28971,
+              "cacheRead": 16675434,
+              "cacheWrite5m": 400198,
+              "cacheWrite1h": 96531
+            },
+            "cost": {
+              "input": 0.15866100000000002,
+              "output": 0.43837499999999996,
+              "cacheRead": 3.1927038000000003,
+              "cacheWrite5m": 1.7649750000000002,
+              "cacheWrite1h": 0.772248,
+              "webSearch": 0.01,
+              "total": 6.336962799999999
+            },
+            "responses": 130,
+            "placeholderResponses": 61,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          }
         ]
       },
       {
@@ -1428,6 +1581,54 @@
             },
             "responses": 423,
             "placeholderResponses": 0,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          }
+        ],
+        "byAccount": [
+          {
+            "key": "acct-fbc9ff170b0e",
+            "tokens": {
+              "input": 1267463,
+              "output": 258307,
+              "cacheRead": 242268946,
+              "cacheWrite5m": 5407748,
+              "cacheWrite1h": 890428
+            },
+            "cost": {
+              "input": 1.285572,
+              "output": 4.321955,
+              "cacheRead": 47.966278700000004,
+              "cacheWrite5m": 26.230639999999998,
+              "cacheWrite1h": 7.123424,
+              "webSearch": 0.05,
+              "total": 86.97786969999999
+            },
+            "responses": 1510,
+            "placeholderResponses": 924,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "acct-946376a35368",
+            "tokens": {
+              "input": 542721,
+              "output": 93213,
+              "cacheRead": 57870937,
+              "cacheWrite5m": 1368265,
+              "cacheWrite1h": 296809
+            },
+            "cost": {
+              "input": 0.548383,
+              "output": 1.37832,
+              "cacheRead": 11.086676900000002,
+              "cacheWrite5m": 6.033222500000001,
+              "cacheWrite1h": 2.374472,
+              "webSearch": 0.02,
+              "total": 21.4410744
+            },
+            "responses": 441,
+            "placeholderResponses": 217,
             "unpricedTokens": 0,
             "unpricedModels": []
           }
@@ -1651,6 +1852,54 @@
             "unpricedTokens": 0,
             "unpricedModels": []
           }
+        ],
+        "byAccount": [
+          {
+            "key": "acct-fbc9ff170b0e",
+            "tokens": {
+              "input": 1706055,
+              "output": 250082,
+              "cacheRead": 173819625,
+              "cacheWrite5m": 3344199,
+              "cacheWrite1h": 1080493
+            },
+            "cost": {
+              "input": 1.723433,
+              "output": 3.985915,
+              "cacheRead": 34.3810932,
+              "cacheWrite5m": 16.0864075,
+              "cacheWrite1h": 8.643944,
+              "webSearch": 0.05,
+              "total": 64.87079269999998
+            },
+            "responses": 1275,
+            "placeholderResponses": 561,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "acct-946376a35368",
+            "tokens": {
+              "input": 730827,
+              "output": 96294,
+              "cacheRead": 47760679,
+              "cacheWrite5m": 996937,
+              "cacheWrite1h": 360164
+            },
+            "cost": {
+              "input": 0.736733,
+              "output": 1.3930799999999999,
+              "cacheRead": 9.169303900000001,
+              "cacheWrite5m": 4.350099999999999,
+              "cacheWrite1h": 2.881312,
+              "webSearch": 0.02,
+              "total": 18.5505289
+            },
+            "responses": 433,
+            "placeholderResponses": 152,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          }
         ]
       },
       {
@@ -1868,6 +2117,54 @@
             },
             "responses": 447,
             "placeholderResponses": 0,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          }
+        ],
+        "byAccount": [
+          {
+            "key": "acct-fbc9ff170b0e",
+            "tokens": {
+              "input": 1340336,
+              "output": 256786,
+              "cacheRead": 174175161,
+              "cacheWrite5m": 3345036,
+              "cacheWrite1h": 1179692
+            },
+            "cost": {
+              "input": 1.35904,
+              "output": 4.20128,
+              "cacheRead": 34.225947000000005,
+              "cacheWrite5m": 15.715555,
+              "cacheWrite1h": 9.437536,
+              "webSearch": 0.06,
+              "total": 64.999358
+            },
+            "responses": 1207,
+            "placeholderResponses": 549,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "acct-946376a35368",
+            "tokens": {
+              "input": 574269,
+              "output": 106121,
+              "cacheRead": 51881458,
+              "cacheWrite5m": 1175403,
+              "cacheWrite1h": 393230
+            },
+            "cost": {
+              "input": 0.58097,
+              "output": 1.5668349999999998,
+              "cacheRead": 9.767206400000001,
+              "cacheWrite5m": 4.867389999999999,
+              "cacheWrite1h": 3.14584,
+              "webSearch": 0.02,
+              "total": 19.948241399999997
+            },
+            "responses": 431,
+            "placeholderResponses": 174,
             "unpricedTokens": 0,
             "unpricedModels": []
           }
@@ -2091,6 +2388,54 @@
             "unpricedTokens": 0,
             "unpricedModels": []
           }
+        ],
+        "byAccount": [
+          {
+            "key": "acct-fbc9ff170b0e",
+            "tokens": {
+              "input": 774574,
+              "output": 239409,
+              "cacheRead": 195938006,
+              "cacheWrite5m": 3863217,
+              "cacheWrite1h": 1164007
+            },
+            "cost": {
+              "input": 0.793942,
+              "output": 4.254165,
+              "cacheRead": 38.84589710000001,
+              "cacheWrite5m": 18.749672500000003,
+              "cacheWrite1h": 9.312056,
+              "webSearch": 0.06,
+              "total": 72.0157326
+            },
+            "responses": 1170,
+            "placeholderResponses": 646,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "acct-946376a35368",
+            "tokens": {
+              "input": 331576,
+              "output": 89837,
+              "cacheRead": 54584618,
+              "cacheWrite5m": 1168651,
+              "cacheWrite1h": 388002
+            },
+            "cost": {
+              "input": 0.33825500000000003,
+              "output": 1.4808549999999998,
+              "cacheRead": 10.5752195,
+              "cacheWrite5m": 5.276842500000001,
+              "cacheWrite1h": 3.104016,
+              "webSearch": 0.02,
+              "total": 20.795188
+            },
+            "responses": 374,
+            "placeholderResponses": 177,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          }
         ]
       },
       {
@@ -2308,6 +2653,54 @@
             },
             "responses": 340,
             "placeholderResponses": 0,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          }
+        ],
+        "byAccount": [
+          {
+            "key": "acct-fbc9ff170b0e",
+            "tokens": {
+              "input": 1020810,
+              "output": 146091,
+              "cacheRead": 128363011,
+              "cacheWrite5m": 3011923,
+              "cacheWrite1h": 396798
+            },
+            "cost": {
+              "input": 1.029913,
+              "output": 2.2778899999999997,
+              "cacheRead": 25.362779400000004,
+              "cacheWrite5m": 14.54605,
+              "cacheWrite1h": 3.174384,
+              "webSearch": 0.02,
+              "total": 46.411016399999994
+            },
+            "responses": 888,
+            "placeholderResponses": 511,
+            "unpricedTokens": 0,
+            "unpricedModels": []
+          },
+          {
+            "key": "acct-946376a35368",
+            "tokens": {
+              "input": 437307,
+              "output": 55643,
+              "cacheRead": 31238561,
+              "cacheWrite5m": 810018,
+              "cacheWrite1h": 132266
+            },
+            "cost": {
+              "input": 0.440236,
+              "output": 0.7579950000000001,
+              "cacheRead": 5.9378894,
+              "cacheWrite5m": 3.536525,
+              "cacheWrite1h": 1.058128,
+              "webSearch": 0.01,
+              "total": 11.7407734
+            },
+            "responses": 276,
+            "placeholderResponses": 127,
             "unpricedTokens": 0,
             "unpricedModels": []
           }

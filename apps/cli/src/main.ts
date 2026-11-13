@@ -69,6 +69,7 @@ async function report(args: ReportArgs): Promise<number> {
         elapsedMs: performance.now() - started,
         noData,
         verbose: args.verbose,
+        accountLabels: await readAccountLabels(),
       }),
     );
   }

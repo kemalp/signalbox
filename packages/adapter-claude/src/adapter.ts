@@ -18,6 +18,7 @@ import {
   type AccountInfo,
   type AccountRef,
   type AccountSighting,
+  type ResolvedAccount,
   type Adapter,
   type AdapterHealth,
   type AppSessionRecord,
@@ -141,6 +142,8 @@ export interface ClaudeCodeAdapter extends Adapter {
   claudeAppStatus(): ClaudeAppStatus | undefined;
   /** Accounts seen so far: each config dir's login, the Claude app's folders, transcript account lines. */
   readAccounts(): Promise<AccountInfo[]>;
+  /** Each listed session's account, for the report's byAccount; unknown sessions are left out. */
+  sessionAccounts(sessionIds: Iterable<string>): Promise<Map<string, ResolvedAccount>>;
   /** How long each config dir keeps transcripts (cleanupPeriodDays only). */
   readRetention(maxAgeMs?: number): Promise<RetentionInfo[]>;
 }
@@ -778,6 +781,11 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
    * a slightly stale one: account lines are rare and don't move); `allowParse` reads a transcript never parsed yet.
    */
   private async accountFor(sessionId: string, ctx: EvidenceCtx, hint: { entrypoint?: string; configDir?: string }, allowParse: boolean): Promise<AccountRef | undefined> {
+    return (await this.resolvedFor(sessionId, ctx, hint, allowParse)).account;
+  }
+
+  /** accountFor, with whether the session's recorded evidence conflicts. */
+  private async resolvedFor(sessionId: string, ctx: EvidenceCtx, hint: { entrypoint?: string; configDir?: string }, allowParse: boolean): Promise<ResolvedAccount> {
     const main = ctx.idx.get(sessionId);
     let meta: TranscriptMeta | undefined;
     if (main) {
@@ -791,7 +799,22 @@ class ClaudeAdapter implements ClaudeCodeAdapter {
     const app = ctx.app.get(sessionId);
     if (app) evidence.push(app);
     evidence.push(...accountMatches(evidence, ctx.known, { recordedOnly: !inferable(hint.entrypoint ?? meta?.entrypoint) }));
-    return resolveAccount(evidence).account;
+    return resolveAccount(evidence);
+  }
+
+  /**
+   * Each listed session's account, for the report's byAccount: the same evidence as a live session's (its transcript's
+   * account lines, the Claude app's folder for it, a terminal session's config dir login). Transcripts come from the
+   * parse cache the usage scan just filled; one never parsed is read once.
+   */
+  async sessionAccounts(sessionIds: Iterable<string>): Promise<Map<string, ResolvedAccount>> {
+    const ctx = await this.evidenceCtx(false);
+    const out = new Map<string, ResolvedAccount>();
+    for (const sid of new Set(sessionIds)) {
+      const r = await this.resolvedFor(sid, ctx, {}, true);
+      if (r.account) out.set(sid, r);
+    }
+    return out;
   }
 
   /** Each config dir's cleanupPeriodDays (and the managed settings'), re-read at most every LOGINS_TTL_MS. */

@@ -1,4 +1,5 @@
 import type {
+  AccountTotals,
   AgentId,
   CostBreakdown,
   DayTotals,
@@ -7,6 +8,7 @@ import type {
   PriceTable,
   ReconciliationRow,
   Report,
+  ResolvedAccount,
   TokenCounts,
   Totals,
   UsageRecord,
@@ -25,6 +27,9 @@ import {
 
 /** Group key used in `byProject` for records without a project directory. */
 export const UNKNOWN_PROJECT = "(unknown)";
+
+/** Group key used in `byAccount` for sessions with no known account. */
+export const UNKNOWN_ACCOUNT = "unknown";
 
 /** byDay never lists more days than this. Beyond it, leading empty days are dropped. */
 export const MAX_DAYS = 3660;
@@ -68,6 +73,11 @@ export interface BuildReportInput {
   timeZone?: string;
   /** `generatedAt` override, for tests. */
   now?: Date;
+  /**
+   * Each session's account (resolveAccount), per agent that has accounts: byAccount covers exactly these agents, and
+   * a session missing from its agent's map is unknown. Omitted: no byAccount.
+   */
+  accounts?: ReadonlyMap<AgentId, ReadonlyMap<string, ResolvedAccount>>;
 }
 
 interface Priced {
@@ -144,7 +154,11 @@ export function buildReport(input: BuildReportInput): Report {
     kind: new Map<string, Acc>(),
     day: new Map<string, Acc>(),
   };
-  const daySplits = new Map<string, { model: Map<string, Acc>; kind: Map<string, Acc> }>();
+  const daySplits = new Map<string, { model: Map<string, Acc>; kind: Map<string, Acc>; account: Map<string, Acc> }>();
+  const accounts = input.accounts;
+  const byAccount = new Map<string, Acc>();
+  /** Per account key: the sessions with in-range records, and how their account was found. */
+  const accountSessions = new Map<string, Map<string, ResolvedAccount | undefined>>();
   let savedByCaching = 0;
   let hashKeyed = 0;
   let fastWithoutRate = 0;
@@ -152,7 +166,7 @@ export function buildReport(input: BuildReportInput): Report {
   for (const { rec, pr } of inRange) {
     const day = localDayKey(new Date(rec.ts), timeZone);
     let split = daySplits.get(day);
-    if (!split) daySplits.set(day, (split = { model: new Map(), kind: new Map() }));
+    if (!split) daySplits.set(day, (split = { model: new Map(), kind: new Map(), account: new Map() }));
     for (const [map, key] of [
       [groups.agent, rec.agent],
       [groups.model, rec.model],
@@ -165,6 +179,19 @@ export function buildReport(input: BuildReportInput): Report {
       let acc = map.get(key);
       if (!acc) map.set(key, (acc = newAcc()));
       addToAcc(acc, rec, pr);
+    }
+    const agentAccounts = accounts?.get(rec.agent);
+    if (agentAccounts) {
+      const resolved = agentAccounts.get(rec.sessionId);
+      const key = resolved?.account?.id ?? UNKNOWN_ACCOUNT;
+      for (const map of [byAccount, split.account]) {
+        let acc = map.get(key);
+        if (!acc) map.set(key, (acc = newAcc()));
+        addToAcc(acc, rec, pr);
+      }
+      let ss = accountSessions.get(key);
+      if (!ss) accountSessions.set(key, (ss = new Map()));
+      ss.set(sessionKey(rec.agent, rec.sessionId), resolved);
     }
     addToAcc(total, rec, pr);
     savedByCaching += pr.cacheSavingsUsd;
@@ -193,6 +220,7 @@ export function buildReport(input: BuildReportInput): Report {
       ...finishAcc(groups.day.get(d) ?? newAcc()),
       byModel: split ? sortGroups(split.model) : [],
       byKind: split ? sortGroups(split.kind) : [],
+      ...(accounts ? { byAccount: split ? sortGroups(split.account) : [] } : {}),
     };
   });
 
@@ -439,6 +467,20 @@ export function buildReport(input: BuildReportInput): Report {
       `${plural(fastWithoutRate, "fast-mode response")} ${agree(fastWithoutRate, "is on a model", "are on models")} without a fast rate and ${agree(fastWithoutRate, "was", "were")} priced at standard rates.`,
     );
   }
+  if (accounts) {
+    const all = new Map<string, ResolvedAccount | undefined>();
+    for (const ss of accountSessions.values()) for (const [k, r] of ss) all.set(k, r);
+    const inferred = [...all.values()].filter((r) => r?.account?.quality === "inferred").length;
+    const conflicts = [...all.values()].filter((r) => r?.conflict).length;
+    if (inferred > 0) {
+      notes.push(
+        `By account: ${plural(inferred, "session")} ${agree(inferred, "has its", "have their")} account inferred (mostly from a config dir's current login), so usage from before a login change there can sit under the newer account.`,
+      );
+    }
+    if (conflicts > 0) {
+      notes.push(`By account: ${plural(conflicts, "session")} named more than one account and ${agree(conflicts, "counts", "count")} whole under the newest.`);
+    }
+  }
   if (geoUnknown.size > 0) notes.push(`Geo values without a multiplier, priced at 1x: ${[...geoUnknown].sort().map((x) => clipId(x)).join(", ")}.`);
 
   return {
@@ -455,6 +497,7 @@ export function buildReport(input: BuildReportInput): Report {
     byModel: sortGroups(groups.model),
     byProject: sortGroups(groups.project),
     byKind: sortGroups(groups.kind),
+    ...(accounts ? { byAccount: accountRows(byAccount, accountSessions), accountAgents: [...accounts.keys()].sort() } : {}),
     byDay,
     reconciliation,
     estimate: { recordedUsd, estimatedLowUsd: low, estimatedHighUsd: high, method },
@@ -538,6 +581,21 @@ function sortGroups(map: Map<string, Acc>): GroupTotals[] {
   return [...map.entries()]
     .map(([key, acc]) => ({ key, ...finishAcc(acc) }))
     .sort((a, b) => b.cost.total - a.cost.total || b.responses - a.responses || a.key.localeCompare(b.key));
+}
+
+/** byAccount rows: by cost like the other groups, but the unknown-account row always last. */
+function accountRows(map: Map<string, Acc>, sessions: Map<string, Map<string, ResolvedAccount | undefined>>): AccountTotals[] {
+  return sortGroups(map)
+    .map((g): AccountTotals => {
+      const ss = [...(sessions.get(g.key)?.values() ?? [])];
+      return {
+        ...g,
+        sessions: ss.length,
+        inferredSessions: ss.filter((r) => r?.account?.quality === "inferred").length,
+        conflictSessions: ss.filter((r) => r?.conflict).length,
+      };
+    })
+    .sort((a, b) => Number(a.key === UNKNOWN_ACCOUNT) - Number(b.key === UNKNOWN_ACCOUNT));
 }
 
 // ---------- Helpers ----------
